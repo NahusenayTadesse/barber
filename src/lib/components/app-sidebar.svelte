@@ -1,0 +1,121 @@
+<script lang="ts">
+	import {
+		Users,
+		UserRoundCog,
+		ChartArea,
+		Mail,
+		LayoutDashboard,
+		Container,
+		Banknote,
+		Plus,
+		Sheet,
+		Loader,
+		CircleCheckBig,
+		OctagonMinus,
+		ListOrdered,
+		CookingPot,
+		Cookie
+	} from '@lucide/svelte';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import type { ComponentProps } from 'svelte';
+	import { bgGradient } from '$lib/global.svelte';
+	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
+
+	import NavMain from './NavMain.svelte';
+
+	const navigation = [
+		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+		{ title: 'Customers', url: '/dashboard/customers', icon: Users },
+		{
+			title: 'Orders',
+			url: '/dashboard/orders',
+			icon: ListOrdered,
+			items: [
+				{ title: 'All Orders', url: '/dashboard/orders/all-orders', icon: Sheet },
+				{ title: 'Pending Orders', url: '/dashboard/orders', icon: Loader },
+				{ title: 'Delivered Orders', url: '/dashboard/orders/delivered', icon: CircleCheckBig },
+				{ title: 'Cancelled Orders', url: '/dashboard/orders/cancelled', icon: OctagonMinus }
+			]
+		},
+
+		{
+			title: 'Products',
+			url: '/dashboard/products',
+			icon: Container,
+			items: [
+				{ title: 'All Products', url: '/dashboard/products', icon: Sheet },
+				{ title: 'Add Product', url: '/dashboard/products/add-products', icon: Plus }
+			]
+		},
+
+		{
+			title: 'Messages',
+			url: '/dashboard/messages',
+			icon: Mail
+		},
+
+		{
+			title: 'Reports',
+			url: '/dashboard/reports',
+			icon: ChartArea
+		},
+
+		{
+			title: 'Admin Panel',
+			url: '/dashboard/admin-panel',
+			icon: UserRoundCog,
+			items: [
+				{
+					title: 'Payment Methods',
+					url: '/dashboard/admin-panel/payment-methods',
+					icon: Banknote
+				},
+				{ title: 'Users', url: '/dashboard/admin-panel/users', icon: Users },
+				{ title: 'Roles', url: '/dashboard/admin-panel/roles', icon: Users }
+			]
+		}
+	];
+
+	let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+
+	const on = 'bg-sidebar-primary text-sidebar-primary-foreground';
+	const off = 'text-sidebar-foreground';
+
+	const sidebar = useSidebar();
+
+	// function closeSidebar() {
+	// 	if (sidebar.isMobile) {
+	// 		sidebar.setOpenMobile(false);
+	// 	}
+	// }
+</script>
+
+<Sidebar.Root collapsible="offcanvas" {...restProps}>
+	<Sidebar.Content
+		class="z-9999! h-full
+  overflow-y-scroll pt-4
+  [scrollbar-color:#a3a3a3_transparent]
+  [scrollbar-width:thin]
+  [&::-webkit-scrollbar]:w-2
+  [&::-webkit-scrollbar-thumb]:bg-gray-400
+  [&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar-track]:bg-transparent
+  {bgGradient}
+"
+	>
+		<Sidebar.Group>
+			<Sidebar.GroupLabel>
+				<a
+					class="mb-8 flex flex-row items-start justify-start gap-4 py-4"
+					href="/"
+					title="Go to Website Home Page"
+					target="_blank"
+				>
+					<img src="/logo512.png" class="mt-4 h-auto w-full justify-self-start" alt="Logo" />
+				</a></Sidebar.GroupLabel
+			>
+			<Sidebar.GroupContent class="my-4">
+				<NavMain items={navigation} />
+			</Sidebar.GroupContent>
+		</Sidebar.Group>
+	</Sidebar.Content>
+</Sidebar.Root>
