@@ -6,6 +6,7 @@
 		Mail,
 		LayoutDashboard,
 		Container,
+		BookText,
 		Banknote,
 		Plus,
 		Sheet,
@@ -39,9 +40,9 @@
 		},
 
 		{
-			title: 'Products',
-			url: '/dashboard/products',
-			icon: Container,
+			title: 'Courses',
+			url: '/dashboard/courses',
+			icon: BookText,
 			items: [
 				{ title: 'All Products', url: '/dashboard/products', icon: Sheet },
 				{ title: 'Add Product', url: '/dashboard/products/add-products', icon: Plus }
@@ -110,7 +111,7 @@
 					title="Go to Website Home Page"
 					target="_blank"
 				>
-					<img src="/logo512.png" class="mt-4 h-auto w-full justify-self-start" alt="Logo" />
+					<img src="/logo.webp" class="mt-4 h-16 w-16 justify-self-center" alt="Logo" />
 				</a></Sidebar.GroupLabel
 			>
 			<Sidebar.GroupContent class="my-4">

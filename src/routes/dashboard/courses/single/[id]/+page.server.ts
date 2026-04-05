@@ -4,19 +4,11 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { edit, adjust, damaged, editGallery } from './schema';
 
 import { db } from '$lib/server/db';
-import {
-	products,
-	productImages,
-	productAdjustments,
-	damagedProducts,
-	prices as priceList,
-	transactions
-} from '$lib/server/db/schema';
+import { courses as products, priceOptions as priceList } from '$lib/server/db/schema';
 import { eq, and, sql, isNotNull, desc } from 'drizzle-orm';
 import { fail, message } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 
-import { saveUploadedFile } from '$lib/server/upload';
 import type { Actions } from './$types';
 
 export const actions: Actions = {

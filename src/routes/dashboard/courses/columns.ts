@@ -1,11 +1,10 @@
 import { renderComponent } from '$lib/components/ui/data-table/index.js';
-import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
-import Statuses from '$lib/components/Table/statuses.svelte';
-import Address from '$lib/components/Table/address.svelte';
-import Copy from '$lib/Copy.svelte';
-
-import Edit from './edit.svelte';
 import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
+import DataTableActions from './data-table-actions.svelte';
+import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
+import ImageViewer from '$lib/components/Table/image-viewer.svelte';
+import PriceList from './priceList.svelte';
+
 export const columns = [
 	{
 		accessorKey: 'index',
@@ -13,6 +12,7 @@ export const columns = [
 		cell: (info) => info.row.index + 1,
 		sortable: false
 	},
+
 	{
 		accessorKey: 'name',
 		header: ({ column }) =>
@@ -26,65 +26,71 @@ export const columns = [
 			return renderComponent(DataTableLinks, {
 				id: row.original.id,
 				name: row.original.name,
-				link: `/dashboard/products/suppliers`
+				link: '/dashboard/courses/single'
 			});
 		}
 	},
 
 	{
-		accessorKey: 'phone',
+		accessorKey: 'prices',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
-				name: 'Phone',
+				name: 'Price',
+
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true,
+
 		cell: ({ row }) => {
 			// You can pass whatever you need from `row.original` to the component
-			return renderComponent(Copy, {
-				data: row.original.phone
+			return renderComponent(PriceList, {
+				priceList: row.original.priceList
 			});
 		}
+	},
+
+	{
+		accessorKey: 'level',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Level',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true
 	},
 	{
-		accessorKey: 'email',
+		accessorKey: 'duration',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
-				name: 'Email',
+				name: 'Duration',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true
+	},
+	{
+		accessorKey: 'basePrice',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Base Price',
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true,
 		cell: ({ row }) => {
-			// You can pass whatever you need from `row.original` to the component
-			return renderComponent(Copy, {
-				data: row.original.email
-			});
+			return '£ ' + row.original.basePrice;
 		}
 	},
+
 	{
 		accessorKey: 'description',
-		header: ({ column }) =>
-			renderComponent(DataTableSort, {
-				name: 'Description',
-				onclick: column.getToggleSortingHandler()
-			}),
-		sortable: true,
-		cell: ({ row }) => {
-			// You can pass whatever you need from `row.original` to the component
-			return renderComponent(Copy, {
-				data: row.original.description
-			});
-		}
+		header: 'Description'
 	},
 
 	{
-		accessorKey: 'status',
-		header: 'Status',
-		sortable: true,
+		accessorKey: 'actions',
+		header: 'Actions',
 		cell: ({ row }) => {
-			return renderComponent(Statuses, {
-				status: row.original.status ? 'Active' : 'Inactive'
-			});
+			// You can pass whatever you need from `row.original` to the component
+			return renderComponent(DataTableActions, { id: row.original.id, name: row.original.name });
 		}
 	}
 ];

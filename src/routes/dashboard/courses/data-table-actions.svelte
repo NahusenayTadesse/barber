@@ -2,14 +2,10 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { Download, ExternalLink, Eye } from '@lucide/svelte';
+	import { ExternalLink } from '@lucide/svelte';
 	import { dropdownClass } from '$lib/global.svelte';
 
-	let {
-		id,
-		recieptLink,
-		booker
-	}: { id: string; booker: string; recieptLink: string; date: string } = $props();
+	let { id, name }: { id: string; name: string } = $props();
 </script>
 
 <DropdownMenu.Root>
@@ -23,22 +19,13 @@
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content>
 		<DropdownMenu.Group>
-			<DropdownMenu.Label>Settings</DropdownMenu.Label>
+			<DropdownMenu.Label>Actions</DropdownMenu.Label>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
 
 		<DropdownMenu.Item
-			><a href="/dashboard/user/{booker}" class={dropdownClass}>
-				<ExternalLink /> Check out Changer's Staff Profile</a
-			></DropdownMenu.Item
-		>
-		<DropdownMenu.Item
-			><a href="/dashboard/files/{recieptLink}" class={dropdownClass}><Eye /> View Reciept</a
-			></DropdownMenu.Item
-		>
-		<DropdownMenu.Item
-			><a href="/dashboard/files/{recieptLink}" download="" class={dropdownClass}
-				><Download /> View Reciept</a
+			><a href="/dashboard/courses/{id}" target="_blank" class={dropdownClass}
+				><ExternalLink /> View {name}'s Details</a
 			></DropdownMenu.Item
 		>
 	</DropdownMenu.Content>

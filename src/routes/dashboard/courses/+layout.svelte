@@ -9,32 +9,25 @@
 
 <div class="mb-8 flex flex-row items-center justify-start gap-2">
 	<Button
-		href="/dashboard/products"
-		variant={page.url.pathname === '/dashboard/products' ? 'default' : 'outline'}
-		><Sheet /> Products</Button
+		href="/dashboard/courses"
+		variant={page.url.pathname === '/dashboard/courses' ? 'default' : 'outline'}
+		><Sheet /> Courses</Button
 	>
 	<Button
-		href="/dashboard/products/add-products"
-		variant={page.url.pathname === '/dashboard/products/add-products' ? 'default' : 'outline'}
-		><Plus /> Add Products</Button
+		href="/dashboard/courses/add-course"
+		variant={page.url.pathname === '/dashboard/courses/add-course' ? 'default' : 'outline'}
+		><Plus /> Add Courses</Button
 	>
 
-	<Button
+	<!-- <Button
 		href="/dashboard/products/categories"
 		variant={page.url.pathname === '/dashboard/products/categories' ? 'default' : 'outline'}
-		><Sheet /> Categories</Button
-	>
-	<Button
+		><Sheet /> Categories</Button /> -->
+	<!-- <Button
 		href="/dashboard/products/suppliers"
 		variant={page.url.pathname === '/dashboard/products/suppliers' ? 'default' : 'outline'}
-		><Sheet /> Suppliers</Button
-	>
-	<Button
-		href="/dashboard/products/suppliers/add-suppliers"
-		variant={page.url.pathname === '/dashboard/products/suppliers/add-suppliers'
-			? 'default'
-			: 'outline'}><Plus /> Add Suppliers</Button
-	>
+		><Sheet /> Prices</Button
+	> -->
 </div>
 
 {@render children?.()}

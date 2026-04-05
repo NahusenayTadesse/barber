@@ -7,7 +7,6 @@
 
 	const flash = getFlash(page, { clearAfterMs: 5000 });
 
-	import { ModeWatcher } from 'mode-watcher';
 	import { fly } from 'svelte/transition';
 
 	import { Button } from '$lib/components/ui/button';
@@ -58,7 +57,6 @@
 <svelte:head>
 	<link rel="icon" href="/logo512.png" />
 </svelte:head>
-<ModeWatcher />
 
 <Toaster position="bottom-right" richColors closeButton />
 

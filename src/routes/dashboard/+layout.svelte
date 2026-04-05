@@ -17,10 +17,9 @@
 			justify-between rounded-lg p-2 pr-4 align-middle
 		 shadow-lg backdrop-blur-md lg:sticky lg:w-full lg:pr-0"
 		>
-			<Sidebar.Trigger class="rounded-lg bg-white p-4 dark:bg-black" />
+			<Sidebar.Trigger class="rounded-lg" />
 			<div class="flex flex-row items-center gap-4">
-				<Search />
-				<DarkMode />
+				<!-- <Search /> -->
 				<AvatarSettings data={data?.name} />
 			</div>
 		</div>

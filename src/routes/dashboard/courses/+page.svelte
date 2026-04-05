@@ -13,26 +13,26 @@
 </script>
 
 <svelte:head>
-	<title>Products List</title>
+	<title>Courses List</title>
 </svelte:head>
 
 {#if data.productList.length === 0}
 	<div class="flex h-96 w-full flex-col items-center justify-center lg:w-5xl">
 		<p class="justify-self-cente mt-4 flex flex-row gap-4 text-center text-4xl">
 			<Frown class="h-12 w-16  animate-bounce" />
-			Products List is Empty
+			Courses List is Empty
 		</p>
-		<Button href="/dashboard/products/add-products"><Plus />Add New Products</Button>
+		<Button href="/dashboard/courses/add-course"><Plus />Add New Course</Button>
 	</div>
 {:else}
 	<h2 class="my-4 text-2xl">No of Products {data.productList?.length}</h2>
 
 	<div class="mt-8 mb-4 w-6xl p-0 pt-4 lg:w-full lg:p-0">
-		<FilterMenu
+		<!-- <FilterMenu
 			bind:filteredList
 			data={data?.productList}
-			filterKeys={['category', 'commission', 'quantity', 'supplier']}
-		/>
-		<DataTable data={filteredList} {columns} fileName="Product List" />
+			filterKeys={['']}
+		/> -->
+		<DataTable data={data?.productList} {columns} fileName="Courses List" />
 	</div>
 {/if}
