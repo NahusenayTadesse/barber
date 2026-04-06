@@ -19,8 +19,6 @@
 		}
 	});
 	let payment = $state();
-
-	$form.courseId = data.coursesList[0].id;
 </script>
 
 <svelte:head>
@@ -183,10 +181,11 @@
 			>
 				Complete Your Enrolment
 			</div>
+			<Errors allErrors={$allErrors} />
 			<form use:enhance method="post" id="enroll" action="?/enroll" class="crow">
-				<Errors allErrors={$allErrors} />
-				<input type="hidden" name="courseId" bind:value={$form.courseId} />
-				<input type="hidden" name="paymentOption" bind:value={$form.paymentOption} />
+				<input type="hidden" required name="courseId" bind:value={$form.courseId} />
+				<input type="text" hidden name="paymentOption" bind:value={$form.paymentOption} />
+
 				<div class="fg">
 					<label for="firstName">First Name</label><input
 						name="firstName"
@@ -220,6 +219,7 @@
 					<label for="phone">Phone</label><input
 						bind:value={$form.phone}
 						type="tel"
+						name="phone"
 						id="ep"
 						placeholder="+44 7700 000000"
 					/>
@@ -251,9 +251,9 @@
 					</div>
 				</div>
 			</div>
-			<button class="btn-gold" style="width:100%;padding:18px;font-size:14px;letter-spacing:2.5px"
+			<!-- <button class="btn-gold" style="width:100%;padding:18px;font-size:14px;letter-spacing:2.5px"
 				>Confirm My Enrolment →</button
-			>
+			> -->
 			<button
 				form="enroll"
 				class="btn-gold"

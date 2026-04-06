@@ -16,7 +16,7 @@
 		<div>
 			<div class="fctitle">Navigate</div>
 			<ul class="flinks">
-				<li><a href="/">Home</a></li>
+				<li><a href="/home">Home</a></li>
 				<li><a href="/freehaircut" id="nav-freehaircut">Free Haircut</a></li>
 				<li><a href="contact" id="nav-contact">Contact</a></li>
 				<li><a href="/courses" class="nav-enrol">Start Your Career</a></li>
@@ -41,14 +41,14 @@
 			</ul>
 		</div>
 	</div>
-	<div class="fbot">
-		<span>© 2025 D&D Barber & Academy. All rights reserved.</span><span
+	<div class="justify-self-center text-xs">
+		<span>© {new Date().getFullYear()} D&D Barber & Academy. All rights reserved.</span><span
 			>✂ Turning passion into profession</span
 		>
 	</div>
-	<div class="legal-links">
+	<!-- <div class="legal-links">
 		<a href="/refund">Refund Policy</a><a href="/terms">Terms & Conditions</a><a href="/privacy"
 			>Privacy Policy</a
 		>
-	</div>
+	</div> -->
 </footer>

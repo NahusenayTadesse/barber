@@ -25,14 +25,14 @@
 		<Button href="/dashboard/courses/add-course"><Plus />Add New Course</Button>
 	</div>
 {:else}
-	<h2 class="my-4 text-2xl">No of Products {data.productList?.length}</h2>
+	<h2 class="my-4 text-2xl">No of Courses {data.productList?.length}</h2>
 
 	<div class="mt-8 mb-4 w-6xl p-0 pt-4 lg:w-full lg:p-0">
-		<!-- <FilterMenu
+		<FilterMenu
 			bind:filteredList
 			data={data?.productList}
-			filterKeys={['']}
-		/> -->
-		<DataTable data={data?.productList} {columns} fileName="Courses List" />
+			filterKeys={['level', 'duration', 'basePrice', 'minPrice']}
+		/>
+		<DataTable data={filteredList} {columns} fileName="Courses List" />
 	</div>
 {/if}

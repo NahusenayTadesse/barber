@@ -47,7 +47,9 @@ export const enrolments = mysqlTable('enrolments', {
 	paymentOptionId: int('payment_option_id').references(() => pricingOptions.id),
 	course: varchar('course', { length: 255 }),
 	paymentOption: varchar('payment_option', { length: 255 }),
-	fullName: varchar('full_name', { length: 255 }).notNull(),
+	firstName: varchar('first_name', { length: 255 }).notNull(),
+	lastName: varchar('last_name', { length: 255 }).notNull(),
+	phone: varchar('phone', { length: 50 }),
 	email: varchar('email', { length: 255 }).notNull(),
 	status: mysqlEnum('status', ['pending', 'confirmed', 'cancelled']).default('pending'),
 	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()

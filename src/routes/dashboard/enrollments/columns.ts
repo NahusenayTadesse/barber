@@ -3,6 +3,8 @@ import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 import Copy from '$lib/Copy.svelte';
 import DataTableActions from './data-table-actions.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
+import { formatDate } from '$lib/global.svelte';
+import Statuses from '$lib/components/Table/statuses.svelte';
 
 export const columns = [
 	{
@@ -13,21 +15,21 @@ export const columns = [
 	},
 
 	{
-		accessorKey: 'customerName',
+		accessorKey: 'name',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
 				name: 'Name',
 				onclick: column.getToggleSortingHandler()
 			}),
-		sortable: true,
-		cell: ({ row }) => {
-			// You can pass whatever you need from `row.original` to the component
-			return renderComponent(DataTableLinks, {
-				id: row.original.id,
-				name: row.original.customerName,
-				link: '/dashboard/customers'
-			});
-		}
+		sortable: true
+		// cell: ({ row }) => {
+		// 	// You can pass whatever you need from `row.original` to the component
+		// 	return renderComponent(DataTableLinks, {
+		// 		id: row.original.id,
+		// 		name: row.original.customerName,
+		// 		link: '/dashboard/customers'
+		// 	});
+		// }
 	},
 	{
 		accessorKey: 'phone',
@@ -37,61 +39,86 @@ export const columns = [
 	},
 	{
 		accessorKey: 'email',
-		header: 'email',
+		header: 'Email',
 		sortable: true,
 		cell: ({ row }) => renderComponent(Copy, { data: row.original.email })
 	},
-
 	{
-		accessorKey: 'createdAt',
+		accessorKey: 'course',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
-				name: 'Booked At',
+				name: 'Course',
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true
 	},
+
 	{
-		accessorKey: 'daysSinceJoined',
+		accessorKey: 'paymentOption',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
-				name: 'Days Since Added',
+				name: 'Payment Option',
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true,
-		cell: (info) => {
-			const n = info.getValue(); // number of days
-			return `${n} ${n === 1 ? 'day' : 'days'}`;
-		}
-	},
-	{
-		accessorKey: 'orderCount',
-		header: ({ column }) =>
-			renderComponent(DataTableSort, {
-				name: 'Order Counts',
-				onclick: column.getToggleSortingHandler()
-			}),
-		sortable: true,
-
-		cell: (info) => {
-			const n = info.getValue(); // number of days
-			return `${n} ${n === 1 ? 'pending order' : 'pending orders'}`;
-		}
-	},
-
-	{
-		accessorKey: 'actions',
-		header: 'Actions',
 		cell: ({ row }) => {
-			// You can pass whatever you need from `row.original` to the component
-			return renderComponent(DataTableActions, {
-				id: row.original.extraSettings,
-				phone: row.original.phone,
-				createdBy: row.original.createdBy,
-				createdById: row.original.bookedById,
-				customerName: row.original.customerName,
-				date: row.original.date
+			return '£ ' + row.original.paymentOption;
+		}
+
+		// cell: ({ row }) => {
+		// 	let n = row.original.paymentOption;
+		// 	if (n === 'minPrice') {
+		// 		n = Math.floor(Number(row.original.minPrice));
+		// 	} else if (n === 'threeEqual') {
+		// 		n = Math.floor(Number(row.original.basePrice / 3));
+		// 	} else if (n === 'basePrice') {
+		// 		n = Math.floor(Number(row.original.basePrice));
+		// 	}
+		// 	return '£ ' + n;
+		// }
+	},
+
+	{
+		accessorKey: 'status',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Status',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			return renderComponent(Statuses, {
+				status: row.original.status
 			});
 		}
+	},
+
+	{
+		accessorKey: 'enrolledAt',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Enrolled At',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			return formatDate(row.original.enrolledAt);
+		}
 	}
+
+	// {
+	// 	accessorKey: 'actions',
+	// 	header: 'Actions',
+	// 	cell: ({ row }) => {
+	// 		// You can pass whatever you need from `row.original` to the component
+	// 		return renderComponent(DataTableActions, {
+	// 			id: row.original.extraSettings,
+	// 			phone: row.original.phone,
+	// 			createdBy: row.original.createdBy,
+	// 			createdById: row.original.bookedById,
+	// 			customerName: row.original.customerName,
+	// 			date: row.original.date
+	// 		});
+	// 	}
+	// }
 ];

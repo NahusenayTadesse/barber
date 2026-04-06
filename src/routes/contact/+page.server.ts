@@ -15,9 +15,9 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	freehaircut: async ({ request }) => {
-		const form = await superValidate(request, zod4(schema));
-		console.log(form);
+	contact: async ({ request }) => {
+		const form = await superValidate(request, zod4(contactSchema));
+
 		if (!form.valid) {
 			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}

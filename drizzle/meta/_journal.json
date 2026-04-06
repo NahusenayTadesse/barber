@@ -43,6 +43,13 @@
       "when": 1775475183027,
       "tag": "0005_fine_tarot",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1775486833523,
+      "tag": "0006_lonely_wong",
+      "breakpoints": true
     }
   ]
 }

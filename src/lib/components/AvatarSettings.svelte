@@ -25,11 +25,11 @@
 		<DropdownMenu.Group>
 			<DropdownMenu.Label>My Account</DropdownMenu.Label>
 			<DropdownMenu.Separator />
-			<DropdownMenu.Item onclick={() => goto('/account')}>
+			<!-- <DropdownMenu.Item onclick={() => goto('/dashboard/account')}>
 				<User /> My Account
-			</DropdownMenu.Item>
+			</DropdownMenu.Item> -->
 
-			<DropdownMenu.Item onclick={() => goto('/change-password')}>
+			<DropdownMenu.Item onclick={() => goto('/dashboard/change-password')}>
 				<KeyRound /> Change Password
 			</DropdownMenu.Item>
 			<DropdownMenu.Item>

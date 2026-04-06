@@ -1,6 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { customers, user, orders } from '$lib/server/db/schema';
+import { enrolments as customers, courses } from '$lib/server/db/schema';
 import { eq, and, count, sql, ne } from 'drizzle-orm';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
@@ -12,19 +12,40 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const customersList = await db
 		.select({
 			id: customers.id,
-			customerName: customers.name,
+			name: sql<string>`TRIM(CONCAT_WS(' ', ${customers.firstName}, ${customers.lastName}))`,
 			email: customers.email,
 			phone: customers.phone,
-			orderCount: count(orders.id),
-			daysSinceJoined: sql<number>`DATEDIFF(CURRENT_DATE, ${customers.createdAt})`,
-			createdBy: user.name,
-			createdById: user.id,
-			createdAt: sql<string>`DATE_FORMAT(${customers.createdAt}, '%Y-%m-%d')`
+			paymentRaw: customers.paymentOption,
+			paymentOption: sql<number>`
+            CASE
+                WHEN ${customers.paymentOption} = 'minPrice'
+                    THEN FLOOR(${courses.minPrice})
+                WHEN ${customers.paymentOption} = 'threeEqual'
+                    THEN FLOOR(${courses.basePrice} / 3)
+                WHEN ${customers.paymentOption} = 'basePrice'
+                    THEN FLOOR(${courses.basePrice})
+                ELSE 0
+            END`.mapWith(Number),
+			course: courses.name,
+			basePrice: courses.basePrice,
+			minPrice: courses.minPrice,
+			status: customers.status,
+			enrolledAt: sql<string>`DATE_FORMAT(${customers.createdAt}, '%Y-%m-%d')`
 		})
 		.from(customers)
-		.leftJoin(user, eq(customers.createdBy, user.id))
-		.leftJoin(orders, and(eq(orders.customerId, customers.id), eq(orders.status, 'pending')))
-		.groupBy(customers.id, user.name, customers.createdAt, customers.name);
+		.leftJoin(courses, eq(customers.courseId, courses.id))
+		.groupBy(
+			customers.id,
+			customers.createdAt,
+			customers.firstName,
+			customers.lastName,
+			courses.name,
+			customers.paymentOption,
+			customers.email,
+			customers.phone,
+			courses.basePrice,
+			courses.minPrice
+		);
 
 	return {
 		customersList

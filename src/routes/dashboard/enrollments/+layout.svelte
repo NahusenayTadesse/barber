@@ -7,7 +7,7 @@
 </script>
 
 <div class="mb-8 flex flex-row items-center justify-start gap-2">
-	<Button href="/dashboard/customers"><Sheet /> All Enrollments</Button>
+	<Button href="/dashboard/enrollments"><Sheet /> All Enrollments</Button>
 	<!-- <DialogComp title="Add New Customer" variant="default">
 		<AddCustomer data={data?.form} action="/dashboard/customers?/addCustomer" />
 	</DialogComp> -->

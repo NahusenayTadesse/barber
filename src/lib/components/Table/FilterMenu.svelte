@@ -168,7 +168,7 @@
 						{#each filterKeys as filterKey (filterKey)}
 							<div class="min-w-50 space-y-2">
 								<Label for={filterKey} class="text-sm font-medium text-foreground capitalize">
-									{pluralize(filterKey)}
+									{pluralize(filterKey).replace(/([a-z])([A-Z])/g, '$1 $2')}
 								</Label>
 
 								<Popover.Root>

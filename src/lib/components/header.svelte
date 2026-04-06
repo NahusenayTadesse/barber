@@ -10,7 +10,7 @@
 	<!-- LEFT: Home + Courses -->
 	<ul class="nav-left">
 		<li>
-			<a href="/" id="nav-home" class={page.url.pathname === '/' ? 'al' : ''}>Home </a>
+			<a href="/home" id="nav-home" class={page.url.pathname === '/home' ? 'al' : ''}>Home </a>
 		</li>
 		<li>
 			<a href="/courses" class={page.url.pathname === '/courses' ? 'al' : ''} id="nav-courses"

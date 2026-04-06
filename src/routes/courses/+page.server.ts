@@ -1,15 +1,17 @@
 import { superValidate, message } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { eq } from 'drizzle-orm';
-import { contactSchema } from './schema';
+import { schema } from './schema';
 import { db } from '$lib/server/db';
 import { courses, enrolments } from '$lib/server/db/schema';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-	const form = await superValidate(zod4(contactSchema));
+	const form = await superValidate(zod4(schema));
 
 	const coursesList = await db.select().from(courses);
+
+	form.data.courseId = coursesList[0].id;
 
 	return {
 		form,
@@ -19,8 +21,7 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	enroll: async ({ request }) => {
-		const form = await superValidate(request, zod4(contactSchema));
-		console.log(form);
+		const form = await superValidate(request, zod4(schema));
 		if (!form.valid) {
 			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}
@@ -28,13 +29,16 @@ export const actions: Actions = {
 		const { firstName, lastName, phone, email, courseId, paymentOption } = form.data;
 
 		try {
-			await db.insert(enrolments).values({ name, phone, email, subject, courseId, paymentOption });
+			await db
+				.insert(enrolments)
+				.values({ firstName, lastName, phone, email, courseId, paymentOption });
 
-			return message(form, { type: 'success', text: 'Message Successfully Sent!' });
+			return message(form, { type: 'success', text: 'Enrolment Successfully Applied!' });
 		} catch (err) {
+			console.error(err.message);
 			return message(form, {
 				type: 'error',
-				text: 'Error Adding Messages: ' + err?.message
+				text: 'Error Adding Enrolment'
 			});
 		}
 	}

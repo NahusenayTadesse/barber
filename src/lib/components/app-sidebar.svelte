@@ -42,17 +42,17 @@
 			title: 'Messages',
 			url: '/dashboard/messages',
 			icon: Mail
-		},
-
-		{
-			title: 'Admin Panel',
-			url: '/dashboard/admin-panel',
-			icon: UserRoundCog,
-			items: [
-				{ title: 'Users', url: '/dashboard/admin-panel/users', icon: Users },
-				{ title: 'Roles', url: '/dashboard/admin-panel/roles', icon: Users }
-			]
 		}
+
+		// {
+		// 	title: 'Admin Panel',
+		// 	url: '/dashboard/admin-panel',
+		// 	icon: UserRoundCog,
+		// 	items: [
+		// 		{ title: 'Users', url: '/dashboard/admin-panel/users', icon: Users },
+		// 		{ title: 'Roles', url: '/dashboard/admin-panel/roles', icon: Users }
+		// 	]
+		// }
 	];
 
 	let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
