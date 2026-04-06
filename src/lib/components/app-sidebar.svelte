@@ -26,26 +26,15 @@
 
 	const navigation = [
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-		{ title: 'Customers', url: '/dashboard/customers', icon: Users },
-		{
-			title: 'Orders',
-			url: '/dashboard/orders',
-			icon: ListOrdered,
-			items: [
-				{ title: 'All Orders', url: '/dashboard/orders/all-orders', icon: Sheet },
-				{ title: 'Pending Orders', url: '/dashboard/orders', icon: Loader },
-				{ title: 'Delivered Orders', url: '/dashboard/orders/delivered', icon: CircleCheckBig },
-				{ title: 'Cancelled Orders', url: '/dashboard/orders/cancelled', icon: OctagonMinus }
-			]
-		},
+		{ title: 'Enrollments', url: '/dashboard/enrollments', icon: Users },
 
 		{
 			title: 'Courses',
 			url: '/dashboard/courses',
 			icon: BookText,
 			items: [
-				{ title: 'All Products', url: '/dashboard/products', icon: Sheet },
-				{ title: 'Add Product', url: '/dashboard/products/add-products', icon: Plus }
+				{ title: 'All Courses', url: '/dashboard/courses', icon: Sheet },
+				{ title: 'Add Course', url: '/dashboard/courses/add-course', icon: Plus }
 			]
 		},
 
@@ -56,21 +45,10 @@
 		},
 
 		{
-			title: 'Reports',
-			url: '/dashboard/reports',
-			icon: ChartArea
-		},
-
-		{
 			title: 'Admin Panel',
 			url: '/dashboard/admin-panel',
 			icon: UserRoundCog,
 			items: [
-				{
-					title: 'Payment Methods',
-					url: '/dashboard/admin-panel/payment-methods',
-					icon: Banknote
-				},
 				{ title: 'Users', url: '/dashboard/admin-panel/users', icon: Users },
 				{ title: 'Roles', url: '/dashboard/admin-panel/roles', icon: Users }
 			]

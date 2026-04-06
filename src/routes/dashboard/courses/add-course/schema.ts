@@ -14,6 +14,10 @@ export const add = z.object({
 	level: z.string().optional(),
 	duration: z.string().optional(),
 	basePrice: z.number('Base Price is required'),
+	minPrice: z.number('Minimum Price is required'),
+	minPriceMessage: z.string().optional(),
+	target: z.string().optional(),
+	experience: z.string().optional(),
 
 	description: z
 		.string()

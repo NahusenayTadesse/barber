@@ -1,53 +1,126 @@
-import { db } from '$lib/server/db';
-import { contactMessages } from '$lib/server/db/schema';
-import { superValidate, message } from 'sveltekit-superforms';
+import { setError, superValidate, message, fail } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { eq } from 'drizzle-orm';
-import { deleteSchema } from './schema';
-import type { Actions, PageServerLoad } from './$types';
+
+import {
+	paymentMethod as schema,
+	editPaymentMethod as editSchema,
+	deleteTestimonial
+} from './schema.js';
+import { db } from '$lib/server/db';
+import { contactMessages as paymentMethods, user } from '$lib/server/db/schema';
+import type { Actions } from './$types.js';
+import type { PageServerLoad } from './$types.js';
 
 export const load: PageServerLoad = async () => {
-	const form = await superValidate(zod4(deleteSchema));
+	const form = await superValidate(zod4(schema));
+	const editForm = await superValidate(zod4(editSchema));
+	const deleteForm = await superValidate(zod4(deleteTestimonial));
 
-	await db.update(contactMessages).set({
-		seen: true
-	});
-
-	const messages = await db
+	const allPaymentMethods = await db
 		.select({
-			id: contactMessages.id,
-			name: contactMessages.name,
-			phone: contactMessages.phone,
-			email: contactMessages.email,
-			date: contactMessages.createdAt,
-			subject: contactMessages.subject,
-			message: contactMessages.message
+			id: paymentMethods.id,
+			name: paymentMethods.name,
+			email: paymentMethods.email,
+			phone: paymentMethods.phone,
+			subject: paymentMethods.subject,
+			isRead: paymentMethods.isRead,
+			message: paymentMethods.message,
+			submittedAt: paymentMethods.createdAt
 		})
-		.from(contactMessages);
+		.from(paymentMethods);
 
 	return {
-		messages,
-		form
+		form,
+		editForm,
+		deleteForm,
+		allPaymentMethods
 	};
 };
 
 export const actions: Actions = {
-	delete: async ({ request, cookies }) => {
+	add: async ({ request, locals }) => {
+		const form = await superValidate(request, zod4(schema));
+
+		if (!form.valid) {
+			return message(form, { type: 'error', text: 'Please check the form for Errors' });
+		}
+
+		const { name, position, testimonial, avatar } = form.data;
+
 		try {
-			const form = await superValidate(request, zod4(deleteSchema));
-			if (!form.valid) {
-				return message(form, { type: 'error', text: 'Please check the form for Errors' });
-			}
+			await db.insert(paymentMethods).values({
+				name,
+				position,
+				message: testimonial,
+				avatar: avatarFile,
+				createdBy: locals.user?.id
+			});
 
-			const { id } = form.data;
-			await db.delete(contactMessages).where(eq(contactMessages.id, id));
-
-			return message(form, { type: 'success', text: 'Delete Successful!' });
-		} catch (err) {
-			console.error('Error' + err.message);
+			return message(form, { type: 'success', text: 'Testimonial Successfully Created' });
+		} catch (err: any) {
 			return message(
 				form,
-				{ type: 'error', text: 'An Error occured while deleting' + err.message },
+				{
+					type: 'error',
+					text: 'Error while creating testimonial.'
+				},
+				{ status: 500 }
+			);
+		}
+	},
+	edit: async ({ request, locals }) => {
+		const form = await superValidate(request, zod4(editSchema));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const { id, name, position, testimonial, avatar } = form.data;
+
+		try {
+			const avatarFile = await saveUploadedFile(avatar);
+			await db
+				.update(paymentMethods)
+				.set({
+					name,
+					position,
+					message: testimonial,
+					avatar: avatarFile,
+					updatedBy: locals?.user?.id
+				})
+				.where(eq(paymentMethods.id, id));
+			return message(form, { type: 'success', text: 'Testimonial Successfully Updated' });
+		} catch (err: any) {
+			return message(
+				form,
+				{
+					type: 'error',
+					text: 'Error while updating testimonial.'
+				},
+				{ status: 500 }
+			);
+		}
+	},
+	delete: async ({ request, locals }) => {
+		const form = await superValidate(request, zod4(deleteTestimonial));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const { id } = form.data;
+
+		try {
+			await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
+			return message(form, { type: 'success', text: 'Testimonial Successfully Deleted' });
+		} catch (err: any) {
+			return message(
+				form,
+				{
+					type: 'error',
+					text: 'Error while deleting testimonial.'
+				},
 				{ status: 500 }
 			);
 		}

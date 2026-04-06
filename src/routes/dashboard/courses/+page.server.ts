@@ -10,6 +10,10 @@ export const load: PageServerLoad = async () => {
 			name: products.name,
 			basePrice: products.basePrice,
 			level: products.level,
+			target: products.target,
+			minPrice: products.minPrice,
+			minPriceMessage: products.minPriceMessage,
+			experience: products.experience,
 			duration: products.duration,
 			description: products.description
 		})

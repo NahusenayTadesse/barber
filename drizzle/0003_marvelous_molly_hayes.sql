@@ -1,0 +1,1 @@
+ALTER TABLE `haircut_requests` ADD `message` text;

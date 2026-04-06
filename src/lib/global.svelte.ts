@@ -159,3 +159,17 @@ export const formatEthiopianDate = (date: Date | undefined): string => {
 
 	return formatter.format(date);
 };
+
+export const formatDate = (dateInput: Date | string | number): string => {
+	const date = new SvelteDate(dateInput);
+
+	if (isNaN(date.getTime())) {
+		return 'Invalid Date';
+	}
+
+	return date.toLocaleDateString('en-US', {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric'
+	});
+};

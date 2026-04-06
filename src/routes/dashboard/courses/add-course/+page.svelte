@@ -101,10 +101,46 @@
 		<InputComp
 			{form}
 			{errors}
+			type="text"
+			name="target"
+			label="Target Audience"
+			placeholder="Enter Target Audience"
+		/>
+
+		<InputComp
+			{form}
+			{errors}
+			type="text"
+			name="experience"
+			label="Experience Level to Enroll"
+			placeholder="Enter Experience Level"
+		/>
+
+		<InputComp
+			{form}
+			{errors}
 			type="textarea"
 			name="description"
-			label="Product Discription"
-			placeholder="Enter Product Description"
+			label="Course Description"
+			placeholder="Enter Course Description"
+		/>
+
+		<InputComp
+			{form}
+			{errors}
+			type="number"
+			name="minPrice"
+			label="Minimum Price to Enroll"
+			placeholder="Enter Minimum Price for deposit to enroll"
+		/>
+
+		<InputComp
+			{form}
+			{errors}
+			type="textarea"
+			name="minPriceMessage"
+			label="Minimum Price Message"
+			placeholder="Enter Minimum Price Message"
 		/>
 
 		<Button type="submit" class="mt-4" form="main">

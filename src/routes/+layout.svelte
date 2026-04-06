@@ -55,12 +55,12 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href="/logo512.png" />
+	<link rel="icon" href="/logo.jpeg" />
 </svelte:head>
 
 <Toaster position="bottom-right" richColors closeButton />
 
-<ProgressBar color="#2596be" zIndex={1000} />
+<ProgressBar color="#b8860b" zIndex={1000} />
 
 {#if !page.url.pathname.startsWith('/dashboard')}
 	<Header />

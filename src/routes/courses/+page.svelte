@@ -1,3 +1,32 @@
+<script>
+	let { data } = $props();
+
+	import { superForm } from 'sveltekit-superforms/client';
+	import { toast } from 'svelte-sonner';
+	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
+
+	import Errors from '$lib/formComponents/Errors.svelte';
+	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
+		dataType: 'json'
+	});
+	$effect(() => {
+		if ($message) {
+			if ($message.type === 'error') toast.error($message.text);
+			else {
+				toast.success($message.text);
+			}
+		}
+	});
+	let payment = $state();
+
+	$form.courseId = data.coursesList[0].id;
+</script>
+
+<svelte:head>
+	<title>Courses & Enrollment</title>
+</svelte:head>
+
 <div class="phero">
 	<div class="phero-bg"></div>
 	<div class="phero-inner fi">
@@ -20,38 +49,39 @@
 </div>
 
 <div class="crsgrid">
-	<div class="crscard fi">
-		<div class="crsstripe"></div>
-		<div class="crstop">
-			<div class="crslv">Level 1 — For complete beginners</div>
-			<div class="crsnm">12 WEEK<br />STARTER</div>
-			<div class="crsdur">12 Weeks · No experience required</div>
-			<div class="crs-prow">
-				<div class="crsprice">£999</div>
-				<div class="crspnote">full course</div>
+	{#each data.coursesList as course}
+		<div class="crscard fi">
+			<div class="crsstripe"></div>
+			<div class="crstop">
+				<div class="crslv">{course.level} — {course.target}</div>
+				<div class="crsnm">{course.name}</div>
+				<div class="crsdur">{course.duration} · {course.experience}</div>
+				<div class="crs-prow">
+					<div class="crsprice">£{course.basePrice}</div>
+					<div class="crspnote">full course</div>
+				</div>
+			</div>
+			<div class="crsbody">
+				<div class="urgency">
+					<strong>Enrol from £{course.minPrice} deposit</strong> — {course.minPriceMessage}
+				</div>
+				<div class="incl">What You'll Learn & Get</div>
+				<ul class="buls">
+					{#each course?.description?.split(/\n+/).filter(Boolean) as point}
+						<li class="capitalize">{point.trim()}</li>
+					{/each}
+				</ul>
+				<button
+					class="btn-gold"
+					onclick={() => ($form.courseId = course.id)}
+					style="width:100%;padding:16px;font-size:14px"
+					>Reserve My Place — {course.name?.split(' ').at(-1)} →</button
+				>
 			</div>
 		</div>
-		<div class="crsbody">
-			<div class="urgency">
-				<strong>Enrol from £299 deposit</strong> — secure your place today and pay the balance before
-				your start date. Instalment option also available.
-			</div>
-			<div class="incl">What You'll Learn & Get</div>
-			<ul class="buls">
-				<li>No experience needed</li>
-				<li>Real clients from week one</li>
-				<li>Fades, tapers, scissor work and beard basics</li>
-				<li>Live tutor feedback every session</li>
-				<li>Portfolio building and certificate</li>
-				<li>Career support at the end of the course</li>
-			</ul>
-			<button class="btn-gold" style="width:100%;padding:16px;font-size:14px"
-				>Reserve My Place — Starter →</button
-			>
-		</div>
-	</div>
+	{/each}
 
-	<div class="crscard fi" style="transition-delay:.15s">
+	<!-- <div class="crscard fi" style="transition-delay:.15s">
 		<div class="crsstripe"></div>
 		<div class="crsbadge">Most Popular</div>
 		<div class="crstop">
@@ -81,7 +111,7 @@
 				>Reserve My Place — Advanced →</button
 			>
 		</div>
-	</div>
+	</div> -->
 </div>
 
 <div class="chain" style="margin-top:60px"><div class="chain-line"></div></div>
@@ -101,28 +131,51 @@
 			Course selected: <strong id="selname"></strong> — Choose your payment method below
 		</div>
 		<div class="popts fi" style="transition-delay:.1s">
-			<div class="popt">
+			<button
+				onclick={() => {
+					$form.paymentOption = 'minPrice';
+				}}
+				class="popt {$form.paymentOption === 'minPrice' ? 'sel' : ''}"
+			>
 				<div class="poname">Deposit to Secure</div>
-				<div class="poamt" id="depAmt">£299</div>
+				<div class="poamt" id="depAmt">
+					£{data.coursesList.find((c) => c.id === $form.courseId)?.minPrice}
+				</div>
 				<div class="ponote">
 					Lock in your place today<br />Balance due before start day<br />Quickest way to enrol
 				</div>
-			</div>
-			<div class="popt">
+			</button>
+			<button
+				onclick={() => {
+					$form.paymentOption = 'threeEqual';
+				}}
+				class="popt {$form.paymentOption === 'threeEqual' ? 'sel' : ''}"
+			>
 				<div class="poname">3 Equal Instalments</div>
-				<div class="poamt" id="instAmt">£333/mo</div>
+				<div class="poamt" id="instAmt">
+					£{Math.floor(
+						Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) / 3
+					)}/mo
+				</div>
 				<div class="ponote">
 					Spread the cost over 3 months<br />0% interest · Equal payments<br />No credit check
 					required
 				</div>
-			</div>
-			<div class="popt">
+			</button>
+			<button
+				onclick={() => {
+					$form.paymentOption = 'fullPrice';
+				}}
+				class="popt {$form.paymentOption === 'fullPrice' ? 'sel' : ''}"
+			>
 				<div class="poname">Pay in Full</div>
-				<div class="poamt" id="fullAmt">£999</div>
+				<div class="poamt" id="fullAmt">
+					£{data.coursesList.find((c) => c.id === $form.courseId)?.basePrice}
+				</div>
 				<div class="ponote">
 					Best value · Save 5%<br />One payment, nothing to track<br />Immediate confirmation
 				</div>
-			</div>
+			</button>
 		</div>
 		<div class="cob fi" style="transition-delay:.2s">
 			<div
@@ -130,20 +183,46 @@
 			>
 				Complete Your Enrolment
 			</div>
+			<form use:enhance method="post" id="enroll" action="?/enroll" class="crow">
+				<Errors allErrors={$allErrors} />
+				<input type="hidden" name="courseId" bind:value={$form.courseId} />
+				<input type="hidden" name="paymentOption" bind:value={$form.paymentOption} />
+				<div class="fg">
+					<label for="firstName">First Name</label><input
+						name="firstName"
+						required
+						bind:value={$form.firstName}
+						type="text"
+						id="ef"
+						placeholder="John"
+					/>
+				</div>
+				<div class="fg">
+					<label for="lastName">Last Name</label><input
+						name="lastName"
+						type="text"
+						bind:value={$form.lastName}
+						id="ef"
+						placeholder="Smith"
+					/>
+				</div>
+			</form>
 			<div class="crow">
 				<div class="fg">
-					<label>First Name</label><input type="text" id="ef" placeholder="John" />
+					<label for="email">Email</label><input
+						type="email"
+						id="ee"
+						bind:value={$form.email}
+						placeholder="john@email.com"
+					/>
 				</div>
 				<div class="fg">
-					<label>Last Name</label><input type="text" id="el" placeholder="Smith" />
-				</div>
-			</div>
-			<div class="crow">
-				<div class="fg">
-					<label>Email</label><input type="email" id="ee" placeholder="john@email.com" />
-				</div>
-				<div class="fg">
-					<label>Phone</label><input type="tel" id="ep" placeholder="+44 7700 000000" />
+					<label for="phone">Phone</label><input
+						bind:value={$form.phone}
+						type="tel"
+						id="ep"
+						placeholder="+44 7700 000000"
+					/>
 				</div>
 			</div>
 			<div class="csum">
@@ -153,16 +232,39 @@
 						style="font-family:var(--fb);font-size:15px;font-weight:700;letter-spacing:1px"
 						id="summC"
 					>
-						— Select a course above —
+						{data.coursesList.find((c) => c.id === $form.courseId)?.name ??
+							'— Select a course above —'}
 					</div>
 				</div>
 				<div style="text-align:right">
 					<div class="clbl">Amount Due Today</div>
-					<div class="cval" id="summA">£—</div>
+					<div class="cval" id="summA">
+						£{$form.paymentOption === 'minPrice'
+							? Math.floor(data.coursesList.find((c) => c.id === $form.courseId)?.minPrice)
+							: $form.paymentOption === 'threeEqual'
+								? Math.floor(
+										Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) / 3
+									)
+								: $form.paymentOption === 'fullPrice'
+									? Math.floor(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice)
+									: '-'}
+					</div>
 				</div>
 			</div>
 			<button class="btn-gold" style="width:100%;padding:18px;font-size:14px;letter-spacing:2.5px"
 				>Confirm My Enrolment →</button
+			>
+			<button
+				form="enroll"
+				class="btn-gold"
+				type="submit"
+				style="width:100%;padding:18px;font-size:14px"
+			>
+				{#if $delayed}
+					<LoadingBtn name="Confirming Enrolment..." />
+				{:else}
+					Confirm My Enrolment →
+				{/if}</button
 			>
 			<div
 				style="font-size:11px;color:var(--grey);text-align:center;margin-top:14px;line-height:1.7"

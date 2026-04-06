@@ -7,9 +7,9 @@ import {
 	text,
 	decimal,
 	timestamp,
-	mysqlEnum
+	mysqlEnum,
+	boolean
 } from 'drizzle-orm/mysql-core';
-import { sql } from 'drizzle-orm';
 
 // --- Courses Table ---
 // Based on the 'crsgrid' and 'crscard' elements in the HTML
@@ -19,6 +19,10 @@ export const courses = mysqlTable('courses', {
 	level: varchar('level', { length: 100 }), // e.g., "Beginner to Advanced"
 	duration: varchar('duration', { length: 100 }), // e.g., "10 Weeks"
 	description: text('description'),
+	target: varchar('target', { length: 255 }),
+	experience: varchar('experience', { length: 255 }),
+	minPrice: decimal('min_price', { precision: 10, scale: 2 }),
+	minPriceMessage: varchar('min_price_message', { length: 255 }),
 	basePrice: decimal('base_price', { precision: 10, scale: 2 }).notNull(),
 	slug: varchar('slug', { length: 255 }).unique(),
 	...secureFields
@@ -41,6 +45,8 @@ export const enrolments = mysqlTable('enrolments', {
 	id: int('id').primaryKey().autoincrement(),
 	courseId: int('course_id').references(() => courses.id),
 	paymentOptionId: int('payment_option_id').references(() => pricingOptions.id),
+	course: varchar('course', { length: 255 }),
+	paymentOption: varchar('payment_option', { length: 255 }),
 	fullName: varchar('full_name', { length: 255 }).notNull(),
 	email: varchar('email', { length: 255 }).notNull(),
 	status: mysqlEnum('status', ['pending', 'confirmed', 'cancelled']).default('pending'),
@@ -56,7 +62,7 @@ export const contactMessages = mysqlTable('contact_messages', {
 	phone: varchar('phone', { length: 50 }),
 	subject: varchar('subject', { length: 255 }),
 	message: text('message').notNull(),
-	isRead: int('is_read').default(0), // Using int for boolean compatibility
+	isRead: boolean('is_read').default(false), // Using boolean for boolean compatibility
 	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()
 });
 
@@ -66,7 +72,11 @@ export const haircutRequests = mysqlTable('haircut_requests', {
 	id: int('id').primaryKey().autoincrement(),
 	clientName: varchar('client_name', { length: 255 }).notNull(),
 	clientEmail: varchar('client_email', { length: 255 }).notNull(),
+	clientPhone: varchar('client_phone', { length: 50 }),
 	preferredDate: timestamp('preferred_date'),
+	prefferedStyle: varchar('preferred_style', { length: 255 }),
+	prefferedTime: varchar('preferred_time', { length: 50 }),
+	message: text('message'),
 	status: mysqlEnum('status', ['requested', 'scheduled', 'completed']).default('requested'),
 	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()
 });

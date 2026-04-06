@@ -2,6 +2,7 @@ import { renderComponent } from '$lib/components/ui/data-table/index.js';
 import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 import DataTableActions from './data-table-actions.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
+import BigText from '$lib/components/Table/bigText.svelte';
 import ImageViewer from '$lib/components/Table/image-viewer.svelte';
 import PriceList from './priceList.svelte';
 
@@ -32,24 +33,6 @@ export const columns = [
 	},
 
 	{
-		accessorKey: 'prices',
-		header: ({ column }) =>
-			renderComponent(DataTableSort, {
-				name: 'Price',
-
-				onclick: column.getToggleSortingHandler()
-			}),
-		sortable: true,
-
-		cell: ({ row }) => {
-			// You can pass whatever you need from `row.original` to the component
-			return renderComponent(PriceList, {
-				priceList: row.original.priceList
-			});
-		}
-	},
-
-	{
 		accessorKey: 'level',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
@@ -60,6 +43,15 @@ export const columns = [
 	},
 	{
 		accessorKey: 'duration',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Duration',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true
+	},
+	{
+		accessorKey: 'target',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
 				name: 'Duration',
@@ -82,7 +74,27 @@ export const columns = [
 
 	{
 		accessorKey: 'description',
-		header: 'Description'
+		header: 'Description',
+		cell: ({ row }) => renderComponent(BigText, { text: row.original.description })
+	},
+
+	{
+		accessorKey: 'minPrice',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Min Price',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			return '£ ' + row.original.minPrice;
+		}
+	},
+
+	{
+		accessorKey: 'minPriceMessage',
+		header: 'Min Price Message',
+		cell: ({ row }) => renderComponent(BigText, { text: row.original.minPriceMessage })
 	},
 
 	{

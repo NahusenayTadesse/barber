@@ -8,6 +8,41 @@
       "when": 1775379665312,
       "tag": "0000_boring_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1775463636812,
+      "tag": "0001_plain_shadowcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1775464622766,
+      "tag": "0002_sour_tyrannus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1775464905910,
+      "tag": "0003_marvelous_molly_hayes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1775465388766,
+      "tag": "0004_brown_spirit",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1775475183027,
+      "tag": "0005_fine_tarot",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `haircut_requests` ADD `client_phone` varchar(50);

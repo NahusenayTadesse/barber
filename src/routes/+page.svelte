@@ -1,3 +1,28 @@
+<script>
+	import { superForm } from 'sveltekit-superforms/client';
+	import { toast } from 'svelte-sonner';
+
+	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
+	import Errors from '$lib/formComponents/Errors.svelte';
+	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	let { data } = $props();
+	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
+		dataType: 'json'
+	});
+	$effect(() => {
+		if ($message) {
+			if ($message.type === 'error') toast.error($message.text);
+			else {
+				toast.success($message.text);
+			}
+		}
+	});
+</script>
+
+<svelte:head>
+	<title>D&D Barber Shop & Academy</title>
+</svelte:head>
+
 <div style="padding-top:88px">
 	<div class="ticker-wrap">
 		<div class="ticker-inner">
@@ -112,21 +137,35 @@
 			>
 				Keep it simple. Send your details and we'll point you to the right course.
 			</div>
-			<div class="cform">
-				<div class="frow">
-					<div class="fg">
-						<label>First Name</label><input type="text" placeholder="Your name" />
-					</div>
-					<div class="fg">
-						<label>Last Name</label><input type="text" placeholder="Surname" />
-					</div>
+			<form method="POST" use:enhance id="contact-form" action="/contact/?/contact" class="cform">
+				<Errors allErrors={$allErrors} />
+				<div class="fg">
+					<label for="name">Name</label><input
+						bind:value={$form.name}
+						name="name"
+						type="text"
+						placeholder="John Doe"
+					/>
 				</div>
 				<div class="fg">
-					<label>Email</label><input type="email" placeholder="your@email.com" />
+					<label for="email">Email</label><input
+						name="email"
+						bind:value={$form.email}
+						type="email"
+						placeholder="john@email.com"
+					/>
 				</div>
 				<div class="fg">
-					<label>Topic</label>
-					<select>
+					<label for="phone">Phone</label><input
+						name="phone"
+						bind:value={$form.phone}
+						type="tel"
+						placeholder="+44 7700 000000"
+					/>
+				</div>
+				<div class="fg">
+					<label for="subject">Topic</label>
+					<select bind:value={$form.subject} name="subject">
 						<option value="">Choose one...</option>
 						<option>Course help</option>
 						<option>Payment options</option>
@@ -136,10 +175,25 @@
 					</select>
 				</div>
 				<div class="fg">
-					<label>Your Message</label><textarea placeholder="Ask your question here..."></textarea>
+					<label for="message">Message</label><textarea
+						bind:value={$form.contactMessage}
+						name="contactMessage"
+						placeholder="Ask us anything — we'll give you a straight answer..."
+					></textarea>
 				</div>
-				<button class="btn-gold" style="align-self:flex-start">Send My Message</button>
-			</div>
+				<button
+					form="contact-form"
+					class="btn-gold"
+					type="submit"
+					style="width:100%;padding:18px;font-size:14px"
+				>
+					{#if $delayed}
+						<LoadingBtn name="Sending Message..." />
+					{:else}
+						Send My Message →
+					{/if}</button
+				>
+			</form>
 		</div>
 	</div>
 </div>

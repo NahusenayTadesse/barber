@@ -1,3 +1,27 @@
+<script>
+	import { superForm } from 'sveltekit-superforms/client';
+	import { toast } from 'svelte-sonner';
+	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
+
+	import Errors from '$lib/formComponents/Errors.svelte';
+	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	let { data } = $props();
+	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
+		dataType: 'json'
+	});
+	$effect(() => {
+		if ($message) {
+			if ($message.type === 'error') toast.error($message.text);
+			else {
+				toast.success($message.text);
+			}
+		}
+	});
+</script>
+
+<svelte:head>
+	<title>Contact</title>
+</svelte:head>
 <div class="phero" style="min-height:42vh">
 	<div class="phero-bg"></div>
 	<div class="phero-inner fi">
@@ -38,14 +62,14 @@
 		</p>
 
 		<div class="cii">
-			<div class="cii-icon">📍</div>
+			<div class="cii-icon"><MapPin /></div>
 			<div>
 				<div class="cii-lbl">Location</div>
 				<div class="cii-val">69 · London, UK</div>
 			</div>
 		</div>
 		<div class="cii">
-			<div class="cii-icon">📞</div>
+			<div class="cii-icon"><Phone /></div>
 			<div>
 				<div class="cii-lbl">Phone</div>
 				<div class="cii-val">
@@ -54,7 +78,7 @@
 			</div>
 		</div>
 		<div class="cii">
-			<div class="cii-icon">✉️</div>
+			<div class="cii-icon"><Mail /></div>
 			<div>
 				<div class="cii-lbl">Email</div>
 				<div class="cii-val">
@@ -110,18 +134,35 @@
 			<div style="font-size:13px;color:var(--grey);margin-bottom:24px;font-weight:300">
 				We'll get back to you the same day.
 			</div>
-			<div class="cform">
-				<div class="frow">
-					<div class="fg"><label>First Name</label><input type="text" placeholder="John" /></div>
-					<div class="fg"><label>Last Name</label><input type="text" placeholder="Smith" /></div>
+			<form method="POST" use:enhance id="contact-form" action="?/contact" class="cform">
+				<Errors allErrors={$allErrors} />
+				<div class="fg">
+					<label for="name"> Name</label><input
+						bind:value={$form.name}
+						name="name"
+						type="text"
+						placeholder="John Doe"
+					/>
 				</div>
 				<div class="fg">
-					<label>Email</label><input type="email" placeholder="john@email.com" />
+					<label for="email">Email</label><input
+						name="email"
+						bind:value={$form.email}
+						type="email"
+						placeholder="john@email.com"
+					/>
 				</div>
-				<div class="fg"><label>Phone</label><input type="tel" placeholder="+44 7700 000000" /></div>
 				<div class="fg">
-					<label>Subject</label>
-					<select>
+					<label for="phone">Phone</label><input
+						name="phone"
+						bind:value={$form.phone}
+						type="tel"
+						placeholder="+44 7700 000000"
+					/>
+				</div>
+				<div class="fg">
+					<label for="subject">Subject</label>
+					<select bind:value={$form.subject} name="subject">
 						<option value="">What's on your mind?</option>
 						<option>Which course is right for me?</option>
 						<option>Upcoming intake dates</option>
@@ -131,14 +172,25 @@
 					</select>
 				</div>
 				<div class="fg">
-					<label>Message</label><textarea
+					<label for="message">Message</label><textarea
+						bind:value={$form.contactMessage}
+						name="contactMessage"
 						placeholder="Ask us anything — we'll give you a straight answer..."
 					></textarea>
 				</div>
-				<button class="btn-gold" style="width:100%;padding:18px;font-size:14px"
-					>Send My Message →</button
+				<button
+					form="contact-form"
+					class="btn-gold"
+					type="submit"
+					style="width:100%;padding:18px;font-size:14px"
 				>
-			</div>
+					{#if $delayed}
+						<LoadingBtn name="Sending Message..." />
+					{:else}
+						Send My Message →
+					{/if}</button
+				>
+			</form>
 		</div>
 	</div>
 </div>

@@ -28,7 +28,17 @@ export const actions: Actions = {
 			return message(form, { type: 'error', text: 'Please check your form data.' });
 		}
 
-		const { name, level, duration, basePrice, description } = form.data;
+		const {
+			name,
+			level,
+			duration,
+			basePrice,
+			description,
+			minPrice,
+			minPriceMessage,
+			target,
+			experience
+		} = form.data;
 
 		try {
 			await db.transaction(async (tx) => {
@@ -41,7 +51,11 @@ export const actions: Actions = {
 					level,
 					duration,
 					basePrice,
-					description
+					description,
+					minPrice,
+					minPriceMessage,
+					target,
+					experience
 				});
 			});
 
