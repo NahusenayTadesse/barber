@@ -1,4 +1,4 @@
-<main class="container justify-self-center">
+<!-- <main class="container justify-self-center">
 	<section class="hero">
 		<div class="hero-copy">
 			<div>
@@ -984,6 +984,303 @@
 		}
 		.services-grid {
 			grid-template-columns: 1fr;
+		}
+	}
+</style> -->
+
+<svelte:head>
+	<title>Barbershop & Academy</title>
+</svelte:head>
+
+<section class="my-6 mt-32 flex flex-col gap-4 justify-self-center">
+	<div class="eyebrow text-center">Barbershop & Academy</div>
+
+	<p>Start your barber career or book your next cut — quick and simple.</p>
+</section>
+
+<section class="choice-grid mb-16 justify-self-center lg:w-9/10">
+	<a class="card" href="/courses">
+		<div
+			class="card-media"
+			style="background-image:url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=1200&q=80');"
+		></div>
+		<div class="card-overlay"></div>
+		<div class="card-inner">
+			<div class="card-tag">Academy</div>
+			<h3 class="card-title">GO TO<br />ACADEMY</h3>
+			<p class="card-copy">
+				Learn barbering in a real shop environment. See the courses, pricing, payment options and
+				how to get started.
+			</p>
+			<div class="card-points">
+				<span>No experience needed</span>
+				<span>Real clients</span>
+				<span>12 week courses</span>
+			</div>
+			<div class="cta cta-primary">Enter Academy →</div>
+		</div>
+	</a>
+
+	<a class="card" href="https://tesbarber.co.uk/" target="_blank" rel="noopener noreferrer">
+		<div
+			class="card-media"
+			style="background-image:url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80');"
+		></div>
+		<div class="card-overlay"></div>
+		<div class="card-inner">
+			<div class="card-tag">Barbershop</div>
+			<h3 class="card-title">BOOK A<br />HAIRCUT</h3>
+			<p class="card-copy">
+				Book your haircut, fade or beard trim online using your booking system. Fast, simple and
+				direct.
+			</p>
+			<div class="card-points">
+				<span>Haircuts</span>
+				<span>Fades</span>
+				<span>Beard trims</span>
+			</div>
+			<div class="cta cta-secondary">Book Now →</div>
+		</div>
+	</a>
+</section>
+
+<style>
+	.wrap {
+		width: min(1240px, 100%);
+		position: relative;
+		z-index: 1;
+	}
+	.topbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 20px;
+		margin-bottom: 28px;
+		padding-bottom: 22px;
+		border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+	}
+	.brand {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+	}
+	.brand-mark {
+		width: 58px;
+		height: 58px;
+		border-radius: 50%;
+		border: 2px solid var(--gold);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, #0f0e00 0%, #1c1900 100%);
+		box-shadow: 0 0 24px rgba(212, 175, 55, 0.18);
+		font-family: var(--fh);
+		font-size: 22px;
+		letter-spacing: 1px;
+		color: var(--gold);
+	}
+	.brand-copy h1 {
+		font-family: var(--fh);
+		font-size: 26px;
+		letter-spacing: 3px;
+		line-height: 1;
+		background: linear-gradient(90deg, var(--gold3), var(--gold), var(--gold2));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.brand-copy p {
+		margin-top: 6px;
+		color: var(--grey);
+		font-size: 11px;
+		letter-spacing: 3px;
+		text-transform: uppercase;
+	}
+	.quick-contact {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+	.quick-contact a {
+		color: var(--grey);
+		text-decoration: none;
+		font-size: 12px;
+		letter-spacing: 1px;
+		border: 1px solid rgba(212, 175, 55, 0.15);
+		padding: 10px 14px;
+		transition: 0.25s;
+	}
+	.quick-contact a:hover {
+		border-color: rgba(212, 175, 55, 0.35);
+		color: var(--gold);
+		background: rgba(212, 175, 55, 0.05);
+	}
+	.hero {
+		text-align: center;
+		margin: 0 auto 10px;
+		max-width: 900px;
+	}
+	.eyebrow {
+		color: var(--gold);
+		font-size: 11px;
+		letter-spacing: 5px;
+		text-transform: uppercase;
+		margin-bottom: 14px;
+		font-weight: 600;
+	}
+	.hero h2 {
+		font-family: var(--fh);
+		font-size: clamp(58px, 10vw, 130px);
+		line-height: 0.92;
+		letter-spacing: 2px;
+		margin-bottom: 16px;
+		text-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+	}
+
+	.hero p {
+		max-width: 620px;
+		margin: 0 auto;
+		color: #c0bdb7;
+		font-size: 16px;
+		line-height: 1.75;
+	}
+	.choice-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 18px;
+	}
+	.card {
+		position: relative;
+		overflow: hidden;
+		min-height: 480px;
+		border: 1px solid rgba(212, 175, 55, 0.16);
+		background: var(--dark2);
+		text-decoration: none;
+		color: inherit;
+		display: flex;
+		transition: 0.3s ease;
+		isolation: isolate;
+	}
+	.card:hover {
+		transform: translateY(-6px);
+		border-color: rgba(212, 175, 55, 0.4);
+		box-shadow:
+			0 26px 70px rgba(0, 0, 0, 0.45),
+			0 0 35px rgba(212, 175, 55, 0.08);
+	}
+	.card-media {
+		position: absolute;
+		inset: 0;
+		background-size: cover;
+		background-position: center;
+		transform: scale(1.02);
+		transition: transform 0.6s ease;
+		opacity: 0.38;
+		z-index: -2;
+	}
+	.card:hover .card-media {
+		transform: scale(1.08);
+	}
+	.card-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to top,
+			rgba(5, 5, 5, 0.96) 0%,
+			rgba(5, 5, 5, 0.68) 45%,
+			rgba(5, 5, 5, 0.2) 100%
+		);
+		z-index: -1;
+	}
+	.card-inner {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		padding: 34px;
+	}
+	.card-tag {
+		display: inline-flex;
+		align-self: flex-start;
+		margin-bottom: 14px;
+		font-size: 10px;
+		letter-spacing: 4px;
+		text-transform: uppercase;
+		color: var(--gold);
+		font-weight: 700;
+	}
+	.card-title {
+		font-family: var(--fh);
+		font-size: clamp(42px, 5vw, 72px);
+		line-height: 0.95;
+		letter-spacing: 1px;
+		margin-bottom: 10px;
+	}
+	.card-copy {
+		color: #c7c3bc;
+		max-width: 420px;
+		font-size: 14px;
+		line-height: 1.7;
+		margin-bottom: 22px;
+	}
+	.card-points {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin-bottom: 22px;
+	}
+	.card-points span {
+		font-size: 11px;
+		color: var(--grey);
+		border: 1px solid rgba(212, 175, 55, 0.12);
+		padding: 8px 10px;
+		background: rgba(255, 255, 255, 0.02);
+	}
+	.cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		width: max-content;
+		font-family: var(--fb);
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 2.5px;
+		text-transform: uppercase;
+		padding: 16px 28px;
+		transition: 0.25s;
+	}
+	.cta-primary {
+		background: linear-gradient(135deg, var(--gold3), var(--gold), var(--gold2));
+		color: var(--black);
+		clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+	}
+	.cta-secondary {
+		color: var(--gold);
+		border: 1px solid rgba(212, 175, 55, 0.35);
+		clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+		background: rgba(212, 175, 55, 0.05);
+	}
+	.card:hover .cta-primary {
+		box-shadow: 0 12px 30px rgba(212, 175, 55, 0.28);
+	}
+	.card:hover .cta-secondary {
+		background: rgba(212, 175, 55, 0.1);
+	}
+
+	@media (max-width: 900px) {
+		.choice-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 640px) {
+		.card {
+			min-height: 420px;
+		}
+		.card-inner {
+			padding: 24px;
+		}
+		.hero p {
+			font-size: 15px;
 		}
 	}
 </style>
