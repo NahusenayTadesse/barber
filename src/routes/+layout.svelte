@@ -62,7 +62,7 @@
 
 <ProgressBar color="#b8860b" zIndex={1000} />
 
-{#if !page.url.pathname.startsWith('/dashboard')}
+{#if !page.url.pathname.startsWith('/dashboard') && page.url.pathname !== '/'}
 	<Header />
 	{@render children()}
 

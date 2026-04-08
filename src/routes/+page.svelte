@@ -992,13 +992,29 @@
 	<title>Barbershop & Academy</title>
 </svelte:head>
 
-<section class="my-6 mt-32 flex flex-col gap-4 justify-self-center">
+<div class="topbar mt-4 flex flex-col justify-self-center lg:flex lg:w-7/10 lg:flex-row">
+	<div class="brand">
+		<div class="brand-mark">D&D</div>
+		<div class="brand-copy">
+			<h1>D&D Barber & Academy</h1>
+			<p>London · Barber Shop & Academy</p>
+		</div>
+	</div>
+	<div class="quick-contact">
+		<a href="tel:0202779988">Call: 0202 779 988</a>
+		<a href="https://wa.me/442027799988" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+	</div>
+</div>
+
+<section class="my-6 flex flex-col items-center justify-center gap-4 justify-self-center">
 	<div class="eyebrow text-center">Barbershop & Academy</div>
 
-	<p>Start your barber career or book your next cut — quick and simple.</p>
+	<p class="w-1/2 justify-self-center text-center lg:w-full">
+		Start your barber career or book your next cut — quick and simple.
+	</p>
 </section>
 
-<section class="choice-grid mb-16 justify-self-center lg:w-9/10">
+<section class="choice-grid mb-16 justify-self-center lg:w-7/10">
 	<a class="card" href="/courses">
 		<div
 			class="card-media"
@@ -1021,7 +1037,7 @@
 		</div>
 	</a>
 
-	<a class="card" href="https://tesbarber.co.uk/" target="_blank" rel="noopener noreferrer">
+	<a class="card" href="/barber-shop" rel="noopener noreferrer">
 		<div
 			class="card-media"
 			style="background-image:url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80');"

@@ -263,7 +263,7 @@
 				{#if $delayed}
 					<LoadingBtn name="Confirming Enrolment..." />
 				{:else}
-					Confirm My Enrolment →
+					Confirm Enrollment →
 				{/if}</button
 			>
 			<div

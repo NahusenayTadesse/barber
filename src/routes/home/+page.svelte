@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>D&D Barber Shop & Academy</title>
+	<title>D&D Academy</title>
 </svelte:head>
 
 <div style="padding-top:88px">

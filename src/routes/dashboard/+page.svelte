@@ -1,37 +1,66 @@
 <script lang="ts">
-	import ReorderList from '$lib/components/dashboard/reorder-list.svelte';
-	import { PackageIcon } from '@lucide/svelte';
-
-	import Reports from '$lib/components/dashboard/reports.svelte';
-	import DailyStats from '$lib/components/dashboard/daily-stats.svelte';
+	import { Users, MessageSquare, TrendingUp, Calendar } from '@lucide/svelte';
+	import * as Card from '$lib/components/ui/card'; // Standard Shadcn-Svelte path
 
 	let { data } = $props();
+
+	let totalActivity = $derived(data.enrolmentResult[0]?.count + data.messageResult[0]?.count);
 </script>
 
 <svelte:head>
 	<title>Dashboard</title>
 </svelte:head>
 
-<div
-	class="min-h-dvh w-full rounded-lg border bg-linear-to-br from-background/10 via-background/10
- to-muted/30 backdrop-blur-md transition-colors duration-300"
->
-	<!-- Header Section -->
-	<div
-		class="rounded-xl border-b border-border/50 bg-linear-to-r from-primary/5 via-accent/5
-	 to-secondary/5 shadow-sm backdrop-blur-sm"
-	>
-		<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-			<div class="flex items-center justify-between">
-				<div class="space-y-1">
-					<h1
-						class="bg-linear-to-r from-primary to-black bg-clip-text text-3xl font-bold text-transparent dark:to-white"
-					>
-						Dashboard
-					</h1>
-					<p class="text-sm text-muted-foreground">Welcome back! Here's your daily overview.</p>
-				</div>
-			</div>
+<div class="space-y-6">
+	<div class="flex items-center justify-between">
+		<h2 class="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+		<div class="flex items-center space-x-2 text-sm text-muted-foreground">
+			<Calendar class="h-4 w-4" />
+			<span>Today, {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}</span
+			>
 		</div>
+	</div>
+
+	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+		<Card.Root class="overflow-hidden transition-all hover:shadow-md">
+			<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+				<Card.Title class="text-sm font-medium">New Enrolments</Card.Title>
+				<Users class="h-4 w-4 text-blue-500" />
+			</Card.Header>
+			<Card.Content>
+				<div class="text-2xl font-bold">{data.enrolmentResult[0]?.count}</div>
+				<p class="text-xs text-muted-foreground">
+					<span class="inline-flex items-center font-medium text-emerald-500">
+						<TrendingUp class="mr-1 h-3 w-3" />
+						Active
+					</span>
+					{' '}students joined today
+				</p>
+			</Card.Content>
+		</Card.Root>
+
+		<Card.Root class="overflow-hidden transition-all hover:shadow-md">
+			<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+				<Card.Title class="text-sm font-medium">Inquiries</Card.Title>
+				<MessageSquare class="h-4 w-4 text-purple-500" />
+			</Card.Header>
+			<Card.Content>
+				<div class="text-2xl font-bold">{data.messageResult[0]?.count}</div>
+				<p class="text-xs text-muted-foreground">Contact form submissions</p>
+			</Card.Content>
+		</Card.Root>
+
+		<Card.Root
+			class="overflow-hidden border-primary/20 bg-primary/5 transition-all hover:shadow-md md:col-span-2 lg:col-span-1"
+		>
+			<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+				<Card.Title class="text-sm font-medium">Total Engagement</Card.Title>
+				<TrendingUp class="h-4 w-4 text-primary" />
+			</Card.Header>
+			<Card.Content>
+				<div class="text-2xl font-bold text-primary">{totalActivity}</div>
+				<p class="text-xs text-muted-foreground">Combined interactions today</p>
+			</Card.Content>
+		</Card.Root>
 	</div>
 </div>
