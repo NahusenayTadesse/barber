@@ -1006,13 +1006,13 @@
 	</div>
 </div>
 
-<section class="my-6 flex flex-col items-center justify-center gap-4 justify-self-center">
+<!-- <section class="my-6 flex flex-col items-center justify-center gap-4 justify-self-center">
 	<div class="eyebrow text-center">Barbershop & Academy</div>
 
 	<p class="w-1/2 justify-self-center text-center lg:w-full">
 		Start your barber career or book your next cut — quick and simple.
 	</p>
-</section>
+</section> -->
 
 <section class="choice-grid mb-16 justify-self-center lg:w-7/10">
 	<a class="card" href="/courses">
@@ -1023,7 +1023,7 @@
 		<div class="card-overlay"></div>
 		<div class="card-inner">
 			<div class="card-tag">Academy</div>
-			<h3 class="card-title">GO TO<br />ACADEMY</h3>
+			<h3 class="card-title">GO TO ACADEMY</h3>
 			<p class="card-copy">
 				Learn barbering in a real shop environment. See the courses, pricing, payment options and
 				how to get started.
@@ -1045,7 +1045,7 @@
 		<div class="card-overlay"></div>
 		<div class="card-inner">
 			<div class="card-tag">Barbershop</div>
-			<h3 class="card-title">BOOK A<br />HAIRCUT</h3>
+			<h3 class="card-title">BOOK A HAIRCUT</h3>
 			<p class="card-copy">
 				Book your haircut, fade or beard trim online using your booking system. Fast, simple and
 				direct.
@@ -1290,10 +1290,17 @@
 	}
 	@media (max-width: 640px) {
 		.card {
-			min-height: 420px;
+			min-height: 320px;
 		}
 		.card-inner {
 			padding: 24px;
+		}
+		.card-title {
+			font-family: var(--fh);
+			font-size: clamp(36px, 5vw, 72px);
+			line-height: 0.95;
+			letter-spacing: 1px;
+			margin-bottom: 10px;
 		}
 		.hero p {
 			font-size: 15px;

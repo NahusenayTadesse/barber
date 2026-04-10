@@ -1222,7 +1222,7 @@ nav::after {
 
 /* ——— PAGE HERO ——— */
 .phero {
-	padding-top: 88px;
+	padding-top: 40px;
 	background: var(--black);
 	position: relative;
 	overflow: hidden;
@@ -2092,5 +2092,12 @@ footer::before {
 	.cta-banner-btns {
 		flex-direction: column;
 		align-items: center;
+	}
+	.crsnm,
+	.crsprice {
+		font-size: 45px;
+	}
+	.crsbody {
+		margin-top: -20px;
 	}
 }

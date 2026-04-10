@@ -69,11 +69,12 @@
 						<li class="capitalize">{point.trim()}</li>
 					{/each}
 				</ul>
-				<button
+				<a
 					class="btn-gold"
+					href="/courses/{course.id}"
 					onclick={() => ($form.courseId = course.id)}
 					style="width:100%;padding:16px;font-size:14px"
-					>Reserve My Place — {course.name?.split(' ').at(-1)} →</button
+					>Reserve My Place — {course.name?.split(' ').at(-1)} →</a
 				>
 			</div>
 		</div>
@@ -112,7 +113,7 @@
 	</div> -->
 </div>
 
-<div class="chain" style="margin-top:60px"><div class="chain-line"></div></div>
+<div class="chain mt-10"><div class="chain-line"></div></div>
 
 <!-- PAYMENT -->
 <div class="psec" id="paySection">
