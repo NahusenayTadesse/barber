@@ -1,8 +1,12 @@
+<script>
+	let href = 'https://simplybook.me/en/';
+</script>
+
 <svelte:head>
-	<title>D&DBarber Shop</title>
+	<title>D&D Barber Shop</title>
 </svelte:head>
 
-<main class="container mt-22 justify-self-center">
+<main class="container justify-self-center lg:mt-22">
 	<section class="hero">
 		<div class="hero-copy">
 			<div>
@@ -23,12 +27,7 @@
 					<span>Beard trims</span>
 				</div>
 				<div class="hero-actions">
-					<a
-						class="btn-gold"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book Now</a
-					>
+					<a class="btn-gold" {href} target="_blank" rel="noopener noreferrer">Book Now</a>
 					<a class="btn-outline" href="tel:0202779988">Call the Shop</a>
 				</div>
 				<div class="hero-note">Replace the booking link with your real booking system URL.</div>
@@ -82,12 +81,7 @@
 						Variety of cuts including classic haircuts, fade and taper, buzz cut, undercut and more
 						tailored to suit your style.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -101,12 +95,7 @@
 						Enjoy a fresh cut followed by a relaxing hair wash using premium shampoo for a clean
 						finish.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -120,12 +109,7 @@
 						A quick touch-up to keep your edges sharp, focused on the hairline, sideburns and
 						neckline.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 
@@ -139,12 +123,7 @@
 					<div class="service-copy">
 						Gentle and professional haircuts for young children in a comfortable, easy environment.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -157,12 +136,7 @@
 					<div class="service-copy">
 						Trendy cuts for pre-teens and teens with attention to current styles and preferences.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -176,12 +150,7 @@
 						A professional haircut followed by full or partial hair colouring for a complete
 						refreshed look.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 
@@ -196,12 +165,7 @@
 						Whether you want a bold change or a subtle refresh, our colouring service is tailored to
 						your look.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -214,12 +178,7 @@
 					<div class="service-copy">
 						Hair and beard colouring to match or complement each other for a more complete finish.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -232,12 +191,7 @@
 					<div class="service-copy">
 						Transform your look with a haircut, colouring and beard service tailored to your style.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 
@@ -251,12 +205,7 @@
 					<div class="service-copy">
 						Professional braids for men with clean parting, precision and a sharp finished look.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -269,12 +218,7 @@
 					<div class="service-copy">
 						Facial treatments designed to support healthier, cleaner and more refreshed skin.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -288,12 +232,7 @@
 						A rejuvenating face steam treatment that opens pores, helps cleanse skin and refreshes
 						your face.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 
@@ -308,12 +247,7 @@
 						Men’s skin care services designed to help maintain healthy, clean and well-presented
 						skin.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -327,12 +261,7 @@
 						Hair grooming and makeup application for events, photoshoots, special occasions or a
 						polished look.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 			<div class="service-card">
@@ -345,12 +274,7 @@
 					<div class="service-copy">
 						Precise eyebrow grooming and shaping to sharpen your overall appearance.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 
@@ -364,12 +288,7 @@
 					<div class="service-copy">
 						A relaxing scalp cleanse using premium products that nourish and revitalize your hair.
 					</div>
-					<a
-						class="service-book"
-						href="https://tesbarber.co.uk/"
-						target="_blank"
-						rel="noopener noreferrer">Book →</a
-					>
+					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
 		</div>
@@ -421,9 +340,7 @@
 		<div class="booking-box">
 			<h2>READY TO<br /><span class="gold">BOOK?</span></h2>
 			<p>Click below to book your appointment online. Fast, simple and direct.</p>
-			<a class="btn-gold" href="https://tesbarber.co.uk/" target="_blank" rel="noopener noreferrer"
-				>Book Now</a
-			>
+			<a class="btn-gold" {href} target="_blank" rel="noopener noreferrer">Book Now</a>
 		</div>
 	</section>
 </main>

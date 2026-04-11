@@ -5,8 +5,10 @@ import { db } from '$lib/server/db';
 import { haircutRequests } from '$lib/server/db/schema';
 
 import type { PageServerLoad, Actions } from './$types';
+import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async () => {
+	return error(404, 'Not Found');
 	const form = await superValidate(zod4(schema));
 
 	return {

@@ -6,6 +6,7 @@
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
 
 	import Errors from '$lib/formComponents/Errors.svelte';
+	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import { Mail, MapPin, Phone } from '@lucide/svelte';
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
@@ -25,8 +26,11 @@
 	<title>Courses & Enrollment</title>
 </svelte:head>
 
-<div class="phero">
-	<div class="phero-bg"></div>
+<div
+	class="bg-start relative z-0 bg-cover py-0 lg:py-12"
+	style="background-image: url('/images (18).webp');"
+>
+	<div class="absolute inset-0 -z-1 bg-black/70"></div>
 	<div class="phero-inner fi">
 		<div class="ey"><span>Courses & Enrolment</span></div>
 		<h1 class="sec-title" style="font-size:clamp(58px,9vw,116px)">
@@ -45,74 +49,82 @@
 		><span>Enrol from £299</span><span>London Based</span><span>Flexible Payment</span>
 	</div>
 </div>
+<Carousel.Root class="my-16 block w-full max-w-xs justify-self-center lg:hidden">
+	<Carousel.Content>
+		{#each data.coursesList as course}
+			<Carousel.Item>
+				<div class="crscard fi">
+					<div class="crsstripe"></div>
+					<div class="crstop">
+						<div class="crslv">{course.level} — {course.target}</div>
+						<div class="crsnm">{course.name}</div>
+						<div class="crsdur">{course.duration} · {course.experience}</div>
+						<div class="crs-prow">
+							<div class="crsprice">£{course.basePrice}</div>
+							<div class="crspnote">full course</div>
+						</div>
+					</div>
+					<div class="crsbody">
+						<div class="urgency">
+							<strong>Enrol from £{course.minPrice} deposit</strong> — {course.minPriceMessage}
+						</div>
+						<div class="incl">What You'll Learn & Get</div>
+						<ul class="buls">
+							{#each course?.description?.split(/\n+/).filter(Boolean) as point}
+								<li class="capitalize">{point.trim()}</li>
+							{/each}
+						</ul>
+						<a
+							class="btn-gold"
+							href="/courses/{course.id}"
+							onclick={() => ($form.courseId = course.id)}
+							>Reserve My Place — {course.name?.split(' ').at(-1)} →</a
+						>
+					</div>
+				</div>
+			</Carousel.Item>
+		{/each}
+	</Carousel.Content>
+	<Carousel.Previous />
+	<Carousel.Next />
+</Carousel.Root>
 
-<div class="crsgrid">
-	{#each data.coursesList as course}
-		<div class="crscard fi">
-			<div class="crsstripe"></div>
-			<div class="crstop">
-				<div class="crslv">{course.level} — {course.target}</div>
-				<div class="crsnm">{course.name}</div>
-				<div class="crsdur">{course.duration} · {course.experience}</div>
-				<div class="crs-prow">
-					<div class="crsprice">£{course.basePrice}</div>
-					<div class="crspnote">full course</div>
+<div class="hidden lg:block">
+	<div class="crsgrid">
+		{#each data.coursesList as course}
+			<div class="crscard fi">
+				<div class="crsstripe"></div>
+				<div class="crstop">
+					<div class="crslv">{course.level} — {course.target}</div>
+					<div class="crsnm">{course.name}</div>
+					<div class="crsdur">{course.duration} · {course.experience}</div>
+					<div class="crs-prow">
+						<div class="crsprice">£{course.basePrice}</div>
+						<div class="crspnote">full course</div>
+					</div>
+				</div>
+				<div class="crsbody">
+					<div class="urgency">
+						<strong>Enrol from £{course.minPrice} deposit</strong> — {course.minPriceMessage}
+					</div>
+					<div class="incl">What You'll Learn & Get</div>
+					<ul class="buls">
+						{#each course?.description?.split(/\n+/).filter(Boolean) as point}
+							<li class="capitalize">{point.trim()}</li>
+						{/each}
+					</ul>
+					<a
+						class="btn-gold"
+						href="/courses/{course.id}"
+						onclick={() => ($form.courseId = course.id)}
+						style="width:100%;padding:16px;font-size:14px"
+						>Reserve My Place — {course.name?.split(' ').at(-1)} →</a
+					>
 				</div>
 			</div>
-			<div class="crsbody">
-				<div class="urgency">
-					<strong>Enrol from £{course.minPrice} deposit</strong> — {course.minPriceMessage}
-				</div>
-				<div class="incl">What You'll Learn & Get</div>
-				<ul class="buls">
-					{#each course?.description?.split(/\n+/).filter(Boolean) as point}
-						<li class="capitalize">{point.trim()}</li>
-					{/each}
-				</ul>
-				<a
-					class="btn-gold"
-					href="/courses/{course.id}"
-					onclick={() => ($form.courseId = course.id)}
-					style="width:100%;padding:16px;font-size:14px"
-					>Reserve My Place — {course.name?.split(' ').at(-1)} →</a
-				>
-			</div>
-		</div>
-	{/each}
-
-	<!-- <div class="crscard fi" style="transition-delay:.15s">
-		<div class="crsstripe"></div>
-		<div class="crsbadge">Most Popular</div>
-		<div class="crstop">
-			<div class="crslv">Level 2 — For barbers levelling up</div>
-			<div class="crsnm">12 WEEK<br />ADVANCED</div>
-			<div class="crsdur">12 Weeks · Take your skills to the top</div>
-			<div class="crs-prow">
-				<div class="crsprice">£1,499</div>
-				<div class="crspnote">full course</div>
-			</div>
-		</div>
-		<div class="crsbody">
-			<div class="urgency">
-				<strong>Enrol from £399 deposit</strong> — limited spaces per cohort. Once the intake is full,
-				the next available date may be weeks away.
-			</div>
-			<div class="incl">What You'll Learn & Get</div>
-			<ul class="buls">
-				<li>For barbers ready to level up</li>
-				<li>Advanced fades and cleaner blending</li>
-				<li>Texture, finishing and sharper client work</li>
-				<li>Speed, consistency and shop-floor confidence</li>
-				<li>Business, bookings and client retention</li>
-				<li>Advanced certificate and 1-to-1 support</li>
-			</ul>
-			<button class="btn-gold" style="width:100%;padding:16px;font-size:14px"
-				>Reserve My Place — Advanced →</button
-			>
-		</div>
-	</div> -->
+		{/each}
+	</div>
 </div>
-
 <div class="chain mt-10"><div class="chain-line"></div></div>
 
 <!-- PAYMENT -->

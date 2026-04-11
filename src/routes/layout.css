@@ -1222,7 +1222,7 @@ nav::after {
 
 /* ——— PAGE HERO ——— */
 .phero {
-	padding-top: 40px;
+	padding-top: 50px;
 	background: var(--black);
 	position: relative;
 	overflow: hidden;
@@ -1241,7 +1241,7 @@ nav::after {
 	margin: 0 auto;
 	padding: 80px 48px 56px;
 }
-.phero-bg {
+/*.phero-bg {
 	position: absolute;
 	inset: 0;
 	background: radial-gradient(
@@ -1249,7 +1249,7 @@ nav::after {
 		rgba(212, 175, 55, 0.05) 0%,
 		transparent 65%
 	);
-}
+}*/
 
 /* ——— COURSES PAGE ——— */
 .crsgrid {
@@ -2095,9 +2095,17 @@ footer::before {
 	}
 	.crsnm,
 	.crsprice {
-		font-size: 45px;
+		font-size: 38px;
 	}
 	.crsbody {
 		margin-top: -20px;
+	}
+	.phero {
+		padding-top: 0px;
+		margin-top: -5px;
+	}
+	.buls li {
+		font-size: 11px;
+		gap: 6px;
 	}
 }
