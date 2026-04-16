@@ -72,6 +72,32 @@
 		</div>
 
 		<div class="services-grid">
+			{#each data?.allServices as service}
+				<div class="service-card">
+					<div
+						class="service-image"
+						style="background-image: url('/files/{service.imageUrl}')"
+					></div>
+					<div class="service-body">
+						<div class="service-top">
+							<div class="service-name">{service.name}</div>
+							<div class="service-price">£{service.price}</div>
+						</div>
+						<div class="service-copy">
+							{service.description}
+						</div>
+						<a
+							class="service-book"
+							href={service.bookingLink}
+							target="_blank"
+							rel="noopener noreferrer">Book →</a
+						>
+					</div>
+				</div>
+			{/each}
+		</div>
+
+		<!-- <div class="services-grid">
 			<div class="service-card">
 				<div class="service-image"></div>
 				<div class="service-body">
@@ -293,7 +319,7 @@
 					<a class="service-book" {href} target="_blank" rel="noopener noreferrer">Book →</a>
 				</div>
 			</div>
-		</div>
+		</div> -->
 	</section>
 
 	<section class="reviews">
@@ -746,7 +772,7 @@
 	}
 
 	/* Assign images per card */
-	.services-grid .service-card:nth-child(1) .service-image {
+	/*.services-grid .service-card:nth-child(1) .service-image {
 		background-image: url('/images (1).webp');
 	}
 	.services-grid .service-card:nth-child(2) .service-image {
@@ -793,7 +819,7 @@
 	}
 	.services-grid .service-card:nth-child(16) .service-image {
 		background-image: url('/images (17).webp');
-	}
+	}*/
 
 	.split-grid {
 		display: grid;

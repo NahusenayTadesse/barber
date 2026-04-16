@@ -3,6 +3,7 @@
 	import DataTable from '$lib/components/Table/data-table.svelte';
 	import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 	import ImageViewer from '$lib/components/Table/image-viewer.svelte';
+	import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 
 	import Edit from './edit.svelte';
 	import Delete from './delete.svelte';
@@ -69,6 +70,25 @@
 				return '£ ' + row.original.price;
 			}
 		},
+
+		{
+			accessorKey: 'bookingLink',
+			header: ({ column }) =>
+				renderComponent(DataTableSort, {
+					name: 'Booking Link',
+					onclick: column.getToggleSortingHandler()
+				}),
+			sortable: true,
+			cell: ({ row }) =>
+				renderComponent(DataTableLinks, {
+					id: '',
+					name: 'Booking Link',
+					link: row.original.bookingLink,
+					target: '_blank',
+					IconComp: SquareArrowOutUpRight,
+					tooltip: `Goto ${row.original.name}'s booking link`
+				})
+		},
 		{
 			accessorKey: 'description',
 			header: ({ column }) =>
@@ -121,7 +141,7 @@
 
 	import { superForm } from 'sveltekit-superforms';
 	import DialogComp from '$lib/formComponents/DialogComp.svelte';
-	import { Plus } from '@lucide/svelte';
+	import { Plus, SquareArrowOutUpRight } from '@lucide/svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
 	import Errors from '$lib/formComponents/Errors.svelte';
