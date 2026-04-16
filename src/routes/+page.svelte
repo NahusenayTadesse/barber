@@ -1190,7 +1190,7 @@
 		background-position: center;
 		transform: scale(1.02);
 		transition: transform 0.6s ease;
-		opacity: 0.38;
+		opacity: 0.85;
 		z-index: -2;
 	}
 	.card:hover .card-media {

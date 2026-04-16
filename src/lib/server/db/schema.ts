@@ -1,3 +1,4 @@
+import { desc } from 'drizzle-orm';
 import { secureFields, user } from './auth.schema';
 
 import {
@@ -84,3 +85,12 @@ export const haircutRequests = mysqlTable('haircut_requests', {
 });
 
 export * from './auth.schema';
+
+export const services = mysqlTable('services', {
+	id: int('id').primaryKey().autoincrement(),
+	name: varchar('name', { length: 255 }).notNull(),
+	price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+	description: text('description'),
+	imageUrl: varchar('image_url', { length: 255 }),
+	bookingLink: varchar('booking_link', { length: 255 })
+});

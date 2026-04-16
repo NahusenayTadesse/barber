@@ -30,7 +30,7 @@
 	class="bg-start relative z-0 bg-cover py-0 lg:py-12"
 	style="background-image: url('/images (18).webp');"
 >
-	<div class="absolute inset-0 -z-1 bg-black/70"></div>
+	<div class="absolute inset-0 -z-1 bg-black/20"></div>
 	<div class="phero-inner fi">
 		<div class="ey"><span>Courses & Enrolment</span></div>
 		<h1 class="sec-title" style="font-size:clamp(58px,9vw,116px)">

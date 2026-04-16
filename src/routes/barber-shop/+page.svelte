@@ -1,5 +1,7 @@
 <script>
 	let href = 'https://simplybook.me/en/';
+
+	let { data } = $props();
 </script>
 
 <svelte:head>
@@ -30,7 +32,7 @@
 					<a class="btn-gold" {href} target="_blank" rel="noopener noreferrer">Book Now</a>
 					<a class="btn-outline" href="tel:0202779988">Call the Shop</a>
 				</div>
-				<div class="hero-note">Replace the booking link with your real booking system URL.</div>
+				<!-- <div class="hero-note">Replace the booking link with your real booking system URL.</div> -->
 			</div>
 		</div>
 
@@ -466,7 +468,7 @@
 			linear-gradient(135deg, #0a0a0a 0%, #111111 55%, #090909 100%);
 	}
 	.hero-image {
-		background-image: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1600&q=80');
+		background-image: url('/images (12).webp');
 		background-size: cover;
 		background-position: center;
 	}

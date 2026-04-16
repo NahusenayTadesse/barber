@@ -101,7 +101,7 @@
 </script>
 
 <svelte:head>
-	<title>Messages</title>
+	<title>Services</title>
 </svelte:head>
 {#key data?.allPaymentMethods}
 	<FilterMenu data={data?.allPaymentMethods} bind:filteredList filterKeys={['subject']} />
