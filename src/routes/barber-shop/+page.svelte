@@ -72,7 +72,7 @@
 		</div>
 
 		<div class="services-grid">
-			{#each data?.allServices as service}
+			{#each data?.allServices as service (service.id)}
 				<div class="service-card">
 					<div
 						class="service-image"

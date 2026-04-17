@@ -94,3 +94,8 @@ export const services = mysqlTable('services', {
 	imageUrl: varchar('image_url', { length: 255 }),
 	bookingLink: varchar('booking_link', { length: 255 })
 });
+
+export const gallery = mysqlTable('gallery', {
+	id: int('id').primaryKey().autoincrement(),
+	imageUrl: varchar('image_url', { length: 255 })
+});

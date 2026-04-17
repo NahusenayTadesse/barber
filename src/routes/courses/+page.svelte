@@ -8,6 +8,7 @@
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	import Gallery from '$lib/components/gallery.svelte';
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
 	});
@@ -51,7 +52,7 @@
 </div>
 <Carousel.Root class="my-16 block w-full max-w-xs justify-self-center lg:hidden">
 	<Carousel.Content>
-		{#each data.coursesList as course}
+		{#each data.coursesList as course (course.id)}
 			<Carousel.Item>
 				<div class="crscard fi">
 					<div class="crsstripe"></div>
@@ -91,7 +92,7 @@
 
 <div class="hidden lg:block">
 	<div class="crsgrid">
-		{#each data.coursesList as course}
+		{#each data.coursesList as course (course.id)}
 			<div class="crscard fi">
 				<div class="crsstripe"></div>
 				<div class="crstop">
@@ -124,6 +125,10 @@
 			</div>
 		{/each}
 	</div>
+</div>
+
+<div class="mt-10 flex w-full flex-row items-center justify-center justify-self-center">
+	<Gallery title="Gallery" images={data.imagesList} bento />
 </div>
 <div class="chain mt-10"><div class="chain-line"></div></div>
 

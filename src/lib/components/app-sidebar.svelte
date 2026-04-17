@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Users, Mail, LayoutDashboard, BookText, Plus, Sheet, SprayCan } from '@lucide/svelte';
+	import {
+		Users,
+		Mail,
+		LayoutDashboard,
+		BookText,
+		Plus,
+		Sheet,
+		SprayCan,
+		Images
+	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { bgGradient } from '$lib/global.svelte';
@@ -11,6 +20,7 @@
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 		{ title: 'Enrollments', url: '/dashboard/enrollments', icon: Users },
 		{ title: 'Services', url: '/dashboard/services', icon: SprayCan },
+		{ title: 'Gallery', url: '/dashboard/gallery', icon: Images },
 
 		{
 			title: 'Courses',

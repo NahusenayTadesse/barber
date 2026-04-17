@@ -992,7 +992,9 @@
 	<title>Barbershop & Academy</title>
 </svelte:head>
 
-<div class="topbar mt-4 flex flex-col justify-self-center lg:flex lg:w-7/10 lg:flex-row">
+<div
+	class="topbar mt-2 flex flex-col gap-2 justify-self-center lg:mb-12 lg:flex lg:w-7/10 lg:flex-row"
+>
 	<div class="brand">
 		<div class="brand-mark">D&D</div>
 		<div class="brand-copy">
@@ -1014,12 +1016,9 @@
 	</p>
 </section> -->
 
-<section class="choice-grid mb-16 justify-self-center lg:w-7/10">
+<section class="choice-grid mb-4 justify-self-center lg:w-7/10">
 	<a class="card" href="/courses">
-		<div
-			class="card-media"
-			style="background-image:url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=1200&q=80');"
-		></div>
+		<div class="card-media" style="background-image:url('/shop (1).webp');"></div>
 		<div class="card-overlay"></div>
 		<div class="card-inner">
 			<div class="card-tag">Academy</div>
@@ -1038,10 +1037,7 @@
 	</a>
 
 	<a class="card" href="/barber-shop" rel="noopener noreferrer">
-		<div
-			class="card-media"
-			style="background-image:url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80');"
-		></div>
+		<div class="card-media" style="background-image:url('/shop (3).webp');"></div>
 		<div class="card-overlay"></div>
 		<div class="card-inner">
 			<div class="card-tag">Barbershop</div>
@@ -1070,9 +1066,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 20px;
-		margin-bottom: 28px;
-		padding-bottom: 22px;
+		gap: 5px;
+
+		padding-bottom: 10px;
 		border-bottom: 1px solid rgba(212, 175, 55, 0.12);
 	}
 	.brand {
@@ -1162,7 +1158,7 @@
 	.choice-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 18px;
+		gap: 10px;
 	}
 	.card {
 		position: relative;

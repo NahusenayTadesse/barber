@@ -3,7 +3,7 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { eq } from 'drizzle-orm';
 import { schema } from './schema';
 import { db } from '$lib/server/db';
-import { courses, enrolments } from '$lib/server/db/schema';
+import { courses, enrolments, gallery } from '$lib/server/db/schema';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -11,11 +11,16 @@ export const load: PageServerLoad = async () => {
 
 	const coursesList = await db.select().from(courses);
 
+	const images = await db.select().from(gallery);
+
+	const imagesList = images.map((img) => img.imageUrl);
+
 	form.data.courseId = coursesList[0].id;
 
 	return {
 		form,
-		coursesList
+		coursesList,
+		imagesList
 	};
 };
 
