@@ -6,7 +6,7 @@
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import { Mail, MapPin, Phone } from '@lucide/svelte';
 	let { data } = $props();
-	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
+	const { form, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
 	});
 	$effect(() => {
@@ -22,7 +22,7 @@
 <svelte:head>
 	<title>Contact</title>
 </svelte:head>
-<div class="phero" style="min-height:42vh">
+<!-- <div class="phero" style="min-height:42vh">
 	<div class="phero-bg"></div>
 	<div class="phero-inner fi">
 		<div class="ey"><span>Get In Touch</span></div>
@@ -34,8 +34,8 @@
 			talk it through.
 		</p>
 	</div>
-</div>
-<div class="ticker-wrap">
+</div> -->
+<!-- <div class="ticker-wrap">
 	<div class="ticker-inner">
 		<span>0202 779 988</span><span>WhatsApp Us</span><span>Instagram & TikTok</span><span
 			>London · 69</span
@@ -44,7 +44,7 @@
 			>London · 69</span
 		><span>Same-Day Replies</span>
 	</div>
-</div>
+</div> -->
 
 <div class="cpgrid">
 	<div class="fi">

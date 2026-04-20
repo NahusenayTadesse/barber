@@ -7,8 +7,11 @@
 
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
-	import { Mail, MapPin, Phone } from '@lucide/svelte';
+
+	import Gallery2 from './gallery.svelte';
 	import Gallery from '$lib/components/gallery.svelte';
+	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	// import Gallery from '$lib/components/gallery.svelte';
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
 	});
@@ -27,7 +30,7 @@
 	<title>Courses & Enrollment</title>
 </svelte:head>
 
-<div
+<!-- <div
 	class="bg-start relative z-0 bg-cover py-0 lg:py-12"
 	style="background-image: url('/images (18).webp');"
 >
@@ -39,6 +42,60 @@
 		</h1>
 		<p class="sec-sub">Pick your course. Secure your place. Start cutting.</p>
 	</div>
+</div> -->
+
+<div
+	class="bg-start relative z-0 flex w-full flex-col items-center justify-center justify-self-center bg-cover py-0 lg:py-24"
+	style="background-image: url('/images (18).webp');"
+>
+	<div class="absolute inset-0 -z-1 bg-black/30"></div>
+	<div
+		class="grid w-full grid-cols-1 items-center justify-between gap-4 p-3 lg:w-9/10 lg:grid-cols-3"
+	>
+		<div class="lg:col-span-2">
+			<div class="ey"><span>London's Barber Academy</span></div>
+			<h1 class="hero-h1">
+				<div>LEARN TO CUT.</div>
+				<div class="g">GET PAID.</div>
+			</h1>
+
+			<p class="hero-sub">
+				No experience needed. <strong>Real clients from week one.</strong><br />
+				Walk out ready to earn in <strong>12 weeks</strong>.
+			</p>
+
+			<!-- <div class="hero-btns">
+		<button class="btn-gold" onclick="go('courses')">View Courses</button>
+		<button class="btn-out" onclick="go('freehaircut')">Get a Free Haircut</button>
+	</div> -->
+
+			<div class="hero-quick">
+				<a href="tel:0202779988">Call: 0202 779 988</a>
+				<a href="https://wa.me/442027799988" target="_blank">WhatsApp now</a>
+				<a href="/contact">Ask a question</a>
+			</div>
+		</div>
+		<!-- <div class="trust-row">
+			<span class="trust-pill">No experience required</span>
+			<span class="trust-pill">Enrol from £299 deposit</span>
+			<span class="trust-pill">London-based, real shop</span>
+			<span class="trust-pill">Certificate on completion</span>
+		</div> -->
+
+		<!-- HERO CARD -->
+		<div class="hcard fi h-auto!" style="transition-delay:.2s">
+			<div class="hcard-label">Start Fast</div>
+			<ul class="hcard-list">
+				<li>Starter course from £299 deposit</li>
+				<li>Advanced course from £399 deposit</li>
+				<li>Next intake: limited spots</li>
+			</ul>
+			<div class="hcard-cta">
+				<a href="#courses">Reserve My Place →</a>
+			</div>
+			<div class="hcard-note">Questions first? Message us on WhatsApp.</div>
+		</div>
+	</div>
 </div>
 <div class="ticker-wrap">
 	<div class="ticker-inner">
@@ -48,6 +105,21 @@
 		<span>No Experience Needed</span><span>Real Clients Week One</span><span
 			>Certificate on Completion</span
 		><span>Enrol from £299</span><span>London Based</span><span>Flexible Payment</span>
+	</div>
+</div>
+<div class="my-24 justify-self-center lg:w-9/10">
+	<Gallery2 />
+</div>
+
+<div class="section py-6! pb-0!">
+	<div
+		class="fi"
+		style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px"
+	>
+		<div>
+			<div class="ey"><span>Our Courses</span></div>
+			<h2 class="sec-title">WHERE DO<br />YOU <span class="g">START?</span></h2>
+		</div>
 	</div>
 </div>
 <Carousel.Root class="my-16 block w-full max-w-xs justify-self-center lg:hidden">
@@ -90,7 +162,7 @@
 	<Carousel.Next />
 </Carousel.Root>
 
-<div class="hidden lg:block">
+<div id="courses" class="hidden lg:block">
 	<div class="crsgrid">
 		{#each data.coursesList as course (course.id)}
 			<div class="crscard fi">
@@ -115,7 +187,7 @@
 						{/each}
 					</ul>
 					<a
-						class="btn-gold"
+						class="btn-gold justify-center"
 						href="/courses/{course.id}"
 						onclick={() => ($form.courseId = course.id)}
 						style="width:100%;padding:16px;font-size:14px"
@@ -127,13 +199,33 @@
 	</div>
 </div>
 
-<div class="mt-10 flex w-full flex-row items-center justify-center justify-self-center">
+<div class="mt-10 flex w-full flex-col items-center justify-center justify-self-center lg:w-9/10">
 	<Gallery title="Gallery" images={data.imagesList} bento />
 </div>
 <div class="chain mt-10"><div class="chain-line"></div></div>
 
+<div class="cta-banner">
+	<div class="cta-banner-bg"></div>
+	<div class="cta-banner-inner fi">
+		<div class="cta-banner-kicker">Start This Month</div>
+		<h2 class="cta-banner-title">
+			READY TO<br /><span class="g">START?</span>
+		</h2>
+		<p class="cta-banner-sub">Pick your course. Secure your spot. Get moving.</p>
+		<div class="cta-banner-btns">
+			<a class="btn-gold" href="#courses" style="padding:18px 48px;font-size:14px"
+				>Reserve My Place</a
+			>
+			<a href="https://wa.me/442027799988" target="_blank" class="btn-out" style="padding:18px 36px"
+				>Ask on WhatsApp</a
+			>
+		</div>
+		<div class="cta-banner-trust">From £299 deposit · Limited spots · London-based</div>
+	</div>
+</div>
+
 <!-- PAYMENT -->
-<div class="psec" id="paySection">
+<!-- <div class="psec" id="paySection">
 	<div class="pinner">
 		<div class="fi">
 			<div class="ey"><span>Payment Options</span></div>
@@ -272,7 +364,7 @@
 			<!-- <button class="btn-gold" style="width:100%;padding:18px;font-size:14px;letter-spacing:2.5px"
 				>Confirm My Enrolment →</button
 			> -->
-			<button
+<!-- <button
 				form="enroll"
 				class="btn-gold"
 				type="submit"
@@ -297,5 +389,5 @@
 				><br />Deposits are non-refundable once your place is confirmed. Full terms available below.
 			</div>
 		</div>
-	</div>
-</div>
+	</div> -->
+<!-- </div> -->
