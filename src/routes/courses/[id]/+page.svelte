@@ -134,10 +134,12 @@
 				>
 					<div class="poname">Pay in Full</div>
 					<div class="poamt" id="fullAmt">
-						£{data.coursesList.find((c) => c.id === $form.courseId)?.basePrice}
+						£{Math.floor(
+							Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) * 0.9
+						)}
 					</div>
 					<div class="ponote">
-						Best value · Save 5%<br />One payment, nothing to track<br />Immediate confirmation
+						Best value · Save 10%<br />One payment, nothing to track<br />Immediate confirmation
 					</div>
 				</button>
 			</div>
@@ -162,7 +164,9 @@
 										Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) / 3
 									)
 								: $form.paymentOption === 'fullPrice'
-									? Math.floor(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice)
+									? Math.floor(
+											Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) * 0.9
+										)
 									: '-'}
 					</div>
 				</div>
