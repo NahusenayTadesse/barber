@@ -1962,6 +1962,9 @@ footer::before {
 	.policy-title {
 		font-size: 34px;
 	}
+	.section {
+		padding: 10px 0px;
+	}
 }
 
 /* ——— RESPONSIVE ——— */

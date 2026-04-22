@@ -105,11 +105,13 @@
 		><span>Enrol from £299</span><span>London Based</span><span>Flexible Payment</span>
 	</div>
 </div>
-<div class="my-8 justify-self-center lg:my-24 lg:w-9/10">
+<!-- <div class="my-0 w-full justify-self-center lg:my-24 lg:w-9/10">
 	<Gallery2 />
-</div>
+</div> -->
 
-<div class="section py-6! pb-0!">
+<Gallery2 />
+
+<div class="section">
 	<div
 		class="fi"
 		style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px"
