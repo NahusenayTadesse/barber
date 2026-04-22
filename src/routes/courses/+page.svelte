@@ -86,8 +86,6 @@
 		<div class="hcard fi h-auto!" style="transition-delay:.2s">
 			<div class="hcard-label">Start Fast</div>
 			<ul class="hcard-list">
-				<li>Starter course from £299 deposit</li>
-				<li>Advanced course from £399 deposit</li>
 				<li>Next intake: limited spots</li>
 			</ul>
 			<div class="hcard-cta">
@@ -107,7 +105,7 @@
 		><span>Enrol from £299</span><span>London Based</span><span>Flexible Payment</span>
 	</div>
 </div>
-<div class="my-24 justify-self-center lg:w-9/10">
+<div class="my-8 justify-self-center lg:my-24 lg:w-9/10">
 	<Gallery2 />
 </div>
 

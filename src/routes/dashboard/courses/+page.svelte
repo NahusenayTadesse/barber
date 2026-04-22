@@ -31,8 +31,8 @@
 		<FilterMenu
 			bind:filteredList
 			data={data?.productList}
-			filterKeys={['level', 'duration', 'basePrice', 'minPrice']}
+			filterKeys={['level', 'duration', 'basePrice', 'minPrice', 'status']}
 		/>
-		<DataTable data={filteredList} {columns} fileName="Courses List" />
+		<DataTable data={filteredList} class="lg:max-w-6xl!" {columns} fileName="Courses List" />
 	</div>
 {/if}

@@ -1,6 +1,5 @@
 import { db } from '$lib/server/db';
 import { courses as products, pricingOptions as prices } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
 import type { PageServerLoad } from '../$types';
 export const load: PageServerLoad = async () => {
 	// First, get products
@@ -15,10 +14,10 @@ export const load: PageServerLoad = async () => {
 			minPriceMessage: products.minPriceMessage,
 			experience: products.experience,
 			duration: products.duration,
-			description: products.description
+			description: products.description,
+			status: products.isActive
 		})
-		.from(products)
-		.where(eq(products.isActive, true));
+		.from(products);
 
 	// Then, get prices for those products
 	const productIds = productsData.map((p) => p.id);

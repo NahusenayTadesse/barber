@@ -5,6 +5,7 @@ import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import BigText from '$lib/components/Table/bigText.svelte';
 import ImageViewer from '$lib/components/Table/image-viewer.svelte';
 import PriceList from './priceList.svelte';
+import Statuses from '$lib/components/Table/statuses.svelte';
 
 export const columns = [
 	{
@@ -27,7 +28,7 @@ export const columns = [
 			return renderComponent(DataTableLinks, {
 				id: row.original.id,
 				name: row.original.name,
-				link: '/dashboard/courses/single'
+				link: '/dashboard/courses'
 			});
 		}
 	},
@@ -54,7 +55,16 @@ export const columns = [
 		accessorKey: 'target',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
-				name: 'Duration',
+				name: 'Target',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true
+	},
+	{
+		accessorKey: 'experience',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Experience',
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true
@@ -95,6 +105,17 @@ export const columns = [
 		accessorKey: 'minPriceMessage',
 		header: 'Min Price Message',
 		cell: ({ row }) => renderComponent(BigText, { text: row.original.minPriceMessage })
+	},
+
+	{
+		accessorKey: 'status',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Status',
+				onclick: column.getToggleSortingHandler()
+			}),
+		cell: ({ row }) =>
+			renderComponent(Statuses, { status: row.original.status ? 'Active' : 'Inactive' })
 	},
 
 	{
