@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	let { data } = $props();
 
 	import { superForm } from 'sveltekit-superforms/client';
@@ -23,7 +23,48 @@
 			}
 		}
 	});
-	let payment = $state();
+
+	/**
+	 * Finds the ID of a course that represents the most popular price point.
+	 * @param {Array} courses - The array of course objects.
+	 * @returns {number|string|null} - The ID of a course with the most popular price.
+	 */
+
+	function getMostPopularCourseId(courses) {
+		if (!courses || courses.length === 0) return null;
+
+		const priceCounts = {};
+		const priceToFirstIdMap = {};
+
+		courses.forEach((course) => {
+			const price = course.basePrice.toString();
+
+			// 1. Count frequency
+			priceCounts[price] = (priceCounts[price] || 0) + 1;
+
+			// 2. Map the price to the first ID we see for it
+			// (if it doesn't already have one)
+			if (!priceToFirstIdMap[price]) {
+				priceToFirstIdMap[price] = course.id;
+			}
+		});
+
+		// 3. Find the price with the highest frequency
+		let maxCount = 0;
+		let winningPrice = null;
+
+		for (const price in priceCounts) {
+			if (priceCounts[price] > maxCount) {
+				maxCount = priceCounts[price];
+				winningPrice = price;
+			}
+		}
+
+		// 4. Return the ID associated with that winning price
+		return priceToFirstIdMap[winningPrice];
+	}
+
+	const mostPopularCourseId = $derived(getMostPopularCourseId(data.coursesList));
 </script>
 
 <svelte:head>
@@ -122,6 +163,7 @@
 		</div>
 	</div>
 </div>
+<!--
 <Carousel.Root class="my-16 block w-full max-w-xs justify-self-center lg:hidden">
 	<Carousel.Content>
 		{#each data.coursesList as course (course.id)}
@@ -160,14 +202,21 @@
 	</Carousel.Content>
 	<Carousel.Previous />
 	<Carousel.Next />
-</Carousel.Root>
+</Carousel.Root> -->
 
-<div id="courses" class="hidden lg:block">
+<div id="courses">
 	<div class="crsgrid">
 		{#each data.coursesList as course (course.id)}
 			<div class="crscard fi">
 				<div class="crsstripe"></div>
 				<div class="crstop">
+					{#if course.id === Number(mostPopularCourseId)}
+						<div
+							class="my-4 inline-flex items-center rounded-full border border-transparent bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/80"
+						>
+							Most Popular
+						</div>
+					{/if}
 					<div class="crslv">{course.level} — {course.target}</div>
 					<div class="crsnm">{course.name}</div>
 					<div class="crsdur">{course.duration} · {course.experience}</div>
