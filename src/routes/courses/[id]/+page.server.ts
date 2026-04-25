@@ -7,6 +7,13 @@ import { courses, enrolments } from '$lib/server/db/schema';
 import type { PageServerLoad, Actions } from './$types';
 import { error } from '@sveltejs/kit';
 
+import { redirect } from 'sveltekit-flash-message/server';
+
+import { STRIPE_SECRET_KEY } from '$env/static/private';
+import Stripe from 'stripe';
+import { ORIGIN } from '$env/static/public';
+const stripe = new Stripe(STRIPE_SECRET_KEY);
+
 export const load: PageServerLoad = async ({ params }) => {
 	const { id } = params;
 	const form = await superValidate(zod4(schema));
@@ -34,26 +41,72 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-	enroll: async ({ request }) => {
+	enroll: async ({ request, cookies, url }) => {
 		const form = await superValidate(request, zod4(schema));
 		if (!form.valid) {
 			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}
 
-		const { firstName, lastName, phone, email, courseId, paymentOption } = form.data;
+		const { firstName, lastName, phone, email, courseId, paymentOption, paymentAmount } = form.data;
 
-		try {
-			await db
+		const siteOrigin = url.origin;
+
+		const session = await stripe.checkout.sessions.create({
+			line_items: [
+				{
+					price_data: {
+						currency: 'gbp',
+						product_data: {
+							name: 'Service Fee'
+						},
+						unit_amount: paymentAmount * 100
+					},
+					quantity: 1
+				}
+			],
+			mode: 'payment',
+
+			success_url: `${siteOrigin}/courses`,
+			cancel_url: `${siteOrigin}/courses`
+		});
+
+		console.log(session);
+
+		if (session.url) {
+			const enrolment = await db
 				.insert(enrolments)
-				.values({ firstName, lastName, phone, email, courseId, paymentOption });
+				.values({ firstName, lastName, phone, email, courseId, paymentOption })
+				.$returningId();
 
-			return message(form, { type: 'success', text: 'Enrolment Successfully Applied!' });
-		} catch (err) {
-			console.error(err.message);
-			return message(form, {
-				type: 'error',
-				text: 'Error Adding Enrolment'
-			});
+			if (!enrolment) {
+				return message(
+					form,
+					{
+						type: 'error',
+						text: 'Error Adding Enrolment'
+					},
+					{
+						status: 500
+					}
+				);
+			}
+			redirect(
+				303,
+				session.url,
+				{ type: 'success', message: 'Enrolment Successfully Applied!' },
+				cookies
+			);
+		} else {
+			return message(
+				form,
+				{
+					type: 'error',
+					text: 'Error Creating Checkout Session'
+				},
+				{
+					status: 500
+				}
+			);
 		}
 	}
 };

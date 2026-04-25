@@ -10,5 +10,6 @@ export const schema = z.object({
 		.max(15, 'Phone number must be at most 15 characters'),
 	paymentOption: z
 		.string('Please Select a Payment Option')
-		.nonempty('Please Select a Payment Option')
+		.nonempty('Please Select a Payment Option'),
+	paymentAmount: z.number('Payment Amount is Required').positive('Payment Amount is required')
 });

@@ -6,9 +6,29 @@
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
 
 	import Errors from '$lib/formComponents/Errors.svelte';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	import { schema } from './schema.js';
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
-		dataType: 'json'
+		dataType: 'json',
+
+		validators: zod4Client(schema),
+		onChange(event) {
+			if (event.paths) {
+				$form.paymentAmount =
+					$form.paymentOption === 'minPrice'
+						? Math.floor(data?.coursesList?.find((c) => c.id === $form.courseId)?.minPrice)
+						: $form.paymentOption === 'threeEqual'
+							? Math.floor(
+									Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) / 3
+								)
+							: $form.paymentOption === 'fullPrice'
+								? Math.floor(
+										Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) * 0.9
+									)
+								: 0;
+			}
+		}
 	});
 	$effect(() => {
 		if ($message) {
@@ -157,17 +177,8 @@
 				<div style="text-align:right">
 					<div class="clbl">Amount Due Today</div>
 					<div class="cval" id="summA">
-						£{$form.paymentOption === 'minPrice'
-							? Math.floor(data.coursesList.find((c) => c.id === $form.courseId)?.minPrice)
-							: $form.paymentOption === 'threeEqual'
-								? Math.floor(
-										Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) / 3
-									)
-								: $form.paymentOption === 'fullPrice'
-									? Math.floor(
-											Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) * 0.9
-										)
-									: '-'}
+						£ {$form.paymentAmount}
+						<input hidden name="paymentAmount" bind:value={$form.paymentAmount} />
 					</div>
 				</div>
 			</div>

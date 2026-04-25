@@ -6,7 +6,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { edit } from './schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from '../$types';
 import { fail, error } from '@sveltejs/kit';
 
