@@ -27,12 +27,12 @@
 {:else}
 	<h2 class="my-4 text-2xl">No of Courses {data.productList?.length}</h2>
 
-	<div class="mt-8 mb-4 w-6xl p-0 pt-4 lg:w-full lg:p-0">
+	<div class="mt-8 mb-4  p-0 pt-4 lg:w-full lg:p-0">
 		<FilterMenu
 			bind:filteredList
 			data={data?.productList}
 			filterKeys={['level', 'duration', 'basePrice', 'minPrice', 'status']}
 		/>
-		<DataTable data={filteredList} class="lg:max-w-6xl!" {columns} fileName="Courses List" />
+		<DataTable data={filteredList}  {columns} fileName="Courses List" />
 	</div>
 {/if}

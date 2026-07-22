@@ -1,6 +1,5 @@
 import { superValidate, message } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { eq } from 'drizzle-orm';
 import { schema } from './schema';
 import { db } from '$lib/server/db';
 import { courses, enrolments, gallery } from '$lib/server/db/schema';

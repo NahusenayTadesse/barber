@@ -7,9 +7,6 @@
 
 	const flash = getFlash(page, { clearAfterMs: 5000 });
 
-	import { fly } from 'svelte/transition';
-
-	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 
 	async function notifyBrowser(title: string, body: string) {
@@ -66,7 +63,7 @@
 	<Header courses={data?.courses} />
 	{@render children()}
 
-	<Footer />
+	<Footer courses={data?.courses} />
 	<Floating />
 {:else}
 	{@render children()}

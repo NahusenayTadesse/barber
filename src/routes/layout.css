@@ -138,9 +138,9 @@
 		@apply bg-background text-[#F0EDE4] antialiased;
 		font-family: 'Space Grotesk', sans-serif;
 	}
-	html {
+	/* html {
 		scroll-behavior: smooth;
-	}
+	} */
 }
 
 /** {
@@ -1405,7 +1405,7 @@ nav::after {
 /* ——— PAYMENT ——— */
 .psec {
 	background: var(--dark3);
-	padding: 80px 48px;
+	padding: 40px 48px;
 	border-top: 1px solid rgba(212, 175, 55, 0.08);
 }
 .pinner {

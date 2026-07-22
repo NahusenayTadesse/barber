@@ -7,7 +7,7 @@
 
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { Mail, MapPin, Phone } from '@lucide/svelte';
+import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 	import { schema } from './schema.js';
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json',
@@ -45,10 +45,10 @@
 	<title>Register for {data.course.name}</title>
 </svelte:head>
 
-<div class="chain mt-10"><div class="chain-line"></div></div>
+<!-- <div class="chain mt-10 lg:block! hidden"><div class="chain-line"></div></div> -->
 
 <!-- PAYMENT -->
-<div class="psec" id="paySection">
+<div class="psec lg:mt-32!" id="paySection">
 	<div class="pinner">
 		<div class="fi">
 			<h2 class="ptitle">Register for <span class="g">{data.course.name}</span></h2>

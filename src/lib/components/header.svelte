@@ -3,6 +3,7 @@
 	import { MenuIcon, XIcon } from '@lucide/svelte';
 	import { Sheet, SheetContent, SheetTrigger } from '$lib/components/ui/sheet';
 	import { Button } from '$lib/components/ui/button';
+	import ScrollArea from './ui/scroll-area/scroll-area.svelte';
 
 	// Only the fields the menu needs. Keep secureFields out of what you pass in.
 	type Course = {
@@ -71,7 +72,7 @@
 </div>
 
 <!-- ============ MOBILE ============ -->
-<div class="flex items-center justify-between px-4 py-3 lg:hidden">
+<div class="flex items-center bg-black z-9999 justify-between sticky top-0 px-4 py-3 lg:hidden">
 	<!-- Compact brand, left-aligned -->
 	<a href="/" class="brand brand--sm">
 		<div class="brand-mark">D&D</div>
@@ -92,7 +93,7 @@
 
 		<SheetContent
 			side="right"
-			class="drawer-content z-9999 w-full border-0 p-0 sm:max-w-sm [&>button]:hidden"
+			class="drawer-content z-9999 border-0 p-0 sm:max-w-sm [&>button]:hidden"
 		>
 			<div class="drawer">
 				<!-- Brand header -->
@@ -108,9 +109,10 @@
 						<XIcon class="size-5" />
 					</button>
 				</div>
+				   <ScrollArea orientation="vertical" class="h-85">
 
 				<!-- Scrollable body -->
-				<nav class="drawer-body">
+				
 					<div class="link-group">
 						{#each menuItems as item (item.href)}
 							<a
@@ -134,15 +136,13 @@
 									class="drawer-course"
 									onclick={handleMenuClick}
 								>
-									<span class="course-name">{course.name}</span>
-									{#if priceLabel(course)}
-										<span class="course-price">{priceLabel(course)}</span>
-									{/if}
+										<span class="course-price">{course.name}</span>
+								
 								</a>
 							{/each}
 						</div>
 					{/if}
-				</nav>
+			</ScrollArea>
 
 				<!-- Footer / CTA -->
 				<div class="drawer-foot">
@@ -278,7 +278,7 @@
 		padding: 16px 14px;
 		border-radius: 12px;
 		font-family: var(--fh);
-		font-size: 17px;
+		font-size: 18px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
 		color: #efeadb;
@@ -335,7 +335,16 @@
 		border-radius: 12px;
 		border: 1px solid transparent;
 		transition: background 0.2s ease, border-color 0.2s ease;
+		max-width: 80%;
+		font-size: 8px !important;
 	}
+	.drawer-course .text {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0; /* Important for flex items */
+}
 	.drawer-course + .drawer-course {
 		margin-top: 2px;
 	}
@@ -345,12 +354,11 @@
 		border-color: rgba(212, 175, 55, 0.18);
 	}
 	.course-name {
-		font-size: 15px;
+		font-size: 12px;
 		font-weight: 500;
 		color: #e7e2d4;
-		overflow: hidden;
 		text-overflow: ellipsis;
-		white-space: nowrap;
+		
 	}
 	.course-price {
 		flex-shrink: 0;

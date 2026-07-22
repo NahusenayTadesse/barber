@@ -10,7 +10,7 @@
 
 	import Gallery2 from './gallery.svelte';
 	import Gallery from '$lib/components/gallery.svelte';
-	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	import { Mail, MapPin, MessageCircle, Phone } from '@lucide/svelte';
 	// import Gallery from '$lib/components/gallery.svelte';
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
@@ -92,11 +92,23 @@
 				Walk out ready to earn in <strong>12 weeks</strong>.
 			</p>
 
-			<div class="hero-quick">
-				<a href="tel:0202779988">Call: 0202 779 988</a>
-				<a href="https://wa.me/442027799988" target="_blank">WhatsApp now</a>
-				<a href="/contact">Ask a question</a>
-			</div>
+		<div class="hero-quick">
+	<a class="hq hq-call" href="tel:0202779988">
+		<Phone size={18} strokeWidth={2.5} />
+		<span>Call: 0202 779 988</span>
+	</a>
+
+	<div class="hq-secondary">
+		<a class="hq hq-wa" href="https://wa.me/442027799988" target="_blank">
+			<MessageCircle size={20} strokeWidth={2.25} />
+			<span>WhatsApp</span>
+		</a>
+		<a class="hq hq-ask" href="/contact">
+			<Mail size={20} strokeWidth={2.25} />
+			<span>Ask a question</span>
+		</a>
+	</div>
+</div>
 		</div>
 
 		<!-- HERO CARD -->
@@ -214,6 +226,95 @@
 	:global(#courses) {
 		scroll-margin-top: 80px;
 	}
+
+	.hq-secondary {
+		display: contents;
+	}
+	.hero-quick .hq svg {
+		display: none;
+	}
+	/* Quick links — primary call bar + two glass tiles */
+		.hero-quick {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 12px;
+			margin-top: 22px;
+		}
+		.hero-quick .hq {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			min-height: 56px;
+			padding: 15px 18px;
+			border-radius: 14px;
+			font-weight: 600;
+			letter-spacing: 0.2px;
+			text-align: center;
+			text-decoration: none;
+			-webkit-tap-highlight-color: transparent;
+			transition:
+				transform 0.15s ease,
+				box-shadow 0.25s ease,
+				background 0.25s ease;
+		}
+		.hero-quick .hq svg {
+			display: inline-block;
+			flex: none;
+		}
+		.hero-quick .hq:active {
+			transform: translateY(1px) scale(0.99);
+		}
+
+		/* Primary — Call */
+		.hero-quick .hq-call {
+				background: linear-gradient(
+		90deg,
+		var(--gold3) 0%,
+		var(--gold) 40%,
+		var(--gold2) 70%,
+		var(--gold) 100%);
+			color: #201703;
+			font-weight: 800;
+			font-size: 16px !important;
+			border: 1px solid rgba(255, 255, 255, 0.28);
+			box-shadow:
+				0 12px 28px -12px rgba(211, 164, 65, 0.8),
+				inset 0 1px 0 rgba(255, 255, 255, 0.45);
+		}
+		.hero-quick .hq-call svg {
+			color: #201703;
+		}
+
+		/* Secondary — two glass tiles */
+		.hq-secondary {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+		}
+		.hero-quick .hq-wa,
+		.hero-quick .hq-ask {
+			flex-direction: column;
+			gap: 7px;
+			min-height: 82px;
+			padding: 14px 10px;
+			font-size: 13.5px !important;
+			line-height: 1.2;
+			color: #fff;
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			box-shadow:
+				0 8px 22px -14px rgba(0, 0, 0, 0.65),
+				inset 0 1px 0 rgba(255, 255, 255, 0.14);
+			backdrop-filter: blur(14px);
+			-webkit-backdrop-filter: blur(14px);
+		}
+		.hero-quick .hq-wa svg {
+			color: #25d366;
+		}
+		.hero-quick .hq-ask svg {
+			color: #f2d477;
+		}
 
 	@media (max-width: 640px) {
 		/* ---- Hero ---- */
