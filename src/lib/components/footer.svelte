@@ -42,7 +42,8 @@
 				<li><a href="https://www.instagram.com/dnd_barber_academy/" target="_blank">Instagram</a></li>
 				<li><a href="https://www.tiktok.com/@dnd_barber_academy" target="_blank">TikTok</a></li>
 				<li><a href="https://wa.me/442027799988" target="_blank">WhatsApp</a></li>
-				<li><a href="tel:0202779988">0202 779 988</a></li>
+				<li><a href="tel:02037003997">020 3700 3997</a></li>
+				<li><a href="tel:07846119677">078 46 11 96 77</a></li>
 			</ul>
 		</div>
 	</div>

@@ -93,13 +93,13 @@
 			</p>
 
 		<div class="hero-quick">
-	<a class="hq hq-call" href="tel:0202779988">
+	<a class="hq hq-call" href="tel:07846119677">
 		<Phone size={18} strokeWidth={2.5} />
-		<span>Call: 0202 779 988</span>
+		<span>Call:078 46 11 96 77</span>
 	</a>
 
 	<div class="hq-secondary">
-		<a class="hq hq-wa" href="https://wa.me/442027799988" target="_blank">
+		<a class="hq hq-wa" href="https://wa.me/447846119677" target="_blank">
 			<MessageCircle size={20} strokeWidth={2.25} />
 			<span>WhatsApp</span>
 		</a>
@@ -209,7 +209,7 @@
 		<p class="cta-banner-sub">Pick your course. Secure your spot. Get moving.</p>
 		<div class="cta-banner-btns">
 			<a class="btn-gold" href="#courses">Reserve My Place</a>
-			<a href="https://wa.me/442027799988" target="_blank" class="btn-out">Ask on WhatsApp</a>
+			<a href="https://wa.me/447846119677" target="_blank" class="btn-out">Ask on WhatsApp</a>
 		</div>
 		<div class="cta-banner-trust">From £299 deposit · Limited spots · London-based</div>
 	</div>

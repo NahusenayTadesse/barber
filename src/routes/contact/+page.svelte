@@ -76,9 +76,18 @@
 		<div class="cii">
 			<div class="cii-icon"><Phone /></div>
 			<div>
+				<div class="cii-lbl">LandLine</div>
+				<div class="cii-val">
+					<a href="tel:02037003997" style="color:var(--white);text-decoration:none">020 3700 3997</a>
+				</div>
+			</div>
+		</div>
+			<div class="cii">
+			<div class="cii-icon"><Phone /></div>
+			<div>
 				<div class="cii-lbl">Phone</div>
 				<div class="cii-val">
-					<a href="tel:0202779988" style="color:var(--white);text-decoration:none">0202 779 988</a>
+					<a href="tel:07846119677" style="color:var(--white);text-decoration:none">078 46 11 96 77</a>
 				</div>
 			</div>
 		</div>
@@ -99,7 +108,7 @@
 				<div class="cii-lbl">WhatsApp — Fastest Response</div>
 				<div class="cii-val" style="margin-top:8px">
 					<a
-						href="https://wa.me/442027799988"
+						href="https://wa.me/447846119677"
 						target="_blank"
 						class="wa-big"
 						style="font-size:12px;padding:12px 22px"><span>💬</span> Start a Chat</a
