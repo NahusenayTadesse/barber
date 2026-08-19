@@ -21,6 +21,7 @@
 			<div class="fctitle">Navigate</div>
 			<ul class="flinks">
 				<li><a href="/">Home</a></li>
+				<li><a href="/haircuts">Haircuts</a></li>
 				<li><a href="contact" id="nav-contact">Contact</a></li>
 				<li><a href="/courses" class="nav-enrol">Start Your Career</a></li>
 			</ul>

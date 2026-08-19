@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barber Academy — D&amp;D Barber &amp; Academy, London</title>
+<meta name="description" content="Learn to cut. Get paid. No experience needed, real clients from week one, job-ready in 12 weeks. London barbering academy from £750 deposit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0C0C0C;
+  --ink-2:#161616;
+  --gold:#C8A23C;
+  --gold-soft:#E0C776;
+  --paper:#F6F4EF;
+  --line:rgba(255,255,255,.14);
+  --line-dark:rgba(12,12,12,.12);
+  --muted:#8E8B85;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+.wrap{width:min(1120px,92vw);margin:0 auto}
+.display{font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.92;letter-spacing:-.01em}
+.eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:var(--gold)}
+
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;z-index:60;background:var(--ink);color:#fff;border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none}
+.mark{width:38px;height:38px;border:1.5px solid var(--gold);border-radius:50%;display:grid;place-items:center;font-family:Anton,sans-serif;font-size:14px;color:var(--gold)}
+.brand b{font-family:Anton,sans-serif;font-size:16px;letter-spacing:.04em;text-transform:uppercase;font-weight:400}
+.brand span{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.nav-links{display:flex;gap:26px;font-size:14px;font-weight:500}
+.nav-links a{text-decoration:none;opacity:.85}
+.nav-links a:hover{opacity:1;color:var(--gold)}
+.btn{display:inline-block;border:none;cursor:pointer;font-family:Inter,sans-serif;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;padding:14px 22px;border-radius:2px;text-decoration:none;transition:transform .15s ease,background .15s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{background:var(--gold);color:#0C0C0C}
+.btn-gold:hover{background:var(--gold-soft)}
+.btn-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-dark{background:var(--ink);color:#fff}
+@media(max-width:860px){.nav-links{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;background:var(--ink);color:#fff;overflow:hidden}
+.hero-media{position:absolute;inset:0}
+.hero-media img{width:100%;height:100%;object-fit:cover;object-position:center 35%;opacity:.5}
+.hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,12,12,.94) 0%,rgba(12,12,12,.75) 48%,rgba(12,12,12,.35) 100%)}
+.hero-in{position:relative;z-index:2;padding:96px 0 84px;max-width:720px}
+.hero h1{font-size:clamp(52px,8.5vw,104px)}
+.hero h1 em{font-style:normal;color:var(--gold);display:block}
+.hero p.lede{font-size:clamp(17px,2.1vw,21px);margin-top:22px;max-width:30em;color:rgba(255,255,255,.86)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.reply{margin-top:18px;font-size:13.5px;color:rgba(255,255,255,.62);display:flex;align-items:center;gap:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 3px rgba(74,222,128,.18)}
+.ticker{position:relative;z-index:2;border-top:1px solid var(--line);background:rgba(0,0,0,.35)}
+.ticker ul{display:flex;flex-wrap:wrap;gap:8px 34px;list-style:none;padding:16px 0;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.ticker li::before{content:"✂";color:var(--gold);margin-right:9px}
+@media(max-width:860px){.hero-media::after{background:linear-gradient(180deg,rgba(12,12,12,.82),rgba(12,12,12,.94))}.hero-in{padding:64px 0 56px}}
+
+/* ---------- sections ---------- */
+section{padding:84px 0}
+.sec-head{max-width:640px;margin-bottom:44px}
+.sec-head h2{font-size:clamp(34px,5vw,58px);margin-top:12px}
+.sec-head p{margin-top:16px;color:#4A4740;font-size:18px}
+.dark{background:var(--ink);color:#fff}
+.dark .sec-head p{color:rgba(255,255,255,.72)}
+
+/* ---------- proof ---------- */
+.proof{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-dark);border:1px solid var(--line-dark)}
+.proof div{background:var(--paper);padding:28px 22px}
+.proof strong{display:block;font-family:Anton,sans-serif;font-weight:400;font-size:40px;line-height:1;letter-spacing:-.02em}
+.proof span{display:block;margin-top:8px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#6B6862}
+@media(max-width:760px){.proof{grid-template-columns:1fr 1fr}}
+
+/* ---------- quiz ---------- */
+.quiz{background:var(--ink-2);border:1px solid var(--line);border-radius:3px;padding:clamp(24px,4vw,46px)}
+.q-step{display:none}
+.q-step.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.q-count{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.q-title{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(26px,3.6vw,38px);line-height:1.02;margin:12px 0 26px}
+.q-opts{display:grid;gap:10px}
+.q-opt{text-align:left;background:transparent;color:#fff;border:1px solid var(--line);padding:17px 20px;font:inherit;font-size:16px;border-radius:2px;cursor:pointer;transition:.15s}
+.q-opt:hover{border-color:var(--gold);background:rgba(200,162,60,.09)}
+.q-result h3{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(28px,4vw,42px);line-height:1;color:var(--gold);margin:10px 0 12px}
+.q-result p{color:rgba(255,255,255,.8);max-width:44em}
+.q-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.q-restart{background:none;border:none;color:rgba(255,255,255,.55);text-decoration:underline;cursor:pointer;font:inherit;font-size:14px;padding:14px 4px}
+
+/* ---------- courses ---------- */
+.courses{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.course{background:#fff;border:1px solid var(--line-dark);border-radius:3px;padding:30px 28px 28px;display:flex;flex-direction:column;position:relative}
+.course.pop{border:1.5px solid var(--gold);box-shadow:0 12px 40px rgba(200,162,60,.16)}
+.tag{position:absolute;top:-11px;left:28px;background:var(--gold);color:#0C0C0C;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:2px}
+.course .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8A6D3B;font-weight:600}
+.course h3{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;font-size:26px;line-height:1.02;margin:10px 0 14px}
+.best{font-size:15px;color:#4A4740;border-left:2px solid var(--gold);padding-left:13px;margin-bottom:20px}
+.price{display:flex;align-items:baseline;gap:10px;padding-top:18px;border-top:1px solid var(--line-dark)}
+.price b{font-family:Anton,sans-serif;font-weight:400;font-size:38px;line-height:1}
+.price span{font-size:13.5px;color:#6B6862}
+.dep{font-size:14px;color:#6B6862;margin-top:7px}
+.course ul{list-style:none;margin:20px 0 24px;display:grid;gap:9px}
+.course li{font-size:15px;padding-left:22px;position:relative;color:#33312C}
+.course li::before{content:"";position:absolute;left:0;top:9px;width:9px;height:2px;background:var(--gold)}
+.course .btn{margin-top:auto;text-align:center}
+
+/* ---------- fit ---------- */
+.fit{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:start}
+.fit-list{list-style:none;display:grid;gap:18px}
+.fit-list li{padding-left:34px;position:relative;font-size:17px;color:#33312C}
+.fit-list li::before{content:"✓";position:absolute;left:0;top:-1px;color:var(--gold);font-size:17px;font-weight:700}
+.fit-list li b{font-weight:600;color:var(--ink)}
+.not-fit{border:1px solid var(--line-dark);border-left:3px solid #B9433A;border-radius:3px;padding:26px 26px 24px;background:#fff}
+.not-fit h4{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#B9433A;margin-bottom:12px}
+.not-fit p{font-size:16px;color:#4A4740}
+.not-fit p + p{margin-top:12px}
+.fit-cta{margin-top:34px;font-size:18px;color:#33312C;max-width:34em}
+@media(max-width:860px){.fit{grid-template-columns:1fr;gap:32px}}
+
+/* ---------- steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:s}
+.step{border:1px solid var(--line);padding:28px 24px;border-radius:3px}
+.step::before{counter-increment:s;content:"0" counter(s);font-family:Anton,sans-serif;font-size:30px;color:var(--gold);display:block;margin-bottom:14px}
+.step h4{font-size:19px;font-weight:700;margin-bottom:8px}
+.step p{font-size:15.5px;color:rgba(255,255,255,.72)}
+@media(max-width:760px){.steps{grid-template-columns:1fr}}
+
+/* ---------- split ---------- */
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.split img{border-radius:3px;width:100%;height:100%;max-height:520px;object-fit:cover}
+.why{list-style:none;display:grid;gap:22px;margin-top:8px}
+.why li strong{display:block;font-size:19px;margin-bottom:5px}
+.why li p{font-size:15.5px;color:#4A4740}
+@media(max-width:860px){.split{grid-template-columns:1fr;gap:32px}}
+
+/* ---------- faq ---------- */
+.faq{max-width:820px}
+details{border-bottom:1px solid var(--line-dark);padding:20px 0}
+summary{cursor:pointer;font-weight:600;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--gold);font-size:24px;line-height:1;flex:none;transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{margin-top:12px;color:#4A4740;font-size:16px;max-width:62em}
+
+/* ---------- final ---------- */
+.final{background:var(--ink);color:#fff;text-align:center;padding:96px 0}
+.final h2{font-size:clamp(40px,7vw,84px)}
+.final p{margin:20px auto 0;max-width:34em;color:rgba(255,255,255,.75)}
+.final .hero-cta{justify-content:center}
+.fine{margin-top:22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+footer{background:#070707;color:rgba(255,255,255,.6);padding:52px 0 34px;font-size:14.5px}
+.f-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}
+footer h5{color:#fff;font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
+footer a{text-decoration:none}footer a:hover{color:var(--gold)}
+footer ul{list-style:none;display:grid;gap:9px}
+.f-bot{margin-top:38px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px}
+@media(max-width:760px){.f-grid{grid-template-columns:1fr}}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a class="brand" href="#top">
+      <span class="mark">D&amp;D</span>
+      <b>D&amp;D Barber &amp; Academy<span>London</span></b>
+    </a>
+    <div class="nav-links">
+      <a href="#quiz">Find your course</a>
+      <a href="#courses">Courses &amp; prices</a>
+      <a href="#fit">Is it for me?</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">Questions</a>
+      <a href="haircuts.html">Book a cut</a>
+    </div>
+    <a class="btn btn-gold" href="#courses">Reserve my place</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <!-- VIDEO SWAP: replace this <img> with <video autoplay muted loop playsinline poster="img/hero.jpg"> when the VSL is filmed. Nothing else on the page needs to change. -->
+  <div class="hero-media"><img src="img/hero.jpg" alt="A barber lining up a client's fade at D&amp;D in London"></div>
+  <div class="wrap hero-in">
+    <p class="eyebrow">London · No experience needed</p>
+    <h1 class="display">Learn to cut.<em>Get paid.</em></h1>
+    <p class="lede">Real clients from week one. Job-ready in twelve weeks. Start from a £750 deposit and pay the rest as you train.</p>
+    <div class="hero-cta">
+      <a class="btn btn-gold" href="#courses">See courses &amp; prices</a>
+      <a class="btn btn-ghost" href="#quiz">Not sure which one? Take the 30-second quiz</a>
+    </div>
+    <p class="reply"><span class="dot"></span> Message us on WhatsApp — we reply within about 2 hours, Mon–Sat</p>
+  </div>
+  <div class="ticker">
+    <div class="wrap"><ul>
+      <li>Zero experience welcome</li>
+      <li>Real clients, week one</li>
+      <li>Small groups</li>
+      <li>Pay in instalments</li>
+      <li>Certificate on completion</li>
+    </ul></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="proof">
+      <div><strong>12</strong><span>Weeks to job-ready</span></div>
+      <div><strong>Week 1</strong><span>Your first real client</span></div>
+      <div><strong>£750</strong><span>Deposit to start</span></div>
+      <div><strong>0%</strong><span>Interest, no credit check</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="quiz">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Start here</p>
+      <h2 class="display">Which course is yours?</h2>
+      <p>Three questions. No email, no form. We'll point you at the one that actually fits where you're starting from.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="q-step on" data-step="1">
+        <p class="q-count">Question 1 of 3</p>
+        <h3 class="q-title">Have you cut hair before?</h3>
+        <div class="q-opts">
+          <button class="q-opt" data-score="0">Never touched a clipper</button>
+          <button class="q-opt" data-score="1">Just mates and family at home</button>
+          <button class="q-opt" data-score="2">I already work in a shop</button>
+        </div>
+      </div>
+
+      <div class="q-step" data-step="2">
+        <p class="q-count">Question 2 of 3</p>
+        <h3 class="q-title">What do you want at the end of it?</h3>
+        <div class="q-opts">
+          <button class="q-opt" data-score="0">A job behind a chair, as fast as possible</button>
+          <button class="q-opt" data-score="1">To go further — fades, beards, colour, braiding</button>
+          <button class="q-opt" data-score="2">To run my own shop, or work abroad</button>
+        </div>
+      </div>
+
+      <div class="q-step" data-step="3">
+        <p class="q-count">Question 3 of 3</p>
+        <h3 class="q-title">How much time can you give it?</h3>
+        <div class="q-opts">
+          <button class="q-opt" data-score="0">A month, all in</button>
+          <button class="q-opt" data-score="1">A couple of months</button>
+          <button class="q-opt" data-score="2">Three months, properly</button>
+        </div>
+      </div>
+
+      <div class="q-step q-result" data-step="4">
+        <p class="q-count">Your starting point</p>
+        <h3 id="r-name">—</h3>
+        <p id="r-why"></p>
+        <div class="q-actions">
+          <a class="btn btn-gold" id="r-link" href="#courses">See this course</a>
+          <a class="btn btn-ghost" href="#courses">Compare all five</a>
+          <button class="q-restart" type="button" id="r-again">Start again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="courses">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Courses &amp; prices</p>
+      <h2 class="display">Five ways in. One starting point.</h2>
+      <p>Every price below is the full course fee. Nothing is added later.</p>
+    </div>
+
+    <div class="courses">
+
+      <article class="course" id="c-foundation">
+        <p class="kicker">Complete beginners</p>
+        <h3>4-Week Foundation</h3>
+        <p class="best"><strong>Best for:</strong> you've never held a clipper, and you want to find out fast whether this is for you.</p>
+        <ul>
+          <li>Clipper &amp; scissor technique</li>
+          <li>Classic haircuts</li>
+          <li>Taper &amp; skin fades</li>
+          <li>Beard trimming &amp; shaping</li>
+          <li>Client consultation</li>
+          <li>Live client experience</li>
+          <li>D&amp;D Barber Academy Certificate</li>
+        </ul>
+        <div class="price"><b>£1,500</b><span>full course</span></div>
+        <p class="dep">Start with a £750 deposit</p>
+        <a class="btn btn-dark" href="#reserve" style="margin-top:22px">Reserve my place</a>
+      </article>
+
+      <article class="course pop" id="c-professional">
+        <span class="tag">Most popular</span>
+        <p class="kicker">Beginner to job-ready</p>
+        <h3>8-Week Professional</h3>
+        <p class="best"><strong>Best for:</strong> you want a job behind a chair at the end of it, not just a certificate.</p>
+        <ul>
+          <li>Everything in Foundation</li>
+          <li>Advanced fading</li>
+          <li>Afro &amp; textured hair cutting</li>
+          <li>Precision beard sculpting</li>
+          <li>Hot towel shaving</li>
+          <li>Barber business &amp; marketing</li>
+          <li>D&amp;D Professional Barber Diploma</li>
+        </ul>
+        <div class="price"><b>£2,300</b><span>full course</span></div>
+        <p class="dep">Start with a £1,150 deposit</p>
+        <a class="btn btn-gold" href="#reserve" style="margin-top:22px">Reserve my place</a>
+      </article>
+
+      <article class="course" id="c-master">
+        <p class="kicker">The full trade</p>
+        <h3>12-Week Master Barber Diploma</h3>
+        <p class="best"><strong>Best for:</strong> you want the whole trade — including colour, designs and braiding — and your own shop one day.</p>
+        <ul>
+          <li>Everything in Professional</li>
+          <li>Every fade technique</li>
+          <li>Hair &amp; beard colouring</li>
+          <li>Designs &amp; creative patterns</li>
+          <li>Braiding: cornrows, box, stitch</li>
+          <li>Relaxing &amp; texture management</li>
+          <li>Shop start-up &amp; career mentoring</li>
+        </ul>
+        <div class="price"><b>£3,000</b><span>full course</span></div>
+        <p class="dep">Start with a £1,500 deposit</p>
+        <a class="btn btn-dark" href="#reserve" style="margin-top:22px">Reserve my place</a>
+      </article>
+
+      <article class="course" id="c-specialist">
+        <p class="kicker">Already cutting</p>
+        <h3>4-Week Specialist Intensive</h3>
+        <p class="best"><strong>Best for:</strong> you're already working and want to add the skills clients keep asking for.</p>
+        <ul>
+          <li>Fade mastery</li>
+          <li>Beard grooming &amp; sculpting</li>
+          <li>Designs &amp; patterns</li>
+          <li>Braiding, men &amp; women</li>
+          <li>Colouring &amp; texture services</li>
+          <li>Certificate of Completion</li>
+        </ul>
+        <div class="price"><b>£1,500</b><span>full course</span></div>
+        <p class="dep">Start with a £750 deposit</p>
+        <a class="btn btn-dark" href="#reserve" style="margin-top:22px">Reserve my place</a>
+      </article>
+
+      <article class="course" id="c-international">
+        <p class="kicker">Take it anywhere</p>
+        <h3>International Certification</h3>
+        <p class="best"><strong>Best for:</strong> you want to work outside the UK, and need a qualification that travels with you.</p>
+        <ul>
+          <li>The complete 12-Week Master Diploma</li>
+          <li>Internationally recognised qualification or NVQ, where available</li>
+          <li>All required assessments included</li>
+          <li>Certification on completion</li>
+        </ul>
+        <div class="price"><b>£4,200</b><span>full course</span></div>
+        <p class="dep">Start with a £2,100 deposit</p>
+        <a class="btn btn-dark" href="#reserve" style="margin-top:22px">Reserve my place</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="fit">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">An honest fit</p>
+      <h2 class="display">Who does well here.</h2>
+      <p>Not everyone should train as a barber, and not everyone who should would enjoy training here. The people who get the most out of this place tend to have a few things in common.</p>
+    </div>
+    <div class="fit">
+      <ul class="fit-list">
+        <li><b>They bought clippers long before they bought a course.</b> Cutting mates' hair in a kitchen for free counts for far more than most people give it credit for.</li>
+        <li><b>They'd rather be corrected on the spot than told they're doing fine.</b> Small groups exist so someone can watch your hands and say something. That only helps people who want to hear it.</li>
+        <li><b>They care about being employable in twelve weeks, not about a certificate to frame.</b> The final weeks are about speed, because speed is what a shop actually hires for.</li>
+        <li><b>They want textured and Afro hair taught as core craft.</b> Braiding, relaxing, colour and pattern work sit in the syllabus, not in an optional module at the end.</li>
+        <li><b>They're willing to be bad at something in public for a few weeks.</b> Everybody's first fade is rough. The ones who make it did the second one anyway.</li>
+      </ul>
+      <div class="not-fit">
+        <h4>Probably the wrong place for</h4>
+        <p>Anyone after a qualification without the shop floor, or a certificate that arrives faster than the skill does. Both exist elsewhere and both cost less.</p>
+        <p>Anyone who wants to be told they're already good. That's a nice week and a wasted three months.</p>
+      </div>
+    </div>
+    <p class="fit-cta">If that sounds like the right room, the next intake is the one to ask about.</p>
+    <a class="btn btn-dark" href="#reserve" style="margin-top:18px">Ask about the next intake</a>
+  </div>
+</section>
+
+<section class="dark" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Paying for it</p>
+      <h2 class="display">You don't pay it all at once.</h2>
+      <p>Your career shouldn't wait on cash flow. Here's exactly how the money works, in three lines.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h4>Pay the deposit</h4>
+        <p>A 50% deposit secures your place on the next intake. It's non-refundable, so you only pay it when you're sure.</p>
+      </div>
+      <div class="step">
+        <h4>Spread the rest</h4>
+        <p>The remaining 50% is split into equal instalments, paid every two weeks while you train. 0% interest, no credit check.</p>
+      </div>
+      <div class="step">
+        <h4>Finish paid up</h4>
+        <p>Fees are cleared before your certificate or diploma is issued. No surprise admin fees at any point.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <div>
+      <p class="eyebrow">Why here</p>
+      <h2 class="display" style="font-size:clamp(32px,4.6vw,52px);margin:12px 0 26px">Taught on real heads, not foam ones.</h2>
+      <ul class="why">
+        <li><strong>Real clients from week one</strong><p>Not mannequins, not week six. You're on a paying client's head with an educator stood next to you from the first week.</p></li>
+        <li><strong>Small groups</strong><p>Small enough that someone is actually watching your hands and correcting them, not demonstrating to a room.</p></li>
+        <li><strong>Educators still on the floor</strong><p>The people teaching you still cut in the shop every week. You're learning what works now, not what worked ten years ago.</p></li>
+        <li><strong>Afro and textured hair, properly</strong><p>Taught as core skill, not an optional add-on module. In London, it isn't optional.</p></li>
+      </ul>
+    </div>
+    <img src="img/training.jpg" alt="An educator guiding a trainee barber through a cut on a real client">
+  </div>
+</section>
+
+<section class="dark" id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Straight answers</p>
+      <h2 class="display">Questions people ask before they message.</h2>
+    </div>
+    <div class="faq" style="color:#fff">
+      <details open><summary>I've never held a clipper. Am I too far behind?</summary><p style="color:rgba(255,255,255,.75)">No. Almost nobody arrives knowing how to use one properly, and every course is built to start from zero.</p></details>
+      <details><summary>Am I too old to start?</summary><p style="color:rgba(255,255,255,.75)">There's no cut-off age. People train here straight out of school and twenty years into a career they've had enough of.</p></details>
+      <details><summary>Do I really cut real clients, and how many?</summary><p style="color:rgba(255,255,255,.75)">Real clients from week one, with an educator beside you. Ask us for the number on your course and we'll give you the honest figure, not a range.</p></details>
+      <details><summary>What can I actually do the day after I finish?</summary><p style="color:rgba(255,255,255,.75)">Cut, fade, line up and finish a full head on your own, at the pace a working shop needs. That last part is what gets you hired.</p></details>
+      <details><summary>What certificate do I get?</summary><p style="color:rgba(255,255,255,.75)">A D&amp;D certificate or diploma, depending on the course. If you need an internationally recognised qualification, that's what the International Certification programme is for.</p></details>
+      <details><summary>What happens if I fall behind?</summary><p style="color:rgba(255,255,255,.75)">Tell us early and we'll work it out with you. Nobody gets pushed through a stage they haven't got yet, and nobody gets quietly written off.</p></details>
+      <details><summary>Can I train around a job or family?</summary><p style="color:rgba(255,255,255,.75)">Send us your hours and we'll tell you straight whether the next intake fits. If it doesn't, we'll point you at the one that does.</p></details>
+      <details><summary>What do I need to pay for on top of the course?</summary><p style="color:rgba(255,255,255,.75)">Your own tools, travel, and the time itself. Ask us before you enrol and we'll give you a realistic figure rather than let it surprise you.</p></details>
+      <details><summary>What if I can't pay it all upfront?</summary><p style="color:rgba(255,255,255,.75)">Nobody does. A 50% deposit starts you, the rest is spread in equal instalments every two weeks while you train, 0% interest, no credit check.</p></details>
+      <details><summary>Will I actually get work afterwards?</summary><p style="color:rgba(255,255,255,.75)">The last weeks are built around speed, because that's what shops hire for. Ask us where recent students ended up and we'll name specifics, not averages.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="reserve">
+  <div class="wrap">
+    <p class="eyebrow">Next intake — limited places</p>
+    <h2 class="display">Stop thinking<br>about it.</h2>
+    <p>Send one message. We'll tell you which course fits, what it costs in full, and when the next one starts. No pressure, no sales pitch.</p>
+    <div class="hero-cta">
+      <a class="btn btn-gold" href="https://wa.me/447846119677" target="_blank" rel="noopener">Message us on WhatsApp</a>
+      <a class="btn btn-ghost" href="tel:+447846119677">Call 078 46 11 96 77</a>
+    </div>
+    <p class="fine">From £750 deposit · 0% interest · London based</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <h5>D&amp;D Barber &amp; Academy</h5>
+        <p>London's barbering academy. From zero experience to a paid career in 12 weeks.</p>
+        <p style="margin-top:14px">020 3700 3997 · 078 46 11 96 77</p>
+      </div>
+      <div>
+        <h5>Courses</h5>
+        <ul>
+          <li><a href="#c-foundation">4-Week Foundation</a></li>
+          <li><a href="#c-professional">8-Week Professional</a></li>
+          <li><a href="#c-master">12-Week Master Diploma</a></li>
+          <li><a href="#c-specialist">4-Week Specialist</a></li>
+          <li><a href="#c-international">International Certification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Elsewhere</h5>
+        <ul>
+          <li><a href="haircuts.html">Book a haircut</a></li>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">TikTok</a></li>
+          <li><a href="https://wa.me/447846119677">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="f-bot"><span>© 2026 D&amp;D Barber &amp; Academy</span><span>✂ Turning passion into profession</span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var steps=[].slice.call(document.querySelectorAll('.q-step'));
+  var score=0, answered=0;
+  var results={
+    foundation:{name:'4-Week Foundation Course',why:'You\u2019re starting from scratch and you want to find out fast whether this is for you. Four weeks, real clients, and a certificate at the end \u2014 the lowest-commitment way in.',link:'#c-foundation'},
+    professional:{name:'8-Week Professional Course',why:'You want to walk out employable, not just qualified. Eight weeks takes you from the basics through advanced fading, textured hair and beard work, with the business side included.',link:'#c-professional'},
+    master:{name:'12-Week Master Barber Diploma',why:'You\u2019re after the whole trade \u2014 every fade, colour, designs, braiding \u2014 plus shop start-up and career mentoring. This is the one people take when the goal is their own chair or their own shop.',link:'#c-master'},
+    international:{name:'International Certification Programme',why:'You want the full Master Diploma plus a qualification that travels. Same twelve weeks, with internationally recognised certification and assessments included.',link:'#c-international'}
+  };
+  function show(n){steps.forEach(function(s){s.classList.toggle('on',+s.dataset.step===n)});}
+  document.querySelectorAll('.q-opt').forEach(function(b){
+    b.addEventListener('click',function(){
+      score+=+b.dataset.score; answered++;
+      if(answered<3){show(answered+1);return;}
+      var key = score<=1?'foundation':score<=3?'professional':score<=5?'master':'international';
+      var r=results[key];
+      document.getElementById('r-name').textContent=r.name;
+      document.getElementById('r-why').textContent=r.why;
+      document.getElementById('r-link').setAttribute('href',r.link);
+      show(4);
+    });
+  });
+  document.getElementById('r-again').addEventListener('click',function(){score=0;answered=0;show(1);});
+})();
+</script>
+</body>
+</html>

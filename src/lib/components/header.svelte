@@ -36,6 +36,7 @@
 
 	let menuItems = [
 		{ label: 'Home', href: '/courses' },
+		{ label: 'Haircuts', href: '/haircuts' },
 		{ label: 'Contact', href: '/contact' }
 	];
 </script>
@@ -47,6 +48,11 @@
 		<ul class="nav-left">
 			<li>
 				<a href="/courses" id="nav-home" class={page.url.pathname === '/courses' ? 'al' : ''}>Home</a>
+			</li>
+			<li>
+				<a href="/haircuts" id="nav-haircuts" class={page.url.pathname === '/haircuts' ? 'al' : ''}
+					>Haircuts</a
+				>
 			</li>
 			<li>
 				<a href="/contact" id="nav-contact" class={page.url.pathname === '/contact' ? 'al' : ''}
