@@ -49,12 +49,11 @@
 		<div class="hero-in">
 			<div class="ey"><span>London · Walk-ins welcome</span></div>
 			<h1 class="hero-h1">
-				<div>SHARP CUTS.</div>
-				<div class="g">NO FUSS.</div>
+				<div class="lg:text-9xl!">THE LAST BARBER</div>
+				<div class="g lg:text-9xl!">YOU'LL HAVE TO TRY.</div>
 			</h1>
 			<p class="hero-sub">
-				Fades, beard work and hot towel shaves, done properly. Clear prices on the wall and on
-				this page. Book in under thirty seconds.
+			Fades, beards, hot towel shaves. Thirty seconds to book. Then you're sorted.
 			</p>
 			<div class="hero-cta">
 				<a class="btn-gold" href={bookingLink} target="_blank" rel="noopener">Book A Cut</a>
@@ -118,7 +117,7 @@
 	</div>
 </section>
 
-<section class="fitsec">
+<!-- <section class="fitsec">
 	<div class="ey"><span>An honest fit</span></div>
 	<h2 class="sec-title">WHO THIS SHOP<br /><span class="g">SUITS.</span></h2>
 	<p class="sec-sub" style="margin-bottom:44px">
@@ -155,7 +154,7 @@
 			</p>
 		</div>
 	</div>
-</section>
+</section> -->
 
 <section class="quotesec">
 	<div class="quotes">

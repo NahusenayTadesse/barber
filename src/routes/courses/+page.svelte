@@ -228,8 +228,8 @@
 		<div class="ey"><span>Start here</span></div>
 		<h2 class="sec-title">WHICH COURSE<br />IS <span class="g">YOURS?</span></h2>
 		<p class="sec-sub" style="margin-bottom:36px">
-			Three questions. No email, no form. We'll point you at the one that actually fits where
-			you're starting from.
+		Answer these 3 questions.
+		We'll point you at the one that actually fits you.
 		</p>
 
 		<div class="quiz">
@@ -305,6 +305,10 @@
 			<h2 class="sec-title">WHERE DO<br />YOU <span class="g">START?</span></h2>
 		</div>
 	</div>
+	<p class="courses-disclaimer">
+		A 50% non-refundable deposit secures your place, and the remaining 50% is paid in equal
+		instalments every two weeks. Full payment is required before certification.
+	</p>
 </div>
 
 <div id="courses">
@@ -347,49 +351,49 @@
 	</div>
 </div>
 
-<section class="fitsec">
-	<div class="pinner">
-		<div class="ey"><span>An honest fit</span></div>
-		<h2 class="sec-title">WHO DOES WELL<br /><span class="g">HERE.</span></h2>
-		<p class="sec-sub" style="margin-bottom:44px">
-			Not everyone should train as a barber, and not everyone who should would enjoy training
-			here. The people who get the most out of this place tend to have a few things in common.
-		</p>
-		<div class="fit-grid">
-			<ul class="fit-list">
-				<li>
-					<b>They bought clippers long before they bought a course.</b> Cutting mates' hair in a kitchen
-					for free counts for far more than most people give it credit for.
-				</li>
-				<li>
-					<b>They'd rather be corrected on the spot than told they're doing fine.</b> Small groups exist
-					so someone can watch your hands and say something. That only helps people who want to hear
-					it.
-				</li>
-				<li>
-					<b>They care about being employable in twelve weeks, not a certificate to frame.</b> The final
-					weeks are about speed, because speed is what a shop actually hires for.
-				</li>
-				<li>
-					<b>They want textured and Afro hair taught as core craft.</b> Braiding, relaxing, colour and
-					pattern work sit in the syllabus, not in an optional module at the end.
-				</li>
-				<li>
-					<b>They're willing to be bad at something in public for a few weeks.</b> Everybody's first
-					fade is rough. The ones who make it did the second one anyway.
-				</li>
-			</ul>
-			<div class="not-fit">
-				<h4>Probably the wrong place for</h4>
-				<p>
-					Anyone after a qualification without the shop floor, or a certificate that arrives
-					faster than the skill does. Both exist elsewhere and both cost less.
-				</p>
-				<p>Anyone who wants to be told they're already good. That's a nice week and a wasted three months.</p>
-			</div>
-		</div>
-	</div>
-</section>
+<!-- // <section class="fitsec">
+// 	<div class="pinner">
+// 		<div class="ey"><span>An honest fit</span></div>
+// 		<h2 class="sec-title">WHO DOES WELL<br /><span class="g">HERE.</span></h2>
+// 		<p class="sec-sub" style="margin-bottom:44px">
+// 			Not everyone should train as a barber, and not everyone who should would enjoy training
+// 			here. The people who get the most out of this place tend to have a few things in common.
+// 		</p>
+// 		<div class="fit-grid">
+// 			<ul class="fit-list">
+// 				<li>
+// 					<b>They bought clippers long before they bought a course.</b> Cutting mates' hair in a kitchen
+// 					for free counts for far more than most people give it credit for.
+// 				</li>
+// 				<li>
+// 					<b>They'd rather be corrected on the spot than told they're doing fine.</b> Small groups exist
+// 					so someone can watch your hands and say something. That only helps people who want to hear
+// 					it.
+// 				</li>
+// 				<li>
+// 					<b>They care about being employable in twelve weeks, not a certificate to frame.</b> The final
+// 					weeks are about speed, because speed is what a shop actually hires for.
+// 				</li>
+// 				<li>
+// 					<b>They want textured and Afro hair taught as core craft.</b> Braiding, relaxing, colour and
+// 					pattern work sit in the syllabus, not in an optional module at the end.
+// 				</li>
+// 				<li>
+// 					<b>They're willing to be bad at something in public for a few weeks.</b> Everybody's first
+// 					fade is rough. The ones who make it did the second one anyway.
+// 				</li>
+// 			</ul>
+// 			<div class="not-fit">
+// 				<h4>Probably the wrong place for</h4>
+// 				<p>
+// 					Anyone after a qualification without the shop floor, or a certificate that arrives
+// 					faster than the skill does. Both exist elsewhere and both cost less.
+// 				</p>
+// 				<p>Anyone who wants to be told they're already good. That's a nice week and a wasted three months.</p>
+// 			</div>
+// 		</div>
+// 	</div>
+// </section> -->
 
 <section class="psec">
 	<div class="pinner">
@@ -398,8 +402,7 @@
 			YOU DON'T PAY<br />IT ALL AT <span class="g">ONCE.</span>
 		</h2>
 		<p class="sec-sub" style="margin-bottom:20px">
-			Your career shouldn't wait on cash flow. Here's exactly how the money works, in three
-			lines.
+			Your career shouldn't wait on cash flow. Here's exactly how the money works...
 		</p>
 		<div class="pstep-grid">
 			<div class="pstep">
@@ -407,8 +410,7 @@
 				<div>
 					<div class="pst">Pay the deposit</div>
 					<div class="psd">
-						A deposit secures your place on the next intake. It's non-refundable, so you only pay
-						it when you're sure.
+					A deposit secures your place on the next intake. It's non-refundable once paid.
 					</div>
 				</div>
 			</div>
@@ -417,8 +419,7 @@
 				<div>
 					<div class="pst">Spread the rest</div>
 					<div class="psd">
-						The remaining balance is split into equal instalments, paid while you train. 0%
-						interest, no credit check.
+					Pay the remaining balance in equal installments while you train, <span class="text-primary">Interest-free</span>
 					</div>
 				</div>
 			</div>
@@ -427,8 +428,7 @@
 				<div>
 					<div class="pst">Finish paid up</div>
 					<div class="psd">
-						Fees are cleared before your certificate or diploma is issued. No surprise admin fees
-						at any point.
+					All fees are cleared before certification, with <span class="text-primary"> no hidden costs</span>.
 					</div>
 				</div>
 			</div>
@@ -441,8 +441,8 @@
 		<div class="why-intro">
 			<h2 class="why-bigclaim">TAUGHT ON<br />REAL HEADS.</h2>
 			<div class="why-body">
-				<p><strong>Real clients from week one.</strong> Not mannequins, not week six. You're on a paying client's head with an educator stood next to you from the first week.</p>
-				<p><em>Small groups.</em> Small enough that someone is actually watching your hands and correcting them, not demonstrating to a room.</p>
+				<p><strong>Real clients from week one.</strong> You're on a paying client's head with an educator stood next to you from the first week.</p>
+				<p><em>Small groups.</em>Small enough for hands-on correction.</p>
 			</div>
 		</div>
 		<div class="why-cards">
@@ -545,6 +545,19 @@
 		border-color: var(--gold);
 		background: rgba(212, 175, 55, 0.08);
 		transform: translateY(-1px);
+	}
+
+	/* ——— COURSES DISCLAIMER ——— */
+	.courses-disclaimer {
+		margin-top: 20px;
+		padding: 14px 18px;
+		background: rgba(212, 175, 55, 0.06);
+		border: 1px solid rgba(212, 175, 55, 0.2);
+		border-left: 3px solid var(--gold);
+		font-size: 16.5px;
+		line-height: 1.6;
+		color: orange;
+		max-width: 62em;
 	}
 
 	/* ——— PROOF STRIP (academy.html's hairline-grid technique, dark tokens) ——— */
