@@ -10,13 +10,13 @@
 		// 	id: '02',
 		// 	title: 'Tutors Still in the Chair.',
 		// 	description: 'Learn from working barbers who still cut every week.',
-		// 	image: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600&q=80'
+		// 	image: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600&q=70&fm=webp'
 		// },
 		{
 			id: '02',
 			title: 'Walk Out Job-Ready.',
 			description: 'Build the confidence to step into a shop and start working.',
-			image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=80'
+			image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=70&fm=webp'
 		},
 		// {
 		// 	id: '04',
@@ -241,10 +241,10 @@
 		background-image: url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80');
 	}
 	.wc-img-2 {
-		background-image: url('https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600&q=80');
+		background-image: url('https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600&q=70&fm=webp');
 	}
 	.wc-img-3 {
-		background-image: url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=80');
+		background-image: url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=70&fm=webp');
 	}
 	.wc-img-4 {
 		background-image: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=600&q=80');

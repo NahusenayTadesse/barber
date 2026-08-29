@@ -3,10 +3,6 @@
 
 	import { superForm } from 'sveltekit-superforms/client';
 	import { toast } from 'svelte-sonner';
-	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-
-	import Errors from '$lib/formComponents/Errors.svelte';
-	import * as Carousel from '$lib/components/ui/carousel/index.js';
 
 	import { fade, fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
@@ -71,6 +67,7 @@
 			? data.imagesList
 					.filter((img): img is string => !!img)
 					.map((img) => (img.startsWith('http') || img.startsWith('/') ? img : `/files/${img}`))
+					.map((img) => (img.startsWith('/files/') ? `${img}?w=1280&q=68` : img))
 			: ['/images (18).webp']
 	);
 	let heroIndex = $state(0);
@@ -164,6 +161,11 @@
 
 <svelte:head>
 	<title>Courses & Enrollment</title>
+	<meta
+		name="description"
+		content="Learn barbering at D&D Barber Academy in London. No experience needed, real clients from week one, and job-ready in 12 weeks."
+	/>
+	<link rel="preload" as="image" fetchpriority="high" href={heroImages[0]} />
 </svelte:head>
 
 <!-- HERO -->

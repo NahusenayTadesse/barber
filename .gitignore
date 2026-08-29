@@ -21,3 +21,12 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Generated resized-image cache
+files/.cache/
+build/
+build.tar.gz
+build.tar
+build.zip
+build*.tar.gz
+build*.zip

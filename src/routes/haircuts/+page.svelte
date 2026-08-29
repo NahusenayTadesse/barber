@@ -10,9 +10,11 @@
 					.map((img) => (img.startsWith('http') || img.startsWith('/') ? img : `/files/${img}`))
 			: ['/images (18).webp']
 	);
-	const heroImage = $derived(heroImages[0]);
-	const modelImage = $derived(heroImages[1] ?? heroImages[0]);
-	const visitImage = $derived(heroImages[2] ?? heroImages[0]);
+	const resize = (img: string, w: number, q = 70) =>
+		img.startsWith('/files/') ? `${img}?w=${w}&q=${q}` : img;
+	const heroImage = $derived(resize(heroImages[0], 1280, 68));
+	const modelImage = $derived(resize(heroImages[1] ?? heroImages[0], 900));
+	const visitImage = $derived(resize(heroImages[2] ?? heroImages[0], 900));
 
 	const cheapestPrice = $derived.by(() => {
 		const prices = data.servicesList
@@ -39,6 +41,11 @@
 
 <svelte:head>
 	<title>Haircuts &amp; Prices</title>
+	<meta
+		name="description"
+		content="See haircut, fade and beard trim prices at D&D Barber Shop in London, and book your next cut online in minutes."
+	/>
+	<link rel="preload" as="image" fetchpriority="high" href={heroImage} />
 </svelte:head>
 
 <!-- HERO -->
@@ -113,7 +120,7 @@
 				>Book A Model Cut</a
 			>
 		</div>
-		<img src={modelImage} alt="An educator supervising a trainee barber mid-cut" />
+		<img src={modelImage} alt="An educator supervising a trainee barber mid-cut" loading="lazy" />
 	</div>
 </section>
 
@@ -187,7 +194,7 @@
 				>
 			</div>
 		</div>
-		<img src={visitImage} alt="Finishing a neckline at D&amp;D Barber &amp; Academy" />
+		<img src={visitImage} alt="Finishing a neckline at D&amp;D Barber &amp; Academy" loading="lazy" />
 	</div>
 </section>
 

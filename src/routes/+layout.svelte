@@ -1,5 +1,6 @@
 <script lang="ts">
 	import './layout.css';
+	import bebasNeueWoff2 from '@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?url';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page, updated } from '$app/state';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
@@ -53,6 +54,13 @@
 
 <svelte:head>
 	<link rel="icon" href="/logo.jpeg" />
+	<link
+		rel="preload"
+		as="font"
+		type="font/woff2"
+		href={bebasNeueWoff2}
+		crossorigin="anonymous"
+	/>
 </svelte:head>
 
 <Toaster position="bottom-right" richColors closeButton />
@@ -61,7 +69,9 @@
 
 {#if !page.url.pathname.startsWith('/dashboard') && page.url.pathname !== '/'}
 	<Header courses={data?.courses} />
-	{@render children()}
+	<main>
+		{@render children()}
+	</main>
 
 	<Footer courses={data?.courses} />
 	<Floating />

@@ -6,9 +6,13 @@
 
 <svelte:head>
 	<title>D&D Barber Shop</title>
+	<meta
+		name="description"
+		content="Book your haircut, fade or beard trim at D&D Barber Shop in London. Clean, premium environment with fast, simple online booking."
+	/>
 </svelte:head>
 
-<main class="container justify-self-center lg:mt-22">
+<div class="container justify-self-center lg:mt-22">
 	<section class="hero">
 		<div class="hero-copy">
 			<div>
@@ -76,7 +80,7 @@
 				<div class="service-card">
 					<div
 						class="service-image"
-						style="background-image: url('/files/{service.imageUrl}')"
+						style="background-image: url('/files/{service.imageUrl}?w=700&q=68')"
 					></div>
 					<div class="service-body">
 						<div class="service-top">
@@ -371,7 +375,7 @@
 			<a class="btn-gold" {href} target="_blank" rel="noopener noreferrer">Book Now</a>
 		</div>
 	</section>
-</main>
+</div>
 
 <style>
 	.brand {

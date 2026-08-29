@@ -19,6 +19,10 @@
 
 <svelte:head>
 	<title>D&D Academy</title>
+	<meta
+		name="description"
+		content="D&D Barber Academy in London: hands-on barber training with real clients, plus D&D Barber Shop for haircuts, fades and beard trims."
+	/>
 </svelte:head>
 
 <div style="padding-top:88px">
@@ -307,14 +311,14 @@
 	</div>
 	<div class="cpg fi" style="transition-delay:.12s">
 		<a class="cpc" href="/courses">
-			<div class="cpbig">01</div>
+			<div class="cpbig" aria-hidden="true">01</div>
 			<div class="cp-lv">Starter · Level 1 · No experience needed</div>
 			<div class="cp-nm">12 WEEK STARTER</div>
 			<div class="cp-ds">No experience needed. Real clients. 12 weeks.</div>
 			<div class="cp-pr">From £299 deposit</div>
 		</a>
 		<a class="cpc" href="/courses" style="border-left-color:rgba(212,175,55,.38)">
-			<div class="cpbig">02</div>
+			<div class="cpbig" aria-hidden="true">02</div>
 			<div class="cp-lv">Advanced · Level 2 · For barbers levelling up</div>
 			<div class="cp-nm">12 WEEK ADVANCED</div>
 			<div class="cp-ds">Level up your fades, speed and business skills.</div>

@@ -19,12 +19,16 @@
 
 <svelte:head>
 	<title>Free Haircut</title>
+	<meta
+		name="description"
+		content="Get a free haircut from a trainee barber at D&D Barber Academy in London, supervised by an experienced educator."
+	/>
 </svelte:head>
 <div class="fhero">
 	<div
 		style="position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 30% 50%,rgba(212,175,55,.06) 0%,transparent 70%)"
 	></div>
-	<div class="fhbig">FREE</div>
+	<div class="fhbig" aria-hidden="true">FREE</div>
 	<div class="fh-inner">
 		<div class="fi">
 			<div class="ey"><span>For the Community</span></div>

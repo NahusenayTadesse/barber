@@ -21,6 +21,10 @@
 
 <svelte:head>
 	<title>Contact</title>
+	<meta
+		name="description"
+		content="Get in touch with D&D Barber Shop & Academy in London — call, WhatsApp or send us a message."
+	/>
 </svelte:head>
 <!-- <div class="phero" style="min-height:42vh">
 	<div class="phero-bg"></div>
@@ -176,7 +180,7 @@
 				</div>
 				<div class="fg">
 					<label for="subject">Subject</label>
-					<select bind:value={$form.subject} name="subject">
+					<select bind:value={$form.subject} name="subject" id="subject">
 						<option value="">What's on your mind?</option>
 						<option>Which course is right for me?</option>
 						<option>Upcoming intake dates</option>

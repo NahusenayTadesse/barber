@@ -1,13 +1,47 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Readable } from 'node:stream';
+import sharp from 'sharp';
 import { env } from '$env/dynamic/private';
-import { getCachedStats } from '$lib/server/fileCache';
+import { getCachedStats, invalidateStatCache } from '$lib/server/fileCache';
 
 const FILES_DIR = path.resolve(env.FILES_DIR ?? '.tempFiles');
+const RESIZE_CACHE_DIR = path.join(FILES_DIR, '.cache');
+const RESIZABLE_EXTS = new Set(['png', 'jpg', 'jpeg', 'webp']);
 
 if (!fs.existsSync(FILES_DIR)) {
 	fs.mkdirSync(FILES_DIR, { recursive: true });
+}
+if (!fs.existsSync(RESIZE_CACHE_DIR)) {
+	fs.mkdirSync(RESIZE_CACHE_DIR, { recursive: true });
+}
+
+/**
+ * Returns a resized+webp-encoded copy of an image, generating and caching it on
+ * first request. Subsequent requests for the same source (by mtime) reuse the
+ * cached file instead of re-encoding.
+ */
+async function getResizedImagePath(
+	sourcePath: string,
+	sourceStats: fs.Stats,
+	width: number,
+	quality: number
+): Promise<string> {
+	const base = path.basename(sourcePath, path.extname(sourcePath));
+	const cachePath = path.join(RESIZE_CACHE_DIR, `${base}-w${width}-q${quality}.webp`);
+
+	const cached = getCachedStats(cachePath);
+	if (cached && cached.mtimeMs >= sourceStats.mtimeMs) {
+		return cachePath;
+	}
+
+	const buffer = await sharp(sourcePath)
+		.resize({ width, withoutEnlargement: true })
+		.webp({ quality })
+		.toBuffer();
+	fs.writeFileSync(cachePath, buffer);
+	invalidateStatCache(cachePath);
+	return cachePath;
 }
 
 // ---------------------------------------------------------------------------
@@ -88,11 +122,34 @@ export async function GET({ params, request }: { params: { name: string }; reque
 	}
 
 	// Stat (with cache)
-	const stats = getCachedStats(file_path);
-	if (!stats) return new Response('not found', { status: 404 });
+	const sourceStats = getCachedStats(file_path);
+	if (!sourceStats) return new Response('not found', { status: 404 });
 
-	const ext = params.name.toLowerCase().split('.').at(-1) ?? '';
-	const mimeType = mimes.lookup(params.name);
+	let ext = params.name.toLowerCase().split('.').at(-1) ?? '';
+	let servePath = file_path;
+	let stats = sourceStats;
+
+	// Optional on-the-fly resize+webp conversion, e.g. ?w=1600&q=75
+	const widthParam = new URL(request.url).searchParams.get('w');
+	if (widthParam && RESIZABLE_EXTS.has(ext)) {
+		const width = Math.min(3840, Math.max(50, parseInt(widthParam, 10) || 0));
+		const qualityParam = new URL(request.url).searchParams.get('q');
+		const quality = Math.min(95, Math.max(30, parseInt(qualityParam ?? '75', 10) || 75));
+		if (width > 0) {
+			try {
+				servePath = await getResizedImagePath(file_path, sourceStats, width, quality);
+				ext = 'webp';
+				stats = getCachedStats(servePath) ?? sourceStats;
+			} catch {
+				// Fall back to serving the original file on any encoding error.
+				servePath = file_path;
+				ext = params.name.toLowerCase().split('.').at(-1) ?? '';
+				stats = sourceStats;
+			}
+		}
+	}
+
+	const mimeType = mimes.lookup(`file.${ext}`);
 	const etag = `W/"${stats.size}-${stats.mtime.getTime()}"`;
 	const lastMod = stats.mtime.toUTCString();
 
@@ -116,7 +173,7 @@ export async function GET({ params, request }: { params: { name: string }; reque
 			});
 		}
 		const { start, end } = range;
-		const stream = Readable.toWeb(fs.createReadStream(file_path, { start, end }), {
+		const stream = Readable.toWeb(fs.createReadStream(servePath, { start, end }), {
 			strategy: new CountQueuingStrategy({ highWaterMark: 100 })
 		});
 		return new Response(stream as ReadableStream, {
@@ -134,7 +191,7 @@ export async function GET({ params, request }: { params: { name: string }; reque
 	}
 
 	// Full response
-	const stream = Readable.toWeb(fs.createReadStream(file_path), {
+	const stream = Readable.toWeb(fs.createReadStream(servePath), {
 		strategy: new CountQueuingStrategy({ highWaterMark: 100 })
 	});
 	return new Response(stream as ReadableStream, {

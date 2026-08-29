@@ -43,6 +43,10 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 
 <svelte:head>
 	<title>Register for {data.course.name}</title>
+	<meta
+		name="description"
+		content="Enrol on the {data.course.name} course at D&D Barber Academy in London."
+	/>
 </svelte:head>
 
 <!-- <div class="chain mt-10 lg:block! hidden"><div class="chain-line"></div></div> -->
@@ -78,7 +82,7 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 						required
 						bind:value={$form.firstName}
 						type="text"
-						id="ef"
+						id="firstName"
 						placeholder="John"
 					/>
 				</div>
@@ -87,7 +91,7 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 						name="lastName"
 						type="text"
 						bind:value={$form.lastName}
-						id="ef"
+						id="lastName"
 						placeholder="Smith"
 					/>
 				</div>
@@ -96,7 +100,7 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 				<div class="fg">
 					<label for="email">Email</label><input
 						type="email"
-						id="ee"
+						id="email"
 						bind:value={$form.email}
 						placeholder="john@email.com"
 					/>
@@ -106,7 +110,7 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 						bind:value={$form.phone}
 						type="tel"
 						name="phone"
-						id="ep"
+						id="phone"
 						placeholder="+44 7700 000000"
 					/>
 				</div>
@@ -201,12 +205,12 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 				style="font-size:11px;color:var(--grey);text-align:center;margin-top:14px;line-height:1.7"
 			>
 				Secure checkout · You'll receive a confirmation within 24 hours<br />Questions? Call us on
-				<a href="tel:0202779988" style="color:var(--gold);text-decoration:none">0202 779 988</a>
+				<a href="tel:0202779988" style="color:var(--gold);text-decoration:underline">0202 779 988</a>
 				or
 				<a
 					href="https://wa.me/442027799988"
 					target="_blank"
-					style="color:var(--gold);text-decoration:none">WhatsApp us</a
+					style="color:var(--gold);text-decoration:underline">WhatsApp us</a
 				><br />Deposits are non-refundable once your place is confirmed. Full terms available below.
 			</div>
 		</div>
