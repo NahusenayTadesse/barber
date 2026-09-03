@@ -9,8 +9,14 @@ import {
 	decimal,
 	timestamp,
 	mysqlEnum,
-	boolean
+	boolean,
+	uniqueIndex
 } from 'drizzle-orm/mysql-core';
+
+const timestamps = () => ({
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull()
+});
 
 // --- Courses Table ---
 // Based on the 'crsgrid' and 'crscard' elements in the HTML
@@ -99,3 +105,31 @@ export const gallery = mysqlTable('gallery', {
 	id: int('id').primaryKey().autoincrement(),
 	imageUrl: varchar('image_url', { length: 255 })
 });
+
+// --- Business Hours Table ---
+export const businessHours = mysqlTable(
+	'business_hours',
+	{
+		id: int('id').primaryKey().autoincrement(),
+
+		// JS Date#getDay() convention: 0 = Sunday ... 6 = Saturday
+		dayOfWeek: int('day_of_week').notNull(),
+
+		// e.g. "Monday"
+		dayLabel: varchar('day_label', { length: 20 }).notNull(),
+
+		// Display order, Monday-first (0-6)
+		sortOrder: int('sort_order').notNull(),
+
+		isClosed: boolean('is_closed').default(false).notNull(),
+
+		// e.g. "9AM", "12PM"
+		opensLabel: varchar('opens_label', { length: 20 }),
+
+		// e.g. "6PM", "12AM"
+		closesLabel: varchar('closes_label', { length: 20 }),
+
+		...timestamps()
+	},
+	(table) => [uniqueIndex('business_hours_day_of_week_idx').on(table.dayOfWeek)]
+);

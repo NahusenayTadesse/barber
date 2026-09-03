@@ -183,8 +183,10 @@
 			</h2>
 			<dl>
 				<dt>Location</dt><dd>69 · London, UK</dd>
-				<dt>Mon–Sat</dt><dd>9am – 6pm</dd>
-				<dt>Sunday</dt><dd>Closed</dd>
+				{#each data.businessHours ?? [] as day (day.dayOfWeek)}
+					<dt>{day.dayLabel.slice(0, 3)}</dt>
+					<dd>{day.isClosed ? 'Closed' : `${day.opensLabel} – ${day.closesLabel}`}</dd>
+				{/each}
 				<dt>Phone</dt><dd><a href="tel:02037003997">020 3700 3997</a></dd>
 			</dl>
 			<div class="hero-cta">

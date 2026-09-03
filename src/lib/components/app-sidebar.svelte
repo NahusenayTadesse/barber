@@ -7,7 +7,8 @@
 		Plus,
 		Sheet,
 		SprayCan,
-		Images
+		Images,
+		Clock3
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -21,6 +22,7 @@
 		{ title: 'Enrollments', url: '/dashboard/enrollments', icon: Users },
 		{ title: 'Services', url: '/dashboard/services', icon: SprayCan },
 		{ title: 'Gallery', url: '/dashboard/gallery', icon: Images },
+		{ title: 'Opening Hours', url: '/dashboard/hours', icon: Clock3 },
 
 		{
 			title: 'Courses',

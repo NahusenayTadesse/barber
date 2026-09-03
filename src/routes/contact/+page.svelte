@@ -4,11 +4,15 @@
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
 
 	import Errors from '$lib/formComponents/Errors.svelte';
-	import { Mail, MapPin, Phone } from '@lucide/svelte';
+	import { Mail, MapPin, Phone, Clock3 } from '@lucide/svelte';
 	let { data } = $props();
 	const { form, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
 	});
+	const businessHours = $derived(data?.businessHours ?? []);
+	const openRangeLabel = $derived(data?.hoursSummary?.openRangeLabel ?? 'Mon–Sat');
+	const opensLabel = $derived(data?.hoursSummary?.opensLabel ?? '9am');
+	const closesLabel = $derived(data?.hoursSummary?.closesLabel ?? '6pm');
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') toast.error($message.text);
@@ -96,6 +100,19 @@
 			</div>
 		</div>
 		<div class="cii">
+			<div class="cii-icon"><Clock3 /></div>
+			<div>
+				<div class="cii-lbl">Hours</div>
+				<div class="cii-val">
+					{#each businessHours as day (day.dayOfWeek)}
+						{day.dayLabel.slice(0, 3)}: {day.isClosed
+							? 'Closed'
+							: `${day.opensLabel} – ${day.closesLabel}`}<br />
+					{/each}
+				</div>
+			</div>
+		</div>
+		<div class="cii">
 			<div class="cii-icon"><Mail /></div>
 			<div>
 				<div class="cii-lbl">Email</div>
@@ -129,8 +146,8 @@
 				Response Times
 			</div>
 			<div style="font-size:13px;color:var(--grey);font-weight:300;line-height:1.85">
-				WhatsApp: within the hour during working hours<br />Email: same day, Mon–Sat<br />Phone:
-				Mon–Sat, 9am–6pm
+				WhatsApp: within the hour during working hours<br />Email: same day, {openRangeLabel}<br
+				/>Phone: {openRangeLabel}, {opensLabel}–{closesLabel}
 			</div>
 		</div>
 	</div>

@@ -14,7 +14,9 @@ export const load: PageServerLoad = async () => {
 
 	const imagesList = images.map((img) => img.imageUrl);
 
-	form.data.courseId = coursesList[0].id;
+	if (coursesList[0]) {
+		form.data.courseId = coursesList[0].id;
+	}
 
 	return {
 		form,
