@@ -1,0 +1,238 @@
+- generic [ref=f3e2]:
+  - region "Notifications alt+T"
+  - main [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - button "Toggle Sidebar" [ref=f3e6]
+      - button "A" [ref=f3e9]
+    - generic [ref=f3e13]:
+      - generic [ref=f3e14]:
+        - generic [ref=f3e15]:
+          - heading "Dashboard User Guide" [level=1] [ref=f3e16]
+          - paragraph [ref=f3e17]: How to manage your barbershop website, courses, enrollments and messages
+        - button "Download PDF" [ref=f3e18]
+      - generic [ref=f3e19]:
+        - textbox "Search the help guide" [ref=f3e21]:
+          - /placeholder: Search the guide... (press / to focus)
+        - paragraph [ref=f3e22]: 10 sections
+      - generic [ref=f3e24]:
+        - generic [ref=f3e25]:
+          - heading "Getting Started" [level=2] [ref=f3e26]
+          - paragraph [ref=f3e27]: Signing in, finding your way around, and managing your account.
+          - generic [ref=f3e28]:
+            - paragraph [ref=f3e29]: The dashboard is the private area where you control what appears on your public website and where you receive enrollments and messages from customers. You must be signed in to see it. If you are not, you will be sent to the login page.
+            - generic [ref=f3e30]:
+              - heading "Signing in" [level=3] [ref=f3e31]
+              - list [ref=f3e32]:
+                - listitem [ref=f3e33]: Go to the /login page of your website.
+                - listitem [ref=f3e34]: Enter your email and password and press Login.
+                - listitem [ref=f3e35]: You will land on the Dashboard Overview page.
+            - generic [ref=f3e36]:
+              - heading "Finding your way around" [level=3] [ref=f3e37]
+              - list [ref=f3e38]:
+                - listitem [ref=f3e39]: "Sidebar (left): links to every section - Dashboard, Enrollments, Services, Gallery, Opening Hours, Courses, Messages and Help."
+                - listitem [ref=f3e40]: "Sidebar toggle (top-left button): opens and closes the sidebar. On a phone or tablet the sidebar is hidden until you press this button."
+                - listitem [ref=f3e41]: "Logo (top of sidebar): opens your public website in a new tab so you can check your changes."
+                - listitem [ref=f3e42]: "Account menu (top-right circle with your initial): change your password or log out."
+            - generic [ref=f3e43]:
+              - heading "Changing your password" [level=3] [ref=f3e44]
+              - list [ref=f3e45]:
+                - listitem [ref=f3e46]: Click the circle with your initial at the top-right.
+                - listitem [ref=f3e47]: Choose Change Password.
+                - listitem [ref=f3e48]: Enter your current password, then the new password twice.
+                - listitem [ref=f3e49]: Press Change Password.
+            - paragraph [ref=f3e53]:
+              - strong [ref=f3e54]: "Warning:"
+              - text: "A new password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number and a special character (for example ! or #)."
+            - paragraph [ref=f3e58]:
+              - strong [ref=f3e59]: "Tip:"
+              - text: Always log out from the account menu when you use a shared or public computer.
+        - generic [ref=f3e60]:
+          - heading "Dashboard Overview" [level=2] [ref=f3e61]
+          - paragraph [ref=f3e62]: The three summary cards on the home page of the dashboard.
+          - generic [ref=f3e63]:
+            - paragraph [ref=f3e64]: The Dashboard page gives you a quick look at what happened today. Counts start again from zero at midnight.
+            - generic [ref=f3e65]:
+              - heading "The cards" [level=3] [ref=f3e66]
+              - list [ref=f3e67]:
+                - listitem [ref=f3e68]: "New Enrolments: how many people enrolled on a course today."
+                - listitem [ref=f3e69]: "Inquiries: how many messages were sent through the Contact form on your website today."
+                - listitem [ref=f3e70]: "Total Engagement: new enrolments and inquiries added together."
+            - paragraph [ref=f3e74]:
+              - strong [ref=f3e75]: "Tip:"
+              - text: Check the Overview first thing every morning, then open Enrollments or Messages to see the details.
+        - generic [ref=f3e76]:
+          - heading "Using Tables (Search, Sort, Filter, Export)" [level=2] [ref=f3e77]
+          - paragraph [ref=f3e78]: Everything that works the same way on the Enrollments, Services, Courses and Messages lists.
+          - generic [ref=f3e79]:
+            - paragraph [ref=f3e80]: Most pages show a table. The tools above every table are the same everywhere, so you only need to learn them once.
+            - generic [ref=f3e81]:
+              - heading "Table tools" [level=3] [ref=f3e82]
+              - list [ref=f3e83]:
+                - listitem [ref=f3e84]: "Search Table: type in the search box to instantly show only the rows that contain your text in any column."
+                - listitem [ref=f3e85]: "Columns: choose which columns to show or hide. Useful on small screens."
+                - listitem [ref=f3e86]: "Pages: choose how many rows to show at once. Use Previous and Next at the bottom to move between pages."
+                - listitem [ref=f3e87]: "Results: shows how many rows match your current search and filters."
+                - listitem [ref=f3e88]: "Download button (arrow icon): export the table as a PDF or as a CSV file that opens in Excel or Google Sheets."
+                - listitem [ref=f3e89]: "Column headings: click a heading that has arrows to sort by that column. Click again to reverse the order."
+                - listitem [ref=f3e90]: "Copy: click a phone number or email address in the table to copy it."
+                - listitem [ref=f3e91]: "Resize: drag the handle on the right edge of the table to make it narrower or wider on large screens."
+            - generic [ref=f3e92]:
+              - heading "Filtering" [level=3] [ref=f3e93]
+              - list [ref=f3e94]:
+                - listitem [ref=f3e95]: Open the Filter menu above the table.
+                - listitem [ref=f3e96]: Pick one or more values for any filter (for example a course or a status).
+                - listitem [ref=f3e97]: The table updates straight away. Use the reset button to clear all filters.
+            - paragraph [ref=f3e101]:
+              - strong [ref=f3e102]: "Tip:"
+              - text: Search and filters apply to the exported file too. Filter first, then download, to export only the rows you need.
+        - generic [ref=f3e103]:
+          - heading "Enrollments" [level=2] [ref=f3e104]
+          - paragraph [ref=f3e105]: See everyone who has enrolled on one of your courses.
+          - generic [ref=f3e106]:
+            - paragraph [ref=f3e107]: "The Enrollments page lists every person who enrolled through the website. It is a read-only list: enrollments are created by customers when they sign up on the Courses page, so there is nothing to add here."
+            - generic [ref=f3e108]:
+              - heading "What each column means" [level=3] [ref=f3e109]
+              - list [ref=f3e110]:
+                - listitem [ref=f3e111]: "Name, Phone, Email: the contact details the person entered."
+                - listitem [ref=f3e112]: "Course: the course they enrolled on."
+                - listitem [ref=f3e113]: "Payment Option: the amount (in pounds) of the payment option they chose."
+                - listitem [ref=f3e114]: "Status: a coloured badge - green for confirmed or paid, yellow for pending, red for cancelled or unpaid."
+                - listitem [ref=f3e115]: "Enrolled At: the date they enrolled."
+            - paragraph [ref=f3e116]: The heading shows the total number of enrollments. You can filter by status, course, payment option and date, search by name or phone, and export the list as PDF or CSV (see Using Tables).
+            - paragraph [ref=f3e120]:
+              - strong [ref=f3e121]: "Tip:"
+              - text: Click a phone number or email to copy it, then paste it into WhatsApp, your phone or your email app.
+        - generic [ref=f3e122]:
+          - heading "Courses" [level=2] [ref=f3e123]
+          - paragraph [ref=f3e124]: Add, view, edit, hide and delete the courses shown on your website.
+          - generic [ref=f3e125]:
+            - paragraph [ref=f3e126]: Courses are the training programmes people can enrol on. Use Courses > All Courses in the sidebar to see them, and Courses > Add Course to create a new one.
+            - generic [ref=f3e127]:
+              - heading "Adding a course" [level=3] [ref=f3e128]
+              - list [ref=f3e129]:
+                - listitem [ref=f3e130]: In the sidebar open Courses, then Add Course.
+                - listitem [ref=f3e131]: Fill in the form. Only Course Name is required; the other fields are optional but make your course page more useful.
+                - listitem [ref=f3e132]: Add the price options if the form shows them (an amount and a label such as "Full payment").
+                - listitem [ref=f3e133]: Press the Add button at the bottom. A green message confirms it was saved.
+            - generic [ref=f3e134]:
+              - heading "Course fields" [level=3] [ref=f3e135]
+              - list [ref=f3e136]:
+                - listitem [ref=f3e137]: "Course Name: required."
+                - listitem [ref=f3e138]: "Course Level and Duration: for example \"Beginner\" and \"6 weeks\"."
+                - listitem [ref=f3e139]: "Base Price: the full price of the course."
+                - listitem [ref=f3e140]: "Minimum Price to Enroll and Minimum Price Message: the deposit needed to book a place, and the text explaining it to customers."
+                - listitem [ref=f3e141]: "Target Audience and Experience Level: who the course is for and what they should already know."
+                - listitem [ref=f3e142]: "Course Description: a longer description shown on the course page."
+            - generic [ref=f3e143]:
+              - heading "Editing or hiding a course" [level=3] [ref=f3e144]
+              - list [ref=f3e145]:
+                - listitem [ref=f3e146]: Open Courses > All Courses and click the three dots in the Actions column.
+                - listitem [ref=f3e147]: Choose View [course]'s Details. The details page opens in a new tab.
+                - listitem [ref=f3e148]: Press Edit, change what you need and press Save Changes.
+                - listitem [ref=f3e149]: To hide a course from the website without deleting it, set Status to Inactive and save.
+            - paragraph [ref=f3e153]:
+              - strong [ref=f3e154]: "Warning:"
+              - text: Delete (on the course details page) removes the course permanently. If you only want to stop taking new enrollments, set the course to Inactive instead.
+        - generic [ref=f3e155]:
+          - heading "Services" [level=2] [ref=f3e156]
+          - paragraph [ref=f3e157]: Manage the barber services, prices and booking links on your website.
+          - generic [ref=f3e158]:
+            - paragraph [ref=f3e159]: The Services page controls the list of services (for example haircuts and beard trims) that visitors see on the website.
+            - generic [ref=f3e160]:
+              - heading "Adding a service" [level=3] [ref=f3e161]
+              - list [ref=f3e162]:
+                - listitem [ref=f3e163]: Press the Add Service button at the top of the page.
+                - listitem [ref=f3e164]: Enter the Name of Service (required, 2 to 50 characters).
+                - listitem [ref=f3e165]: Add the Price, a Description and the Booking Link (the full web address customers should use to book).
+                - listitem [ref=f3e166]: Upload an image for the service. Images must be smaller than 10 MB.
+                - listitem [ref=f3e167]: Press Add Service.
+            - generic [ref=f3e168]:
+              - heading "Editing a service" [level=3] [ref=f3e169]
+              - list [ref=f3e170]:
+                - listitem [ref=f3e171]: Find the service in the table (use the search box if the list is long).
+                - listitem [ref=f3e172]: Click the service name, or press the pencil button in the Edit column.
+                - listitem [ref=f3e173]: Change the details and save. You only need to upload a new image if you want to replace the current one.
+            - generic [ref=f3e174]:
+              - heading "Deleting a service" [level=3] [ref=f3e175]
+              - list [ref=f3e176]:
+                - listitem [ref=f3e177]: Press the red bin button in the Delete column.
+                - listitem [ref=f3e178]: Read the confirmation message and confirm.
+            - paragraph [ref=f3e182]:
+              - strong [ref=f3e183]: "Tip:"
+              - text: Click a service image in the table to see it full size. The Booking Link column opens the link in a new tab so you can test that it works.
+            - paragraph [ref=f3e187]:
+              - strong [ref=f3e188]: "Warning:"
+              - text: Deleting a service cannot be undone and it disappears from the website straight away.
+        - generic [ref=f3e189]:
+          - heading "Gallery" [level=2] [ref=f3e190]
+          - paragraph [ref=f3e191]: Choose the images that scroll across your homepage.
+          - generic [ref=f3e192]:
+            - paragraph [ref=f3e193]: The Gallery page controls the pictures that scroll on your homepage. The number of images currently in the gallery is shown in the card title.
+            - generic [ref=f3e194]:
+              - heading "Adding images" [level=3] [ref=f3e195]
+              - list [ref=f3e196]:
+                - listitem [ref=f3e197]: Drop image files onto the upload area, or click it to choose files from your device. You can select several at once.
+                - listitem [ref=f3e198]: Each image must be smaller than 10 MB.
+                - listitem [ref=f3e199]: Press Save Gallery. Nothing is published until you save.
+            - generic [ref=f3e200]:
+              - heading "Removing images" [level=3] [ref=f3e201]
+              - list [ref=f3e202]:
+                - listitem [ref=f3e203]: Press the X in the corner of an image to take it out of the gallery.
+                - listitem [ref=f3e204]: Use the clear button to remove all newly selected files at once.
+                - listitem [ref=f3e205]: Press Save Gallery to apply the change.
+            - paragraph [ref=f3e209]:
+              - strong [ref=f3e210]: "Tip:"
+              - text: Use bright, landscape or square photos of your best work. Smaller files load faster for your visitors.
+        - generic [ref=f3e211]:
+          - heading "Opening Hours" [level=2] [ref=f3e212]
+          - paragraph [ref=f3e213]: Set the weekly opening times shown across the website.
+          - generic [ref=f3e214]:
+            - paragraph [ref=f3e215]: The hours you set here are shown on the home page, in the footer and on the contact page, so you only need to change them in one place.
+            - generic [ref=f3e216]:
+              - heading "Updating your hours" [level=3] [ref=f3e217]
+              - list [ref=f3e218]:
+                - listitem [ref=f3e219]: Open Opening Hours in the sidebar. All seven days are listed.
+                - listitem [ref=f3e220]: For a day you are closed, tick Closed. The time boxes disappear.
+                - listitem [ref=f3e221]: For an open day, type the Opens and Closes times as you want visitors to read them, for example 9AM and 6PM.
+                - listitem [ref=f3e222]: Press Save Hours.
+            - paragraph [ref=f3e226]:
+              - strong [ref=f3e227]: "Tip:"
+              - text: Keep these hours in sync with your Google Business Profile so customers see the same times everywhere.
+        - generic [ref=f3e228]:
+          - heading "Messages" [level=2] [ref=f3e229]
+          - paragraph [ref=f3e230]: Read and manage enquiries sent through the website Contact form.
+          - generic [ref=f3e231]:
+            - paragraph [ref=f3e232]: Every time someone fills in the Contact form on your website, their message appears here with their name, phone number, email, subject, the message and the time it was sent.
+            - generic [ref=f3e233]:
+              - heading "Working through messages" [level=3] [ref=f3e234]
+              - list [ref=f3e235]:
+                - listitem [ref=f3e236]: Open Messages in the sidebar.
+                - listitem [ref=f3e237]: Click the long message text to read it in full.
+                - listitem [ref=f3e238]: Click a phone number or email to copy it, then reply from your own phone or email app.
+                - listitem [ref=f3e239]: Use the Filter menu to show only one subject, or search for a name.
+                - listitem [ref=f3e240]: When you have dealt with a message, press the bin button in the Delete column and confirm.
+            - paragraph [ref=f3e244]:
+              - strong [ref=f3e245]: "Tip:"
+              - text: Export messages to CSV from the download button if you want to keep a record before deleting them.
+            - paragraph [ref=f3e249]:
+              - strong [ref=f3e250]: "Warning:"
+              - text: Deleted messages cannot be recovered.
+        - generic [ref=f3e251]:
+          - heading "Troubleshooting & Tips" [level=2] [ref=f3e252]
+          - paragraph [ref=f3e253]: Quick answers to common problems.
+          - generic [ref=f3e254]:
+            - generic [ref=f3e255]:
+              - heading "Common problems" [level=3] [ref=f3e256]
+              - list [ref=f3e257]:
+                - listitem [ref=f3e258]: "My change did not appear on the website: make sure you pressed the Save button and saw the green confirmation message, then refresh the website page."
+                - listitem [ref=f3e259]: "A form shows red text: a required field is empty or a value is not valid. Fix the highlighted fields and try again."
+                - listitem [ref=f3e260]: "An image will not upload: check that the file is an image and is smaller than 10 MB."
+                - listitem [ref=f3e261]: "I was sent back to the login page: your session ended. Sign in again."
+                - listitem [ref=f3e262]: "The table looks cramped on my phone: use the Columns menu to hide columns you do not need."
+                - listitem [ref=f3e263]: "I forgot my password: ask the site administrator to reset it, then change it from the account menu."
+            - generic [ref=f3e264]:
+              - heading "Good habits" [level=3] [ref=f3e265]
+              - list [ref=f3e266]:
+                - listitem [ref=f3e267]: Check your public website after every change.
+                - listitem [ref=f3e268]: Use Inactive instead of Delete when you may want something back later.
+                - listitem [ref=f3e269]: Export enrollments and messages regularly as a backup.

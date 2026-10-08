@@ -29,6 +29,7 @@
 		{ name: 'Description', value: data.course?.description },
 		{ name: 'Min Price', value: data.course?.minPrice },
 		{ name: 'Min Price Message', value: data.course?.minPriceMessage },
+		{ name: 'Payment Methods', value: data.methodNames || 'None' },
 		{ name: 'Created At', value: formatDate(data.course?.createdAt) },
 		{ name: 'Status', value: data?.course?.status ? 'Active' : 'Inactive' }
 	]);
@@ -178,6 +179,20 @@
 						{ value: false, name: 'Inactive' }
 					]}
 				/>
+
+				<InputComp
+					{form}
+					{errors}
+					type="checkbox"
+					name="methodIds"
+					label="Payment Methods Offered"
+					items={data.methodItems}
+				/>
+				<p class="text-xs text-muted-foreground">
+					Manage the methods themselves under <a href="/dashboard/payment-methods" class="underline"
+						>Payment Methods</a
+					>.
+				</p>
 
 				<Button form="edit" type="submit" class="mt-4">
 					{#if $delayed}

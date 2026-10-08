@@ -22,6 +22,7 @@
 	import Header from '$lib/components/header.svelte';
 	import Footer from '$lib/components/footer.svelte';
 	import Floating from '$lib/components/WhatsAppFloat.svelte';
+	import DiscountPopup from '$lib/components/DiscountPopup.svelte';
 
 	// This initializes the class and puts it into Svelte's context
 
@@ -54,13 +55,9 @@
 
 <svelte:head>
 	<link rel="icon" href="/logo.jpeg" />
-	<link
-		rel="preload"
-		as="font"
-		type="font/woff2"
-		href={bebasNeueWoff2}
-		crossorigin="anonymous"
-	/>
+	<link rel="apple-touch-icon" href="/logo.jpeg" />
+	<meta name="theme-color" content="#050505" />
+	<link rel="preload" as="font" type="font/woff2" href={bebasNeueWoff2} crossorigin="anonymous" />
 </svelte:head>
 
 <Toaster position="bottom-right" richColors closeButton />
@@ -68,6 +65,10 @@
 <ProgressBar color="#b8860b" zIndex={1000} />
 
 {#if !page.url.pathname.startsWith('/dashboard') && page.url.pathname !== '/'}
+	<!-- Not on the enrolment, payment or certificate pages, so it never interrupts checkout -->
+	{#if data.bannerDiscount && !/^\/(courses|pay|certificates)\/.+/.test(page.url.pathname)}
+		<DiscountPopup discount={data.bannerDiscount} />
+	{/if}
 	<Header courses={data?.courses} />
 	<main>
 		{@render children()}

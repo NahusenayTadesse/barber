@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
+	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { cn } from '$lib/utils.js';
@@ -28,19 +28,16 @@
 		data = form.toString();
 	});
 
-	const formatEthiopianDate = (date: CalendarDate | undefined): string => {
+	const formatDate = (date: CalendarDate | undefined): string => {
 		if (!date) return '';
 
-		const formatter = new Intl.DateTimeFormat('am-ET', {
+		return new Intl.DateTimeFormat('en-GB', {
 			year: 'numeric',
 			month: 'long',
-			day: 'numeric',
-			calendar: 'ethiopic'
-		});
-
-		return formatter.format(date.toDate(getLocalTimeZone()));
+			day: 'numeric'
+		}).format(date.toDate(getLocalTimeZone()));
 	};
-	const displayDate = $derived(form ? formatEthiopianDate(form) : formatEthiopianDate(todayDate));
+	const displayDate = $derived(form ? formatDate(form) : formatDate(todayDate));
 </script>
 
 <Popover.Root>
@@ -59,30 +56,14 @@
 		</div>
 	</Popover.Trigger>
 
-	<Popover.Content class="flex flex-wrap gap-2 border-t p-0 px-2 py-4!">
-		<div class="text-sm text-muted-foreground">
-			Ethiopian Date: <span class="font-semibold text-foreground">{displayDate}</span>
-		</div>
-
+	<Popover.Content class="w-auto p-0">
 		<Calendar
-			locale="am-ET"
+			locale="en-GB"
 			type="single"
 			captionLayout={year ? 'dropdown-years' : 'label'}
 			minValue={todayDate}
 			maxValue={futureDays ? today(getLocalTimeZone()) : undefined}
 			bind:value={form}
 		/>
-		{#each [{ label: 'Today', value: 0 }, { label: 'Tomorrow', value: 1 }, { label: 'In 3 days', value: 3 }, { label: 'In a week', value: 7 }, { label: 'In 2 weeks', value: 14 }] as preset (preset.value)}
-			<Button
-				variant="outline"
-				size="sm"
-				class="flex-1"
-				onclick={() => {
-					form = today(getLocalTimeZone()).add({ days: preset.value });
-				}}
-			>
-				{preset.label}
-			</Button>
-		{/each}
 	</Popover.Content>
 </Popover.Root>

@@ -10,7 +10,9 @@ import {
 	timestamp,
 	mysqlEnum,
 	boolean,
-	uniqueIndex
+	uniqueIndex,
+	primaryKey,
+	date
 } from 'drizzle-orm/mysql-core';
 
 const timestamps = () => ({
@@ -46,6 +48,38 @@ export const pricingOptions = mysqlTable('pricing_options', {
 	...secureFields
 });
 
+// --- Payment Methods Table ---
+// The ways a student can pay for a course (Pay in Full, 2 or 3 instalments,
+// deposit...). Courses offer the ones linked in course_payment_methods.
+export const paymentMethods = mysqlTable('payment_methods', {
+	id: int('id').primaryKey().autoincrement(),
+	name: varchar('name', { length: 255 }).notNull(), // e.g. "3 Equal Instalments"
+	// full = whole price now; instalments = price split into `instalments` payments,
+	// the first paid now; deposit = the course's minimum price now
+	kind: mysqlEnum('kind', ['full', 'instalments', 'deposit']).notNull(),
+	instalments: int('instalments'),
+	// Extra % off the course price for this method, e.g. 10 for paying in full
+	percentOff: decimal('percent_off', { precision: 5, scale: 2 }).default('0').notNull(),
+	// Shown on the payment card, one line each
+	description: text('description'),
+	sortOrder: int('sort_order').default(0).notNull(),
+	...secureFields
+});
+
+// --- Course <-> Payment Method link table ---
+export const coursePaymentMethods = mysqlTable(
+	'course_payment_methods',
+	{
+		courseId: int('course_id')
+			.notNull()
+			.references(() => courses.id, { onDelete: 'cascade' }),
+		methodId: int('method_id')
+			.notNull()
+			.references(() => paymentMethods.id, { onDelete: 'cascade' })
+	},
+	(table) => [primaryKey({ columns: [table.courseId, table.methodId] })]
+);
+
 // --- Enrolments Table ---
 // Based on the 'submitEnrol' function and payment selection
 export const enrolments = mysqlTable('enrolments', {
@@ -53,13 +87,42 @@ export const enrolments = mysqlTable('enrolments', {
 	courseId: int('course_id').references(() => courses.id),
 	paymentOptionId: int('payment_option_id').references(() => pricingOptions.id),
 	course: varchar('course', { length: 255 }),
+	// The method chosen; payment_option keeps its name in case the method is deleted later
+	paymentMethodId: int('payment_method_id').references(() => paymentMethods.id, {
+		onDelete: 'set null'
+	}),
 	paymentOption: varchar('payment_option', { length: 255 }),
 	firstName: varchar('first_name', { length: 255 }).notNull(),
 	lastName: varchar('last_name', { length: 255 }).notNull(),
 	phone: varchar('phone', { length: 50 }),
 	email: varchar('email', { length: 255 }).notNull(),
+	// pending = checkout started, confirmed = paid, cancelled = checkout expired
 	status: mysqlEnum('status', ['pending', 'confirmed', 'cancelled']).default('pending'),
+	// What was actually charged at checkout, and the discount applied (if any)
+	amount: decimal('amount', { precision: 10, scale: 2 }),
+	discountName: varchar('discount_name', { length: 255 }),
+	discountPercentage: decimal('discount_percentage', { precision: 5, scale: 2 }),
+	stripeSessionId: varchar('stripe_session_id', { length: 255 }).unique(),
 	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()
+});
+
+// --- Certificates Table ---
+// Issued when a student completes a course. The student, course and signatory
+// are copied in, so a certificate never changes when those records do.
+// isActive = false means the certificate was revoked.
+export const certificates = mysqlTable('certificates', {
+	id: int('id').primaryKey().autoincrement(),
+	// Public certificate number, also used in the verification link
+	code: varchar('code', { length: 32 }).notNull().unique(),
+	enrolmentId: int('enrolment_id').references(() => enrolments.id, { onDelete: 'set null' }),
+	title: varchar('title', { length: 100 }).notNull(), // e.g. "Certificate of Completion"
+	studentName: varchar('student_name', { length: 255 }).notNull(),
+	courseName: varchar('course_name', { length: 255 }).notNull(),
+	courseDetails: varchar('course_details', { length: 255 }), // e.g. "8 Weeks · Advanced Skills"
+	completedOn: date('completed_on', { mode: 'string' }).notNull(),
+	signatoryName: varchar('signatory_name', { length: 255 }),
+	signatoryRole: varchar('signatory_role', { length: 255 }),
+	...secureFields
 });
 
 // --- Contact Messages Table ---
@@ -132,4 +195,30 @@ export const businessHours = mysqlTable(
 		...timestamps()
 	},
 	(table) => [uniqueIndex('business_hours_day_of_week_idx').on(table.dayOfWeek)]
+);
+
+// --- Course Discounts Table ---
+// A percentage off the courses linked in course_discount_courses.
+// Live between startsAt and expiresAt while isActive is true.
+export const courseDiscounts = mysqlTable('course_discounts', {
+	id: int('id').primaryKey().autoincrement(),
+	name: varchar('name', { length: 255 }).notNull(), // e.g., "Summer Sale"
+	percentage: decimal('percentage', { precision: 5, scale: 2 }).notNull(), // e.g., 15.00
+	startsAt: timestamp('starts_at').defaultNow().notNull(),
+	expiresAt: timestamp('expires_at').notNull(),
+	...secureFields
+});
+
+// --- Course Discount <-> Course link table ---
+export const courseDiscountCourses = mysqlTable(
+	'course_discount_courses',
+	{
+		discountId: int('discount_id')
+			.notNull()
+			.references(() => courseDiscounts.id, { onDelete: 'cascade' }),
+		courseId: int('course_id')
+			.notNull()
+			.references(() => courses.id, { onDelete: 'cascade' })
+	},
+	(table) => [primaryKey({ columns: [table.discountId, table.courseId] })]
 );

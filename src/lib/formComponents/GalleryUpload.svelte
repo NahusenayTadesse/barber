@@ -72,7 +72,7 @@
 			type="file"
 			class="hidden"
 			{name}
-			accept="image/*,application/pdf"
+			accept="image/jpeg,image/png,image/webp,image/avif"
 			bind:files={$file}
 			multiple={true}
 		/>

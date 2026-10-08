@@ -1,5 +1,6 @@
 <script lang="ts">
 	let { data } = $props();
+	import Seo from '$lib/components/Seo.svelte';
 
 	const bookingLink = 'https://simplybook.me/en/';
 
@@ -39,12 +40,12 @@
 	];
 </script>
 
+<Seo
+	title="Haircuts & Prices in London"
+	description="See haircut, skin fade, taper and beard trim prices at D&D Barber Shop in London, and book your next cut online in minutes."
+/>
+
 <svelte:head>
-	<title>Haircuts &amp; Prices</title>
-	<meta
-		name="description"
-		content="See haircut, fade and beard trim prices at D&D Barber Shop in London, and book your next cut online in minutes."
-	/>
 	<link rel="preload" as="image" fetchpriority="high" href={heroImage} />
 </svelte:head>
 
@@ -60,7 +61,7 @@
 				<div class="g lg:text-9xl!">YOU'LL HAVE TO TRY.</div>
 			</h1>
 			<p class="hero-sub">
-			Fades, beards, hot towel shaves. Thirty seconds to book. Then you're sorted.
+				Fades, beards, hot towel shaves. Thirty seconds to book. Then you're sorted.
 			</p>
 			<div class="hero-cta">
 				<a class="btn-gold" href={bookingLink} target="_blank" rel="noopener">Book A Cut</a>
@@ -106,9 +107,8 @@
 			<div class="ey"><span>£10 model cuts</span></div>
 			<h3>Same cut. Supervised. Half the price.</h3>
 			<p>
-				Our trainee barbers need real heads to work on, and an educator checks every single
-				step. You get a proper cut for a tenner, they get the practice that makes them
-				employable.
+				Our trainee barbers need real heads to work on, and an educator checks every single step.
+				You get a proper cut for a tenner, they get the practice that makes them employable.
 			</p>
 			<ul>
 				<li>Every cut supervised by a qualified educator</li>
@@ -182,12 +182,14 @@
 				COME <span class="g">IN.</span>
 			</h2>
 			<dl>
-				<dt>Location</dt><dd>69 · London, UK</dd>
+				<dt>Location</dt>
+				<dd>69 · London, UK</dd>
 				{#each data.businessHours ?? [] as day (day.dayOfWeek)}
 					<dt>{day.dayLabel.slice(0, 3)}</dt>
 					<dd>{day.isClosed ? 'Closed' : `${day.opensLabel} – ${day.closesLabel}`}</dd>
 				{/each}
-				<dt>Phone</dt><dd><a href="tel:02037003997">020 3700 3997</a></dd>
+				<dt>Phone</dt>
+				<dd><a href="tel:02037003997">020 3700 3997</a></dd>
 			</dl>
 			<div class="hero-cta">
 				<a class="btn-gold" href={bookingLink} target="_blank" rel="noopener">Book A Cut</a>
@@ -196,7 +198,11 @@
 				>
 			</div>
 		</div>
-		<img src={visitImage} alt="Finishing a neckline at D&amp;D Barber &amp; Academy" loading="lazy" />
+		<img
+			src={visitImage}
+			alt="Finishing a neckline at D&amp;D Barber &amp; Academy"
+			loading="lazy"
+		/>
 	</div>
 </section>
 
@@ -211,7 +217,8 @@
 			<a href="tel:02037003997" class="btn-out">Call 020 3700 3997</a>
 		</div>
 		<div class="cta-banner-trust">
-			{#if cheapestPrice}Cuts from £{cheapestPrice} · {/if}Model cuts £10 · London
+			{#if cheapestPrice}Cuts from £{cheapestPrice} ·
+			{/if}Model cuts £10 · London
 		</div>
 	</div>
 </div>

@@ -234,8 +234,9 @@
 						</div>
 					</ScrollArea>
 				{/if}
-				<div class="max-h-96 rounded-md border">
-					<Table.Root id={uniqueTableId} class="relative max-h-96">
+				<!-- As tall as the screen; longer tables scroll inside it -->
+				<div class="max-h-[calc(100dvh-8rem)] overflow-y-auto rounded-md border">
+					<Table.Root id={uniqueTableId} class="relative">
 						<Table.Header>
 							{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 								<Table.Row>

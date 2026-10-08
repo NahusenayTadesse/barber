@@ -55,7 +55,7 @@ export const actions: Actions = {
 			console.error('Error updating business hours:', err);
 			return message(
 				form,
-				{ type: 'error', text: `Unexpected Error: ${err?.message}` },
+				{ type: 'error', text: 'Error while saving the opening hours. Please try again.' },
 				{ status: 500 }
 			);
 		}

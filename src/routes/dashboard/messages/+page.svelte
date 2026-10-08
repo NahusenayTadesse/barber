@@ -3,7 +3,6 @@
 	import DataTable from '$lib/components/Table/data-table.svelte';
 	import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 
-	import Edit from './edit.svelte';
 	import Delete from './delete.svelte';
 	import BigText from './bigText.svelte';
 

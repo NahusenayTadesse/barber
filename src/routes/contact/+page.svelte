@@ -6,6 +6,7 @@
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import { Mail, MapPin, Phone, Clock3 } from '@lucide/svelte';
 	let { data } = $props();
+	import Seo from '$lib/components/Seo.svelte';
 	const { form, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
 	});
@@ -23,13 +24,10 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Contact</title>
-	<meta
-		name="description"
-		content="Get in touch with D&D Barber Shop & Academy in London — call, WhatsApp or send us a message."
-	/>
-</svelte:head>
+<Seo
+	title="Contact Us"
+	description="Get in touch with D&D Barber Shop & Academy in London. Call, WhatsApp or send us a message about courses, haircuts or enrolment."
+/>
 <!-- <div class="phero" style="min-height:42vh">
 	<div class="phero-bg"></div>
 	<div class="phero-inner fi">
@@ -45,19 +43,16 @@
 </div> -->
 <!-- <div class="ticker-wrap">
 	<div class="ticker-inner">
-		<span>0202 779 988</span><span>WhatsApp Us</span><span>Instagram & TikTok</span><span
+		<span>020 3700 3997</span><span>WhatsApp Us</span><span>Instagram & TikTok</span><span
 			>London · 69</span
 		><span>Same-Day Replies</span>
-		<span>0202 779 988</span><span>WhatsApp Us</span><span>Instagram & TikTok</span><span
+		<span>020 3700 3997</span><span>WhatsApp Us</span><span>Instagram & TikTok</span><span
 			>London · 69</span
 		><span>Same-Day Replies</span>
 	</div>
 </div> -->
 
-
-<div class="lg:h-32!">
-
-</div>
+<div class="lg:h-32!"></div>
 
 <div class="cpgrid">
 	<div class="fi">
@@ -86,16 +81,19 @@
 			<div>
 				<div class="cii-lbl">LandLine</div>
 				<div class="cii-val">
-					<a href="tel:02037003997" style="color:var(--white);text-decoration:none">020 3700 3997</a>
+					<a href="tel:02037003997" style="color:var(--white);text-decoration:none">020 3700 3997</a
+					>
 				</div>
 			</div>
 		</div>
-			<div class="cii">
+		<div class="cii">
 			<div class="cii-icon"><Phone /></div>
 			<div>
 				<div class="cii-lbl">Phone</div>
 				<div class="cii-val">
-					<a href="tel:07846119677" style="color:var(--white);text-decoration:none">078 46 11 96 77</a>
+					<a href="tel:07846119677" style="color:var(--white);text-decoration:none"
+						>078 46 11 96 77</a
+					>
 				</div>
 			</div>
 		</div>

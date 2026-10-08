@@ -8,7 +8,11 @@
 		Sheet,
 		SprayCan,
 		Images,
-		Clock3
+		Clock3,
+		CircleHelp,
+		BadgePercent,
+		CreditCard,
+		Award
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -20,6 +24,7 @@
 	const navigation = [
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 		{ title: 'Enrollments', url: '/dashboard/enrollments', icon: Users },
+		{ title: 'Certificates', url: '/dashboard/certificates', icon: Award },
 		{ title: 'Services', url: '/dashboard/services', icon: SprayCan },
 		{ title: 'Gallery', url: '/dashboard/gallery', icon: Images },
 		{ title: 'Opening Hours', url: '/dashboard/hours', icon: Clock3 },
@@ -34,11 +39,16 @@
 			]
 		},
 
+		{ title: 'Discounts', url: '/dashboard/discounts', icon: BadgePercent },
+		{ title: 'Payment Methods', url: '/dashboard/payment-methods', icon: CreditCard },
+
 		{
 			title: 'Messages',
 			url: '/dashboard/messages',
 			icon: Mail
-		}
+		},
+
+		{ title: 'Help', url: '/dashboard/help', icon: CircleHelp }
 
 		// {
 		// 	title: 'Admin Panel',
@@ -68,9 +78,9 @@
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
 	<Sidebar.Content
 		class="z-9999! h-full
-  overflow-y-scroll pt-4
-  [scrollbar-color:#a3a3a3_transparent]
-  [scrollbar-width:thin]
+  [scrollbar-width:thin] [scrollbar-color:#a3a3a3_transparent]
+  overflow-y-scroll
+  pt-4
   [&::-webkit-scrollbar]:w-2
   [&::-webkit-scrollbar-thumb]:bg-gray-400
   [&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar-track]:bg-transparent

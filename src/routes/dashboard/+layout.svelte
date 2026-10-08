@@ -9,6 +9,10 @@
 	let { children, data } = $props();
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex, nofollow" />
+</svelte:head>
+
 <Sidebar.Provider>
 	<AppSidebar />
 	<main class="w-full px-2">

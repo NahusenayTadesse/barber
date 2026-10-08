@@ -43,7 +43,7 @@
 
 <!-- ============ DESKTOP ============ -->
 <div class="hidden lg:block">
-	<nav>
+	<nav class="site-nav">
 		<!-- LEFT: Home + Contact -->
 		<ul class="nav-left">
 			<li>

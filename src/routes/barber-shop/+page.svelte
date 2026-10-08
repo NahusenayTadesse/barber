@@ -2,15 +2,16 @@
 	let href = 'https://simplybook.me/en/';
 
 	let { data } = $props();
+	import Seo from '$lib/components/Seo.svelte';
+	import { businessJsonLd } from '$lib/seo';
+	import { page } from '$app/state';
 </script>
 
-<svelte:head>
-	<title>D&D Barber Shop</title>
-	<meta
-		name="description"
-		content="Book your haircut, fade or beard trim at D&D Barber Shop in London. Clean, premium environment with fast, simple online booking."
-	/>
-</svelte:head>
+<Seo
+	title="Barber Shop in London: Fades, Cuts & Beard Trims"
+	description="Book your haircut, fade or beard trim at D&D Barber Shop in London. Clean, premium environment with fast, simple online booking."
+	jsonLd={businessJsonLd(page.url.origin, page.data.businessHours ?? [])}
+/>
 
 <div class="container justify-self-center lg:mt-22">
 	<section class="hero">
@@ -34,7 +35,7 @@
 				</div>
 				<div class="hero-actions">
 					<a class="btn-gold" {href} target="_blank" rel="noopener noreferrer">Book Now</a>
-					<a class="btn-outline" href="tel:0202779988">Call the Shop</a>
+					<a class="btn-outline" href="tel:02037003997">Call the Shop</a>
 				</div>
 				<!-- <div class="hero-note">Replace the booking link with your real booking system URL.</div> -->
 			</div>

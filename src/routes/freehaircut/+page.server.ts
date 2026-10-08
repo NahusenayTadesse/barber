@@ -19,28 +19,28 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
 	freehaircut: async ({ request }) => {
 		const form = await superValidate(request, zod4(schema));
-		console.log(form);
 		if (!form.valid) {
 			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}
 
-		const { name, phone, email, preferredStyle, preferredTime, contactMessage } = form.data;
+		const { name, phone, email, prefferedStyle, prefferedTime, contactMessage } = form.data;
 
 		try {
 			await db.insert(haircutRequests).values({
 				clientName: name,
 				clientPhone: phone,
 				clientEmail: email,
-				preferredStyle: preferredStyle,
-				preferredTime: preferredTime,
+				prefferedStyle,
+				prefferedTime,
 				message: contactMessage
 			});
 
 			return message(form, { type: 'success', text: 'Haircut Request Successfully Sent!' });
 		} catch (err) {
+			console.error('Error saving haircut request:', err);
 			return message(form, {
 				type: 'error',
-				text: 'Error Sending Request: ' + err?.message
+				text: "Sorry, your request couldn't be sent. Please try again or call us."
 			});
 		}
 	}

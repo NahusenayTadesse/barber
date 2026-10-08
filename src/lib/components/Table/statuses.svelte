@@ -31,6 +31,15 @@
 		contracted: { icon: BadgeCheck, colour: 'bg-green-400' },
 		inactive: { icon: OctagonMinus, colour: 'bg-red-500' },
 
+		/* certificates */
+		valid: { icon: BadgeCheck, colour: 'bg-green-400' },
+		revoked: { icon: OctagonMinus, colour: 'bg-red-500' },
+
+		/* discounts */
+		scheduled: { icon: Loader, colour: 'bg-yellow-500' },
+		expired: { icon: OctagonMinus, colour: 'bg-gray-500' },
+		disabled: { icon: OctagonMinus, colour: 'bg-red-500' },
+
 		yes: { icon: BadgeCheck, colour: 'bg-green-400' },
 		no: { icon: OctagonMinus, colour: 'bg-red-500' },
 

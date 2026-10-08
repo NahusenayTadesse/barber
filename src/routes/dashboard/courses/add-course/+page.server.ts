@@ -7,20 +7,26 @@ import { courses } from '$lib/server/db/schema';
 import type { Actions } from './$types';
 import type { PageServerLoad } from './$types.js';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { eq } from 'drizzle-orm';
+import { methodItems, setCourseMethods } from '$lib/server/paymentMethods';
 
 export const load: PageServerLoad = async () => {
-	const form = await superValidate(zod4(add));
+	const items = await methodItems();
+	// New courses offer every enabled method unless unticked
+	const form = await superValidate(
+		{ methodIds: items.filter((m) => m.isActive).map((m) => m.value) },
+		zod4(add),
+		{ errors: false }
+	);
 
 	return {
-		form
+		form,
+		methodItems: items
 	};
 };
 
 export const actions: Actions = {
 	add: async ({ request, cookies, locals }) => {
 		const form = await superValidate(request, zod4(add));
-		console.log(form);
 
 		if (!form.valid) {
 			// Stay on the same page and set a flash message
@@ -37,7 +43,8 @@ export const actions: Actions = {
 			minPrice,
 			minPriceMessage,
 			target,
-			experience
+			experience,
+			methodIds
 		} = form.data;
 
 		try {
@@ -46,17 +53,21 @@ export const actions: Actions = {
 				// to avoid keeping a DB connection open during slow network I/O)
 
 				// 2. Insert the main product
-				await tx.insert(courses).values({
-					name,
-					level,
-					duration,
-					basePrice,
-					description,
-					minPrice,
-					minPriceMessage,
-					target,
-					experience
-				});
+				const [{ id }] = await tx
+					.insert(courses)
+					.values({
+						name,
+						level,
+						duration,
+						basePrice,
+						description,
+						minPrice,
+						minPriceMessage,
+						target,
+						experience
+					})
+					.$returningId();
+				await setCourseMethods(tx, id, methodIds);
 			});
 
 			return message(form, { type: 'success', text: 'New Course Successfully Added' });
@@ -67,7 +78,7 @@ export const actions: Actions = {
 				form,
 				{
 					type: 'error',
-					text: 'An error occurred while adding the course.' + err?.message
+					text: 'An error occurred while adding the course.'
 				},
 				{ status: 500 }
 			);

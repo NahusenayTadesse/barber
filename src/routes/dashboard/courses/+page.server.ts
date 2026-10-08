@@ -1,5 +1,6 @@
 import { db } from '$lib/server/db';
 import { courses as products, pricingOptions as prices } from '$lib/server/db/schema';
+import { getActiveDiscounts } from '$lib/server/discounts';
 import type { PageServerLoad } from '../$types';
 export const load: PageServerLoad = async () => {
 	// First, get products
@@ -25,11 +26,14 @@ export const load: PageServerLoad = async () => {
 
 	// Then filter in memory
 
-	const relevantPrices = pricesData.filter((p) => productIds.includes(p.id));
+	const relevantPrices = pricesData.filter((p) => p.courseId !== null && productIds.includes(p.courseId));
+
+	const discounts = await getActiveDiscounts(productIds);
 
 	// Merge in application code
 	const productList = productsData.map((p) => ({
 		...p,
+		discount: discounts[p.id] ? `${discounts[p.id].percentage}% (${discounts[p.id].name})` : 'None',
 		priceList: relevantPrices
 			.filter((price) => price.courseId === p.id)
 			.map((price) => ({

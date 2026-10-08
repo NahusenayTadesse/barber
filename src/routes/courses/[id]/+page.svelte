@@ -9,27 +9,34 @@
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 	import { schema } from './schema.js';
+	import { amountSuffix, applyDiscount, methodAmountFor } from '$lib/discounts';
+	import Seo from '$lib/components/Seo.svelte';
+	import { courseJsonLd } from '$lib/seo';
+	import { page } from '$app/state';
+	import { onMount } from 'svelte';
+
+	// Back from Stripe without paying
+	onMount(() => {
+		if (page.url.searchParams.has('cancelled')) {
+			toast.info('Payment cancelled — no money was taken. You can try again below.');
+		}
+	});
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json',
 
 		validators: zod4Client(schema),
 		onChange(event) {
 			if (event.paths) {
-				$form.paymentAmount =
-					$form.paymentOption === 'minPrice'
-						? Math.floor(data?.coursesList?.find((c) => c.id === $form.courseId)?.minPrice)
-						: $form.paymentOption === 'threeEqual'
-							? Math.floor(
-									Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) / 3
-								)
-							: $form.paymentOption === 'fullPrice'
-								? Math.floor(
-										Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) * 0.9
-									)
-								: 0;
+				$form.paymentAmount = amountFor(
+					selectedCourse?.methods.find((m) => m.id === $form.paymentMethodId)
+				);
 			}
 		}
 	});
+	const selectedCourse = $derived(data.coursesList.find((c) => c.id === $form.courseId));
+	/** @param {import('$lib/discounts').PaymentMethod | undefined} method */
+	const amountFor = (method) =>
+		methodAmountFor(selectedCourse, method, selectedCourse?.discount?.percentage);
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') toast.error($message.text);
@@ -41,13 +48,25 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 	let payment = $state();
 </script>
 
-<svelte:head>
-	<title>Register for {data.course.name}</title>
-	<meta
-		name="description"
-		content="Enrol on the {data.course.name} course at D&D Barber Academy in London."
+{#if selectedCourse}
+	{@const price = applyDiscount(selectedCourse.basePrice, selectedCourse.discount?.percentage)}
+	<Seo
+		title="Enrol on the {data.course.name}"
+		description={[
+			`Enrol on the ${data.course.name} at D&D Barber Academy, London.`,
+			[selectedCourse.duration, selectedCourse.level].filter(Boolean).join(', ') + '.',
+			selectedCourse.discount
+				? `Now £${price} with ${selectedCourse.discount.percentage}% off (was £${Number(selectedCourse.basePrice)}).`
+				: `£${Number(selectedCourse.basePrice)}.`,
+			selectedCourse.methods.length
+				? `Payment options: ${selectedCourse.methods.map((m) => m.name).join(', ')}.`
+				: ''
+		]
+			.filter(Boolean)
+			.join(' ')}
+		jsonLd={courseJsonLd(page.url.origin, selectedCourse, price)}
 	/>
-</svelte:head>
+{/if}
 
 <!-- <div class="chain mt-10 lg:block! hidden"><div class="chain-line"></div></div> -->
 
@@ -61,6 +80,14 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 				no credit checks, no interest, no hassle.
 			</p>
 		</div>
+		{#if selectedCourse?.discount}
+			<div class="urgency" style="margin-top:20px">
+				<strong
+					>{selectedCourse.discount.name}: {selectedCourse.discount.percentage}% off this course</strong
+				>
+				— applied to every payment option below.
+			</div>
+		{/if}
 		<div class="selbanner" id="selbanner">
 			Course selected: <strong id="selname"></strong> — Choose your payment method below
 		</div>
@@ -74,7 +101,7 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 			<Errors allErrors={$allErrors} />
 			<form use:enhance method="post" id="enroll" action="?/enroll" class="crow">
 				<input type="hidden" required name="courseId" bind:value={$form.courseId} />
-				<input type="text" hidden name="paymentOption" bind:value={$form.paymentOption} />
+				<input type="hidden" name="paymentMethodId" bind:value={$form.paymentMethodId} />
 
 				<div class="fg">
 					<label for="firstName">First Name</label><input
@@ -119,53 +146,30 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 				<label id="ee" for="paymentOptions">Payment Options</label>
 			</div>
 			<div class="popts fi" style="transition-delay:.1s">
-				<button
-					onclick={() => {
-						$form.paymentOption = 'minPrice';
-					}}
-					class="popt {$form.paymentOption === 'minPrice' ? 'sel' : ''}"
-				>
-					<div class="poname">Deposit to Secure</div>
-					<div class="poamt" id="depAmt">
-						£{data.coursesList.find((c) => c.id === $form.courseId)?.minPrice}
-					</div>
-					<div class="ponote">
-						Lock in your place today<br />Balance due before start day<br />Quickest way to enrol
-					</div>
-				</button>
-				<button
-					onclick={() => {
-						$form.paymentOption = 'threeEqual';
-					}}
-					class="popt {$form.paymentOption === 'threeEqual' ? 'sel' : ''}"
-				>
-					<div class="poname">3 Equal Instalments</div>
-					<div class="poamt" id="instAmt">
-						£{Math.floor(
-							Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) / 3
-						)}/mo
-					</div>
-					<div class="ponote">
-						Spread the cost over 3 months<br />0% interest · Equal payments<br />No credit check
-						required
-					</div>
-				</button>
-				<button
-					onclick={() => {
-						$form.paymentOption = 'fullPrice';
-					}}
-					class="popt {$form.paymentOption === 'fullPrice' ? 'sel' : ''}"
-				>
-					<div class="poname">Pay in Full</div>
-					<div class="poamt" id="fullAmt">
-						£{Math.floor(
-							Number(data.coursesList.find((c) => c.id === $form.courseId)?.basePrice) * 0.9
-						)}
-					</div>
-					<div class="ponote">
-						Best value · Save 10%<br />One payment, nothing to track<br />Immediate confirmation
-					</div>
-				</button>
+				{#each selectedCourse?.methods ?? [] as method (method.id)}
+					<button
+						onclick={() => {
+							$form.paymentMethodId = method.id;
+						}}
+						class="popt {$form.paymentMethodId === method.id ? 'sel' : ''}"
+					>
+						<div class="poname">{method.name}</div>
+						<div class="poamt">
+							£{amountFor(method)}{amountSuffix(method)}
+						</div>
+						{#if method.lines.length}
+							<div class="ponote">
+								{#each method.lines as line, i (i)}
+									{#if i > 0}<br />{/if}{line}
+								{/each}
+							</div>
+						{/if}
+					</button>
+				{:else}
+					<p class="ponote">
+						Online payment isn't available for this course yet. Please call us on 020 3700 3997.
+					</p>
+				{/each}
 			</div>
 			<div class="csum">
 				<div>
@@ -205,10 +209,12 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 				style="font-size:11px;color:var(--grey);text-align:center;margin-top:14px;line-height:1.7"
 			>
 				Secure checkout · You'll receive a confirmation within 24 hours<br />Questions? Call us on
-				<a href="tel:0202779988" style="color:var(--gold);text-decoration:underline">0202 779 988</a>
+				<a href="tel:02037003997" style="color:var(--gold);text-decoration:underline"
+					>020 3700 3997</a
+				>
 				or
 				<a
-					href="https://wa.me/442027799988"
+					href="https://wa.me/447846119677"
 					target="_blank"
 					style="color:var(--gold);text-decoration:underline">WhatsApp us</a
 				><br />Deposits are non-refundable once your place is confirmed. Full terms available below.

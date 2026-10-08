@@ -25,7 +25,7 @@
 						target="_blank"
 						rel="noopener noreferrer">Book Now</a
 					>
-					<a class="btn-outline" href="tel:0202779988">Call the Shop</a>
+					<a class="btn-outline" href="tel:02037003997">Call the Shop</a>
 				</div>
 				<div class="hero-note">Replace the booking link with your real booking system URL.</div>
 			</div>
@@ -1003,8 +1003,8 @@
 		</div>
 	</div>
 	<div class="quick-contact">
-		<a href="tel:0202779988">Call: 0202 779 988</a>
-		<a href="https://wa.me/442027799988" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+		<a href="tel:02037003997">Call: 020 3700 3997</a>
+		<a href="https://wa.me/447846119677" target="_blank" rel="noopener noreferrer">WhatsApp</a>
 	</div>
 </div>
 

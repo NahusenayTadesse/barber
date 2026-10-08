@@ -178,7 +178,8 @@ body::before {
 }*/
 
 /* ——— NAV ——— */
-nav {
+/* Site header bar only: a bare `nav` selector would also restyle component navs (e.g. the calendar's) */
+nav.site-nav {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -192,7 +193,7 @@ nav {
 	padding: 0 32px;
 	backdrop-filter: blur(20px);
 }
-nav::after {
+nav.site-nav::after {
 	content: '';
 	position: absolute;
 	bottom: 0;
@@ -1989,7 +1990,7 @@ footer::before {
 	.footer-inner {
 		grid-template-columns: 1fr 1fr;
 	}
-	nav {
+	nav.site-nav {
 		grid-template-columns: 1fr auto;
 		height: 72px;
 		padding: 0 20px;

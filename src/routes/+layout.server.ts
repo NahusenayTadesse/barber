@@ -1,6 +1,8 @@
+import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { courses, businessHours } from '$lib/server/db/schema';
 import { loadFlash } from 'sveltekit-flash-message/server';
+import { getBannerDiscount } from '$lib/server/discounts';
 
 const abbr = (dayLabel: string) => dayLabel.slice(0, 3);
 
@@ -33,7 +35,7 @@ const labelDayGroups = (days: HoursRow[]) =>
 		.join(', ');
 
 export const load = loadFlash(async (event) => {
-	const coursesList = await db.select().from(courses);
+	const coursesList = await db.select().from(courses).where(eq(courses.isActive, true));
 
 	const hoursRows = await db.select().from(businessHours).orderBy(businessHours.sortOrder);
 
@@ -42,12 +44,15 @@ export const load = loadFlash(async (event) => {
 	const closedDays = hoursRows.filter((day) => day.isClosed);
 	const closedRangeLabel = closedDays.length > 0 ? labelDayGroups(closedDays) : null;
 
+	const bannerDiscount = await getBannerDiscount();
+
 	const opensLabel = openDays[0]?.opensLabel ?? null;
 	const closesLabel = openDays[0]?.closesLabel ?? null;
 
 	return {
 		courses: coursesList,
 		businessHours: hoursRows,
+		bannerDiscount,
 		hoursSummary: {
 			openRangeLabel,
 			closedRangeLabel,

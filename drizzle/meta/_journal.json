@@ -71,6 +71,41 @@
       "when": 1788425668942,
       "tag": "0009_dusty_lilandra",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1791461953464,
+      "tag": "0010_course_discounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1791463009191,
+      "tag": "0011_course_discount_courses",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1791464328222,
+      "tag": "0012_enrolment_payment",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1791492726604,
+      "tag": "0013_payment_methods",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1791495280301,
+      "tag": "0014_certificates",
+      "breakpoints": true
     }
   ]
 }

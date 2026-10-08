@@ -1,0 +1,87 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - link "D&D D&D Barber & Academy" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]: D&D
+      - heading "D&D Barber & Academy" [level=1] [ref=e7]
+    - button "Open menu" [ref=e8]
+  - main [ref=e9]:
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - img "Logo" [ref=e14]
+        - generic [ref=e15]:
+          - text: Login
+          - button "Toggle theme" [ref=e16]
+        - paragraph [ref=e18]: Enter your email below to login to your account
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]: Email
+          - textbox "Email" [ref=e24]:
+            - /placeholder: m@example.com
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]: Password
+            - link "Forgot your password?" [ref=e28] [cursor=pointer]:
+              - /url: /forgot-password
+          - generic [ref=e29]:
+            - textbox "Password" [ref=e30]
+            - button "Make Password Visible"
+        - button "Login" [ref=e34]
+  - contentinfo [ref=e35]:
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: D&D Barber & Academy
+        - generic [ref=e39]: 69 · London · 0202 779 988
+        - paragraph [ref=e40]: London's premier barbering academy. From zero experience to paid career in 12 weeks.
+        - link "💬 WhatsApp" [ref=e41] [cursor=pointer]:
+          - /url: https://wa.me/442027799988
+          - generic [ref=e42]: 💬
+          - text: WhatsApp
+      - generic [ref=e43]:
+        - generic [ref=e44]: Navigate
+        - list [ref=e45]:
+          - listitem [ref=e46]:
+            - link "Home" [ref=e47] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e48]:
+            - link "Haircuts" [ref=e49] [cursor=pointer]:
+              - /url: /haircuts
+          - listitem [ref=e50]:
+            - link "Contact" [ref=e51] [cursor=pointer]:
+              - /url: contact
+          - listitem [ref=e52]:
+            - link "Start Your Career" [ref=e53] [cursor=pointer]:
+              - /url: /courses
+      - generic [ref=e54]:
+        - generic [ref=e55]: Courses
+        - list
+      - generic [ref=e56]:
+        - generic [ref=e57]: Follow Us
+        - list [ref=e58]:
+          - listitem [ref=e59]:
+            - link "Instagram" [ref=e60] [cursor=pointer]:
+              - /url: https://www.instagram.com/dnd_barber_academy/
+          - listitem [ref=e61]:
+            - link "TikTok" [ref=e62] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@dnd_barber_academy
+          - listitem [ref=e63]:
+            - link "WhatsApp" [ref=e64] [cursor=pointer]:
+              - /url: https://wa.me/442027799988
+          - listitem [ref=e65]:
+            - link "020 3700 3997" [ref=e66] [cursor=pointer]:
+              - /url: tel:02037003997
+          - listitem [ref=e67]:
+            - link "078 46 11 96 77" [ref=e68] [cursor=pointer]:
+              - /url: tel:07846119677
+    - generic [ref=e69]: © 2026 D&D Barber & Academy. All rights reserved.✂ Turning passion into profession
+  - link "💬" [ref=e70] [cursor=pointer]:
+    - /url: https://wa.me/447846119677
+  - generic [ref=e71]:
+    - paragraph [ref=e72]: sv addon demos
+    - list [ref=e73]:
+      - listitem [ref=e74]:
+        - link "playwright" [ref=e75] [cursor=pointer]:
+          - /url: ./demo/playwright
+    - link "home" [ref=e76] [cursor=pointer]:
+      - /url: ./

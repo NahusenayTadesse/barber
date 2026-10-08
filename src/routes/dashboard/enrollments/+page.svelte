@@ -8,12 +8,17 @@
 	import Loading from '$lib/components/Loading.svelte';
 	import { Frown } from '@lucide/svelte';
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
+	import RegisterStudent from './register-student.svelte';
 	let filteredList = $derived(data.customersList);
 </script>
 
 <svelte:head>
 	<title>Enrollments List</title>
 </svelte:head>
+
+<div class="mb-6 flex flex-wrap items-center gap-2">
+	<RegisterStudent data={data.form} coursesList={data.coursesList} canEmail={data.canEmail} />
+</div>
 
 {#if data.customersList.length === 0}
 	<div class="flex h-96 w-5xl items-center justify-center">
@@ -28,8 +33,11 @@
 	<FilterMenu
 		data={data.customersList}
 		bind:filteredList
-		filterKeys={['status', 'course', 'paymentOption', 'enrolledAt']}
+		filterKeys={['status', 'course', 'paymentOption', 'discount', 'enrolledAt']}
 	/>
 
-	<DataTable data={filteredList} {columns} fileName="Enrollments List" />
+	<!-- Rebuilt when the list changes, so a newly registered student shows up on the same page -->
+	{#key data.customersList}
+		<DataTable data={filteredList} {columns} fileName="Enrollments List" />
+	{/key}
 {/if}

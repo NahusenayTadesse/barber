@@ -1,13 +1,20 @@
 import { db } from '$lib/server/db';
-import { courses as products } from '$lib/server/db/schema';
+import {
+	courses as products,
+	coursePaymentMethods,
+	enrolments,
+	paymentMethods,
+	pricingOptions
+} from '$lib/server/db/schema';
+import { methodItems, setCourseMethods } from '$lib/server/paymentMethods';
 import { message, superValidate } from 'sveltekit-superforms';
 
 import { setFlash } from 'sveltekit-flash-message/server';
 
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { edit } from './schema';
-import { eq } from 'drizzle-orm';
-import type { PageServerLoad, Actions } from '../$types';
+import { asc, count, eq } from 'drizzle-orm';
+import type { PageServerLoad, Actions } from './$types';
 import { fail, error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -36,13 +43,25 @@ export const load: PageServerLoad = async ({ params }) => {
 		error(404, 'Course Not found');
 	}
 
-	const form = await superValidate(course, zod4(edit));
+	const offered = await db
+		.select({ id: paymentMethods.id, name: paymentMethods.name })
+		.from(coursePaymentMethods)
+		.innerJoin(paymentMethods, eq(paymentMethods.id, coursePaymentMethods.methodId))
+		.where(eq(coursePaymentMethods.courseId, course.id))
+		.orderBy(asc(paymentMethods.sortOrder), asc(paymentMethods.id));
+
+	const form = await superValidate(
+		{ ...course, methodIds: offered.map((m) => String(m.id)) },
+		zod4(edit)
+	);
 
 	// Then filter in memory
 
 	return {
 		form,
-		course
+		course,
+		methodItems: await methodItems(),
+		methodNames: offered.map((m) => m.name).join(', ')
 	};
 };
 
@@ -50,8 +69,6 @@ export const actions: Actions = {
 	edit: async ({ request, locals, params }) => {
 		const { id } = params;
 		const form = await superValidate(request, zod4(edit));
-
-		console.log(form);
 
 		if (!form.valid) {
 			// Stay on the same page and set a flash message
@@ -68,7 +85,8 @@ export const actions: Actions = {
 			minPriceMessage,
 			target,
 			experience,
-			status
+			status,
+			methodIds
 		} = form.data;
 
 		try {
@@ -93,6 +111,7 @@ export const actions: Actions = {
 						updatedBy: locals.user.id
 					})
 					.where(eq(products.id, Number(id)));
+				await setCourseMethods(tx, Number(id), methodIds);
 			});
 
 			return message(form, { type: 'success', text: 'Course updated successfully' });
@@ -103,28 +122,48 @@ export const actions: Actions = {
 				form,
 				{
 					type: 'error',
-					text: 'An error occurred while updating the course.' + err?.message
+					text: 'An error occurred while updating the course.'
 				},
 				{ status: 500 }
 			);
 		}
 	},
 	delete: async ({ cookies, params }) => {
-		const { id } = params;
+		const id = Number(params.id);
+
+		if (!id) {
+			setFlash({ type: 'error', message: 'Course not found.' }, cookies);
+			return fail(404);
+		}
 
 		try {
-			if (!id) {
-				setFlash({ type: 'error', text: `Unexpected Error: Course Not Found` }, cookies);
+			// Enrolments are student records, so a course that has any can't be deleted
+			const [{ total }] = await db
+				.select({ total: count() })
+				.from(enrolments)
+				.where(eq(enrolments.courseId, id));
+
+			if (total > 0) {
+				setFlash(
+					{
+						type: 'error',
+						message: `This course has ${total} enrolment${total === 1 ? '' : 's'}, so it can't be deleted. Set it to Inactive instead to hide it from the website.`
+					},
+					cookies
+				);
+				return fail(409);
 			}
 
 			await db.transaction(async (tx) => {
+				await tx.delete(pricingOptions).where(eq(pricingOptions.courseId, id));
 				await tx.delete(products).where(eq(products.id, id));
 			});
 
-			setFlash({ type: 'success', text: 'Course Deleted Successfully!' }, cookies);
+			setFlash({ type: 'success', message: 'Course Deleted Successfully!' }, cookies);
 		} catch (err) {
 			console.error('Error deleting course:', err);
-			return fail(400, { type: 'error', text: `Unexpected Error: ${err?.message}` });
+			setFlash({ type: 'error', message: 'Error while deleting the course.' }, cookies);
+			return fail(500);
 		}
 	}
 };

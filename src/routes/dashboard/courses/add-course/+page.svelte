@@ -143,6 +143,20 @@
 			placeholder="Enter Minimum Price Message"
 		/>
 
+		<InputComp
+			{form}
+			{errors}
+			type="checkbox"
+			name="methodIds"
+			label="Payment Methods Offered"
+			items={data.methodItems}
+		/>
+		<p class="text-xs text-muted-foreground">
+			Manage the methods themselves under <a href="/dashboard/payment-methods" class="underline"
+				>Payment Methods</a
+			>.
+		</p>
+
 		<Button type="submit" class="mt-4" form="main">
 			{#if $delayed}
 				<LoadingBtn name="Adding Courses" />

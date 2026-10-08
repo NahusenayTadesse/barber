@@ -31,9 +31,10 @@ export const actions: Actions = {
 
 			return message(form, { type: 'success', text: 'Message Successfully Sent!' });
 		} catch (err) {
+			console.error('Error saving contact message:', err);
 			return message(form, {
 				type: 'error',
-				text: 'Error Adding Messages: ' + err?.message
+				text: "Sorry, your message couldn't be sent. Please try again or call us."
 			});
 		}
 	}

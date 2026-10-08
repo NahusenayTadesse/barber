@@ -1,58 +1,64 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/button/button.svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
 	import { Checkbox } from '$lib/components/ui/checkbox';
-	import { Label } from '$lib/components/ui/label';
-	import { Badge, BadgeCheck } from '@lucide/svelte';
+	import { CheckCheck, X } from '@lucide/svelte';
+	import { cn } from '$lib/utils.js';
 
 	import { type Item } from '$lib/global.svelte';
 
 	let { items = [], checkedValues = $bindable([]) }: { items: Item[]; checkedValues?: string[] } =
 		$props();
 
-	/**
-	 * Handle checkbox change
-	 */
-	const handleChange = (itemValue: string, isChecked: boolean) => {
-		if (isChecked) {
-			checkedValues = [...checkedValues, itemValue];
-		} else {
-			checkedValues = checkedValues.filter((v) => v !== itemValue);
-		}
+	// Unique per instance, so several checkbox lists on one page don't share ids
+	const uid = $props.id();
+
+	const isChecked = (value: Item['value']) => checkedValues.includes(String(value));
+
+	const toggle = (value: Item['value'], checked: boolean) => {
+		const v = String(value);
+		checkedValues = checked ? [...checkedValues, v] : checkedValues.filter((x) => x !== v);
 	};
 
-	let Icon = $derived(checkedValues.length === items.length ? BadgeCheck : Badge);
+	const allChecked = $derived(items.length > 0 && checkedValues.length === items.length);
 
 	function toggleSelectAll() {
-		if (checkedValues.length === items.length) {
-			checkedValues = [];
-		} else {
-			checkedValues = items.map((item) => String(item.value));
-		}
+		checkedValues = allChecked ? [] : items.map((item) => String(item.value));
 	}
 </script>
 
-<Button onclick={toggleSelectAll} size="icon" class="w-full lg:w-1/5">
-	<Icon />
-	{checkedValues.length === items.length ? 'Unselect' : 'Select'} All
-</Button>
-<div
-	class="grid {items.length > 20
-		? 'grid-cols-1 lg:grid-cols-5'
-		: items.length > 10
-			? 'grid-cols-1 lg:grid-cols-2'
-			: 'grid-cols-1'} gap-3"
->
-	{#each items as item (item.value)}
-		<div class="flex items-center gap-2">
-			<Label for={String(item.value)} class="cursor-pointer font-normal">
-				<Checkbox
-					id={String(item.value)}
-					checked={checkedValues.includes(String(item.value))}
-					onCheckedChange={(c) => handleChange(String(item.value), c)}
-				/>
+<div class="flex w-full flex-col gap-2">
+	<div class="flex items-center justify-between gap-2">
+		<span class="text-xs text-muted-foreground">
+			{checkedValues.length} of {items.length} selected
+		</span>
+		<Button variant="ghost" size="sm" class="h-7 px-2 text-xs" onclick={toggleSelectAll}>
+			{#if allChecked}
+				<X class="size-3.5" /> Clear all
+			{:else}
+				<CheckCheck class="size-3.5" /> Select all
+			{/if}
+		</Button>
+	</div>
 
-				{item.name}
-			</Label>
-		</div>
-	{/each}
+	<div
+		class={cn(
+			'grid gap-2',
+			items.length > 20 ? 'grid-cols-1 lg:grid-cols-3' : items.length > 6 ? 'sm:grid-cols-2' : ''
+		)}
+	>
+		{#each items as item (item.value)}
+			{@const id = `${uid}-${item.value}`}
+			{@const checked = isChecked(item.value)}
+			<label
+				for={id}
+				class={cn(
+					'flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 text-sm transition-colors',
+					checked ? 'border-primary bg-primary/10' : 'hover:bg-muted/50'
+				)}
+			>
+				<Checkbox {id} {checked} onCheckedChange={(c) => toggle(item.value, c === true)} />
+				<span class="leading-tight">{item.name}</span>
+			</label>
+		{/each}
+	</div>
 </div>

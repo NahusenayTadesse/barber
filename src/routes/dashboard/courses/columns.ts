@@ -83,6 +83,16 @@ export const columns = [
 	},
 
 	{
+		accessorKey: 'discount',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Live Discount',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true
+	},
+
+	{
 		accessorKey: 'description',
 		header: 'Description',
 		cell: ({ row }) => renderComponent(BigText, { text: row.original.description })

@@ -13,6 +13,7 @@
 		children,
 		variant,
 		IconComp,
+		open = $bindable(false),
 
 		class: className = ''
 	}: {
@@ -20,11 +21,12 @@
 		children: Snippet;
 		variant: ButtonVariant;
 		IconComp?: Component<IconProps>;
+		open?: boolean;
 		class?: string;
 	} = $props();
 </script>
 
-<Dialog.Root>
+<Dialog.Root bind:open>
 	<Dialog.Trigger class="w-auto border-0">
 		{#snippet child({ props })}
 			<Button size="sm" class="border-0" {variant} {...props}>

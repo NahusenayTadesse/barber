@@ -25,10 +25,10 @@ export const actions: Actions = {
 				form,
 				{
 					type: 'error',
-					text: 'Please Check the form}'
+					text: 'Please check the form'
 				},
 				{
-					status: 500
+					status: 400
 				}
 			);
 		}
@@ -72,7 +72,7 @@ export const actions: Actions = {
 						text: error?.message
 					},
 					{
-						status: 500
+						status: 401
 					}
 				);
 			}

@@ -31,11 +31,11 @@
 			<span>D&D Barber & Academy</span><span>No Experience Needed</span><span>London Based</span
 			><span>Real Clients from Week One</span><span>12 Week Courses</span><span
 				>Enrol from £299 Deposit</span
-			><span>0202 779 988</span>
+			><span>020 3700 3997</span>
 			<span>D&D Barber & Academy</span><span>No Experience Needed</span><span>London Based</span
 			><span>Real Clients from Week One</span><span>12 Week Courses</span><span
 				>Enrol from £299 Deposit</span
-			><span>0202 779 988</span>
+			><span>020 3700 3997</span>
 		</div>
 	</div>
 </div>
@@ -70,7 +70,7 @@
 				Walk out ready to earn in <strong>12 weeks</strong>.
 			</p>
 
-			<div class="hero-addr">69 · London · 0202 779 988</div>
+			<div class="hero-addr">69 · London · 020 3700 3997</div>
 
 			<div class="hero-btns">
 				<a class="btn-gold" href="/courses">View Courses</a>
@@ -78,8 +78,8 @@
 			</div>
 
 			<div class="hero-quick">
-				<a href="tel:0202779988">Call: 0202 779 988</a>
-				<a href="https://wa.me/442027799988" target="_blank">WhatsApp now</a>
+				<a href="tel:02037003997">Call: 020 3700 3997</a>
+				<a href="https://wa.me/447846119677" target="_blank">WhatsApp now</a>
 				<a href="/contact">Ask a question</a>
 			</div>
 
@@ -122,13 +122,13 @@
 			<p class="sec-sub" style="margin-bottom:14px">
 				Want to ask something before you book? Call, WhatsApp or send a quick message.
 			</p>
-			<a href="https://wa.me/442027799988" target="_blank" class="wa-big"
+			<a href="https://wa.me/447846119677" target="_blank" class="wa-big"
 				><span style="font-size:20px">💬</span> Chat on WhatsApp</a
 			>
 			<div style="margin-top:14px;font-size:13px;color:var(--grey)">
 				Or call us: <a
-					href="tel:0202779988"
-					style="color:var(--gold);text-decoration:none;font-weight:600">0202 779 988</a
+					href="tel:02037003997"
+					style="color:var(--gold);text-decoration:none;font-weight:600">020 3700 3997</a
 				>
 			</div>
 			<div style="margin-top:10px;font-size:12px;color:var(--grey)">We reply the same day.</div>
@@ -340,7 +340,7 @@
 			<a class="btn-gold" href="/courses" style="padding:18px 48px;font-size:14px"
 				>Reserve My Place</a
 			>
-			<a href="https://wa.me/442027799988" target="_blank" class="btn-out" style="padding:18px 36px"
+			<a href="https://wa.me/447846119677" target="_blank" class="btn-out" style="padding:18px 36px"
 				>Ask on WhatsApp</a
 			>
 		</div>

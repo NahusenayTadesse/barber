@@ -45,7 +45,7 @@
 			</p>
 			<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px">
 				<button class="btn-gold">Book My Free Haircut</button>
-				<a href="https://wa.me/442027799988" target="_blank" class="btn-out">Ask via WhatsApp</a>
+				<a href="https://wa.me/447846119677" target="_blank" class="btn-out">Ask via WhatsApp</a>
 			</div>
 			<div>
 				<div class="pstep">

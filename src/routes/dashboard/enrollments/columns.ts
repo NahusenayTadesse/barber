@@ -2,6 +2,7 @@ import { renderComponent } from '$lib/components/ui/data-table/index.js';
 import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 import Copy from '$lib/Copy.svelte';
 import DataTableActions from './data-table-actions.svelte';
+import PayLinkCell from './pay-link-cell.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import { formatDate } from '$lib/global.svelte';
 import Statuses from '$lib/components/Table/statuses.svelte';
@@ -60,22 +61,23 @@ export const columns = [
 				name: 'Payment Option',
 				onclick: column.getToggleSortingHandler()
 			}),
-		sortable: true,
-		cell: ({ row }) => {
-			return '£ ' + row.original.paymentOption;
-		}
+		sortable: true
+	},
 
-		// cell: ({ row }) => {
-		// 	let n = row.original.paymentOption;
-		// 	if (n === 'minPrice') {
-		// 		n = Math.floor(Number(row.original.minPrice));
-		// 	} else if (n === 'threeEqual') {
-		// 		n = Math.floor(Number(row.original.basePrice / 3));
-		// 	} else if (n === 'basePrice') {
-		// 		n = Math.floor(Number(row.original.basePrice));
-		// 	}
-		// 	return '£ ' + n;
-		// }
+	{
+		accessorKey: 'amount',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Amount',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => '£ ' + row.original.amount
+	},
+
+	{
+		accessorKey: 'discount',
+		header: 'Discount'
 	},
 
 	{
@@ -91,6 +93,17 @@ export const columns = [
 				status: row.original.status
 			});
 		}
+	},
+
+	{
+		accessorKey: 'payLink',
+		header: 'Payment Link',
+		cell: ({ row }) =>
+			renderComponent(PayLinkCell, {
+				id: row.original.id,
+				link: row.original.payLink,
+				email: row.original.email
+			})
 	},
 
 	{

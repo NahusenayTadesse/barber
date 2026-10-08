@@ -18,6 +18,8 @@ export const add = z.object({
 	minPriceMessage: z.string().optional(),
 	target: z.string().optional(),
 	experience: z.string().optional(),
+	// Payment method ids as strings, matching the checkbox values
+	methodIds: z.array(z.string()).min(1, 'Choose at least one payment method'),
 
 	description: z
 		.string()

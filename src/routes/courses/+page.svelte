@@ -7,6 +7,10 @@
 	import { fade, fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { tick } from 'svelte';
+	import { applyDiscount } from '$lib/discounts';
+	import Seo, { discountLine } from '$lib/components/Seo.svelte';
+	import { businessJsonLd, courseJsonLd } from '$lib/seo';
+	import { page } from '$app/state';
 	const { form, errors, enhance, delayed, message, allErrors } = superForm(data.form, {
 		dataType: 'json'
 	});
@@ -81,7 +85,11 @@
 
 	const minDeposit = $derived(
 		data.coursesList.length
-			? Math.min(...data.coursesList.map((c) => Number(c.minPrice ?? c.basePrice)))
+			? Math.min(
+					...data.coursesList.map((c) =>
+						Math.floor(applyDiscount(c.minPrice ?? c.basePrice, c.discount?.percentage))
+					)
+				)
 			: 0
 	);
 
@@ -135,7 +143,10 @@
 			q: "I've never held a clipper. Am I too far behind?",
 			a: 'No. Almost nobody arrives knowing how to use one properly, and every course is built to start from zero.'
 		},
-		{ q: 'Am I too old to start?', a: "There's no cut-off age. People train here straight out of school and twenty years into a career they've had enough of." },
+		{
+			q: 'Am I too old to start?',
+			a: "There's no cut-off age. People train here straight out of school and twenty years into a career they've had enough of."
+		},
 		{
 			q: 'Do I really cut real clients, and how many?',
 			a: 'Real clients from week one, with an educator beside you. Ask us for the number on your course and we’ll give you the honest figure, not a range.'
@@ -159,12 +170,23 @@
 	];
 </script>
 
+<Seo
+	title="Barber Courses in London"
+	description={[
+		discountLine(page.data.bannerDiscount),
+		'Learn barbering at D&D Barber Academy in London. No experience needed, real clients from week one, and job-ready in 12 weeks.'
+	]
+		.filter(Boolean)
+		.join(' ')}
+	jsonLd={[
+		businessJsonLd(page.url.origin, page.data.businessHours ?? []),
+		...data.coursesList.map((c) =>
+			courseJsonLd(page.url.origin, c, applyDiscount(c.basePrice, c.discount?.percentage))
+		)
+	]}
+/>
+
 <svelte:head>
-	<title>Courses & Enrollment</title>
-	<meta
-		name="description"
-		content="Learn barbering at D&D Barber Academy in London. No experience needed, real clients from week one, and job-ready in 12 weeks."
-	/>
 	<link rel="preload" as="image" fetchpriority="high" href={heroImages[0]} />
 </svelte:head>
 
@@ -218,10 +240,22 @@
 
 <section class="proof-strip">
 	<div class="proof-inner">
-		<div class="proof-item"><div class="proof-num">12</div><div class="proof-label">Weeks to job-ready</div></div>
-		<div class="proof-item"><div class="proof-num">Wk 1</div><div class="proof-label">Your first real client</div></div>
-		<div class="proof-item"><div class="proof-num">£{minDeposit}</div><div class="proof-label">Deposit to start</div></div>
-		<div class="proof-item"><div class="proof-num">0%</div><div class="proof-label">Interest, no credit check</div></div>
+		<div class="proof-item">
+			<div class="proof-num">12</div>
+			<div class="proof-label">Weeks to job-ready</div>
+		</div>
+		<div class="proof-item">
+			<div class="proof-num">Wk 1</div>
+			<div class="proof-label">Your first real client</div>
+		</div>
+		<div class="proof-item">
+			<div class="proof-num">£{minDeposit}</div>
+			<div class="proof-label">Deposit to start</div>
+		</div>
+		<div class="proof-item">
+			<div class="proof-num">0%</div>
+			<div class="proof-label">Interest, no credit check</div>
+		</div>
 	</div>
 </section>
 
@@ -230,8 +264,7 @@
 		<div class="ey"><span>Start here</span></div>
 		<h2 class="sec-title">WHICH COURSE<br />IS <span class="g">YOURS?</span></h2>
 		<p class="sec-sub" style="margin-bottom:36px">
-		Answer these 3 questions.
-		We'll point you at the one that actually fits you.
+			Answer these 3 questions. We'll point you at the one that actually fits you.
 		</p>
 
 		<div class="quiz">
@@ -251,9 +284,11 @@
 							<h3 class="q-title">Have you cut hair before?</h3>
 							<div class="q-opts">
 								<button class="q-opt" onclick={() => answerQuiz(0)}>Never touched a clipper</button>
-								<button class="q-opt" onclick={() => answerQuiz(1)}>Just mates and family at home</button
+								<button class="q-opt" onclick={() => answerQuiz(1)}
+									>Just mates and family at home</button
 								>
-								<button class="q-opt" onclick={() => answerQuiz(2)}>I already work in a shop</button>
+								<button class="q-opt" onclick={() => answerQuiz(2)}>I already work in a shop</button
+								>
 							</div>
 						{:else if quizStep === 2}
 							<p class="q-count">Question 2 of 3</p>
@@ -326,14 +361,33 @@
 					<div class="crsnm">{course.name}</div>
 					<div class="crsdur">{course.duration} · {course.experience}</div>
 					<div class="crs-prow">
-						<div class="crsprice">£{course.basePrice}</div>
-						<div class="crspnote">full course</div>
+						{#if course.discount}
+							<div class="crsprice">
+								£{applyDiscount(course.basePrice, course.discount.percentage)}
+							</div>
+							<div class="crspnote"><s>£{course.basePrice}</s> full course</div>
+						{:else}
+							<div class="crsprice">£{course.basePrice}</div>
+							<div class="crspnote">full course</div>
+						{/if}
 					</div>
 				</div>
 				<div class="crsbody">
-					<div class="urgency">
-						<strong>Enrol from £{course.minPrice} deposit</strong> — {course.minPriceMessage}
-					</div>
+					{#if course.discount}
+						<div class="urgency crsdisc">
+							<strong>{course.discount.name}: {course.discount.percentage}% off</strong>
+						</div>
+					{/if}
+					{#if course.minPrice && Number(course.minPrice) > 0}
+						<div class="urgency">
+							<strong
+								>Enrol from £{Math.floor(
+									applyDiscount(course.minPrice, course.discount?.percentage)
+								)} deposit</strong
+							>
+							{#if course.minPriceMessage}— {course.minPriceMessage}{/if}
+						</div>
+					{/if}
 					<div class="incl">What You'll Learn & Get</div>
 					<ul class="buls">
 						{#each course?.description?.split(/\n+/).filter(Boolean) as point}
@@ -341,11 +395,10 @@
 						{/each}
 					</ul>
 					<a
-						class="btn-gold justify-center! items-center! flex! flex-row!"
+						class="btn-gold flex! flex-row! items-center! justify-center!"
 						href="/courses/{course.id}"
 						onclick={() => ($form.courseId = course.id)}
-						style="width:100%;padding:16px;font-size:14px"
-						>Reserve My Place</a
+						style="width:100%;padding:16px;font-size:14px">Reserve My Place</a
 					>
 				</div>
 			</div>
@@ -412,7 +465,7 @@
 				<div>
 					<div class="pst">Pay the deposit</div>
 					<div class="psd">
-					A deposit secures your place on the next intake. It's non-refundable once paid.
+						A deposit secures your place on the next intake. It's non-refundable once paid.
 					</div>
 				</div>
 			</div>
@@ -421,7 +474,9 @@
 				<div>
 					<div class="pst">Spread the rest</div>
 					<div class="psd">
-					Pay the remaining balance in equal installments while you train, <span class="text-primary">Interest-free</span>
+						Pay the remaining balance in equal installments while you train, <span
+							class="text-primary">Interest-free</span
+						>
 					</div>
 				</div>
 			</div>
@@ -430,7 +485,9 @@
 				<div>
 					<div class="pst">Finish paid up</div>
 					<div class="psd">
-					All fees are cleared before certification, with <span class="text-primary"> no hidden costs</span>.
+						All fees are cleared before certification, with <span class="text-primary">
+							no hidden costs</span
+						>.
 					</div>
 				</div>
 			</div>
@@ -443,7 +500,10 @@
 		<div class="why-intro">
 			<h2 class="why-bigclaim">TAUGHT ON<br />REAL HEADS.</h2>
 			<div class="why-body">
-				<p><strong>Real clients from week one.</strong> You're on a paying client's head with an educator stood next to you from the first week.</p>
+				<p>
+					<strong>Real clients from week one.</strong> You're on a paying client's head with an educator
+					stood next to you from the first week.
+				</p>
 				<p><em>Small groups.</em>Small enough for hands-on correction.</p>
 			</div>
 		</div>
@@ -584,6 +644,16 @@
 		.proof-inner {
 			grid-template-columns: 1fr 1fr;
 		}
+	}
+
+	/* ——— COURSE CARD DISCOUNT ——— */
+	.crsdisc {
+		border-color: rgba(212, 175, 55, 0.4);
+		border-left-color: var(--gold2);
+		background: rgba(212, 175, 55, 0.12);
+	}
+	.crsdisc strong {
+		color: var(--gold2);
 	}
 
 	/* ——— COURSE CARD "MOST POPULAR" TAG ——— */

@@ -30,3 +30,8 @@ build.tar
 build.zip
 build*.tar.gz
 build*.zip
+# Playwright
+test-results
+
+# Content plan PDFs
+*.pdf
