@@ -41,6 +41,12 @@
 				Hi {data.firstName}, your place on the <strong>{data.course}</strong> is reserved. Pay below to
 				confirm it.
 			</p>
+			{#if data.removedDiscount}
+				<p class="psub">
+					The <strong>{data.removedDiscount}</strong> discount has been removed from your enrolment, so
+					this is the remaining balance.
+				</p>
+			{/if}
 			<div class="cob" style="margin-top:28px">
 				<div class="csum">
 					<div>
@@ -55,7 +61,9 @@
 						{/if}
 					</div>
 					<div style="text-align:right">
-						<div class="clbl">Amount Due Today</div>
+						<div class="clbl">
+							{data.removedDiscount ? 'Remaining Balance' : 'Amount Due Today'}
+						</div>
 						<div class="cval">£ {data.amount}</div>
 					</div>
 				</div>

@@ -1,7 +1,12 @@
 import { and, eq, gt, inArray, lte, type SQL } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { courseDiscountCourses, courseDiscounts, courses } from '$lib/server/db/schema';
-import type { ActiveDiscount, BannerDiscount } from '$lib/discounts';
+import {
+	bestDiscount,
+	type ActiveDiscount,
+	type BannerDiscount,
+	type Gender
+} from '$lib/discounts';
 
 /** Discounts that are enabled and within their start/expiration window right now. */
 function liveDiscountsWhere() {
@@ -20,6 +25,7 @@ function liveDiscountCourses(extra?: SQL) {
 			id: courseDiscounts.id,
 			name: courseDiscounts.name,
 			percentage: courseDiscounts.percentage,
+			gender: courseDiscounts.gender,
 			expiresAt: courseDiscounts.expiresAt,
 			courseId: courseDiscountCourses.courseId,
 			courseName: courses.name
@@ -30,22 +36,40 @@ function liveDiscountCourses(extra?: SQL) {
 		.where(and(liveDiscountsWhere(), eq(courses.isActive, true), extra));
 }
 
-/**
- * Best live discount for each course id. When several discounts cover the same
- * course, the highest percentage wins.
- */
-export async function getActiveDiscounts(
+/** Every live discount on each course id, including the ones for one gender only. */
+export async function getCourseDiscounts(
 	courseIds: number[]
-): Promise<Record<number, ActiveDiscount>> {
+): Promise<Record<number, ActiveDiscount[]>> {
 	if (!courseIds.length) return {};
 	const live = await liveDiscountCourses(inArray(courseDiscountCourses.courseId, courseIds));
 
-	const best: Record<number, ActiveDiscount> = {};
+	const byCourse: Record<number, ActiveDiscount[]> = {};
 	for (const d of live) {
-		const percentage = Number(d.percentage);
-		if (!best[d.courseId] || percentage > best[d.courseId].percentage) {
-			best[d.courseId] = { id: d.id, name: d.name, percentage };
-		}
+		(byCourse[d.courseId] ??= []).push({
+			id: d.id,
+			name: d.name,
+			percentage: Number(d.percentage),
+			gender: d.gender
+		});
+	}
+	return byCourse;
+}
+
+/**
+ * Best live discount for each course id. When several discounts cover the same
+ * course, the highest percentage wins. Gender-only discounts count only when
+ * that gender is given.
+ */
+export async function getActiveDiscounts(
+	courseIds: number[],
+	gender?: Gender | null
+): Promise<Record<number, ActiveDiscount>> {
+	const all = await getCourseDiscounts(courseIds);
+
+	const best: Record<number, ActiveDiscount> = {};
+	for (const [courseId, discounts] of Object.entries(all)) {
+		const d = bestDiscount(discounts, gender);
+		if (d) best[Number(courseId)] = d;
 	}
 	return best;
 }
@@ -73,6 +97,7 @@ export async function getBannerDiscount(): Promise<BannerDiscount | null> {
 					? covered[0].courseName
 					: 'selected courses',
 		more: new Set(live.map((d) => d.id)).size > 1,
+		gender: best.gender,
 		endsOn: best.expiresAt.toLocaleDateString('en-GB', {
 			timeZone: 'Europe/London',
 			day: 'numeric',

@@ -7,7 +7,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { tick } from 'svelte';
-	import { applyDiscount } from '$lib/discounts';
+	import { applyDiscount, genderAudience } from '$lib/discounts';
 	import Seo, { discountLine } from '$lib/components/Seo.svelte';
 	import { businessJsonLd, courseJsonLd } from '$lib/seo';
 	import { page } from '$app/state';
@@ -378,6 +378,14 @@
 							<strong>{course.discount.name}: {course.discount.percentage}% off</strong>
 						</div>
 					{/if}
+					{#each course.genderOffers as offer (offer.id)}
+						<div class="urgency crsdisc">
+							<strong
+								>{offer.name}: {offer.percentage}% off for {offer.gender &&
+									genderAudience[offer.gender]}</strong
+							>
+						</div>
+					{/each}
 					{#if course.minPrice && Number(course.minPrice) > 0}
 						<div class="urgency">
 							<strong

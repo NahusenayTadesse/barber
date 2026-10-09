@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import type { PaymentMethod } from '$lib/discounts';
+	import type { ActiveDiscount, PaymentMethod } from '$lib/discounts';
 
 	export type CourseOption = {
 		id: number;
@@ -7,7 +7,8 @@
 		basePrice: string;
 		minPrice: string | null;
 		isActive: boolean;
-		discountPercentage: number;
+		/** Live discounts, including women/men-only ones */
+		discounts: ActiveDiscount[];
 		methods: PaymentMethod[];
 	};
 </script>
@@ -27,7 +28,7 @@
 	import InputComp from '$lib/formComponents/InputComp.svelte';
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { amountSuffix, methodAmountFor } from '$lib/discounts';
+	import { amountSuffix, bestDiscount, methodAmountFor } from '$lib/discounts';
 	import { registerStudent, type RegisterStudent } from './schema';
 
 	let {
@@ -83,13 +84,14 @@
 				};
 			},
 			onChange(event) {
-				// Suggest today's price when the course or option changes; it can still be edited
-				if (event.paths.some((p) => p === 'courseId' || p === 'paymentMethodId')) {
+				// Suggest today's price when the course, option or gender changes; it can still be edited
+				if (event.paths.some((p) => ['courseId', 'paymentMethodId', 'gender'].includes(p))) {
 					const course = coursesList.find((c) => String(c.id) === $form.courseId);
 					const method = course?.methods.find((m) => String(m.id) === $form.paymentMethodId);
 					// A method the newly chosen course doesn't offer
 					if (!method && $form.paymentMethodId) $form.paymentMethodId = '';
-					const amount = methodAmountFor(course, method, course?.discountPercentage);
+					const percentage = bestDiscount(course?.discounts ?? [], $form.gender)?.percentage;
+					const amount = methodAmountFor(course, method, percentage);
 					if (amount > 0) $form.amount = amount;
 				}
 			}
@@ -104,12 +106,18 @@
 	);
 	// The payment methods the chosen course offers
 	const selectedCourse = $derived(coursesList.find((c) => String(c.id) === $form.courseId));
+	const discount = $derived(bestDiscount(selectedCourse?.discounts ?? [], $form.gender));
 	const optionItems = $derived(
 		(selectedCourse?.methods ?? []).map((m) => ({
 			value: String(m.id),
-			name: `${m.name} — £${methodAmountFor(selectedCourse, m, selectedCourse?.discountPercentage)}${amountSuffix(m)}`
+			name: `${m.name} — £${methodAmountFor(selectedCourse, m, discount?.percentage)}${amountSuffix(m)}`
 		}))
 	);
+	const genderItems = [
+		{ value: '', name: 'Not specified' },
+		{ value: 'male', name: 'Male' },
+		{ value: 'female', name: 'Female' }
+	];
 	const statusItems = [
 		{ value: 'unpaid', name: 'Unpaid — send a payment link' },
 		{ value: 'paid', name: 'Paid' }
@@ -240,14 +248,17 @@
 				<InputComp {form} {errors} label="Last Name" type="text" name="lastName" required={true} />
 			</div>
 			<InputComp {form} {errors} label="Email" type="email" name="email" required={true} />
-			<InputComp
-				{form}
-				{errors}
-				label="Phone"
-				type="tel"
-				name="phone"
-				placeholder="+44 7700 000000"
-			/>
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+				<InputComp
+					{form}
+					{errors}
+					label="Phone"
+					type="tel"
+					name="phone"
+					placeholder="+44 7700 000000"
+				/>
+				<InputComp {form} {errors} label="Gender" type="select" name="gender" items={genderItems} />
+			</div>
 			<InputComp {form} {errors} label="Course" type="select" name="courseId" items={courseItems} />
 			<InputComp
 				{form}
@@ -267,8 +278,9 @@
 				<InputComp {form} {errors} label="Status" type="select" name="status" items={statusItems} />
 			</div>
 			<p class="text-xs text-muted-foreground">
-				The amount is filled in with today's price (including any discount). Change it if you agreed
-				a different amount. For unpaid students, it's what the link charges.
+				The amount is filled in with today's price (including any discount, and women/men-only
+				discounts for the gender chosen). Change it if you agreed a different amount. For unpaid
+				students, it's what the link charges.
 			</p>
 
 			<Button type="submit" class="mt-4" form="register-student">

@@ -41,6 +41,7 @@
 		},
 		{ accessorKey: 'name', header: sortable('Name'), cell: editCell(false) },
 		{ accessorKey: 'course', header: sortable('Course') },
+		{ accessorKey: 'audience', header: sortable('For') },
 		{
 			accessorKey: 'percentage',
 			header: sortable('Discount'),
@@ -82,7 +83,8 @@
 	<h1 class="text-3xl font-bold tracking-tight">Course Discounts</h1>
 	<p class="text-muted-foreground">
 		Active discounts are applied automatically to course prices on the website and at checkout. If
-		more than one applies to a course, the biggest one is used.
+		more than one applies to a course, the biggest one is used. A discount for women or men only
+		applies once the student picks that gender when enrolling.
 	</p>
 </div>
 
@@ -90,6 +92,10 @@
 	<DiscountForm data={data.form} action="?/add" courseItems={data.courseItems} />
 	<br />
 	<br />
-	<FilterMenu data={data.discounts} bind:filteredList filterKeys={['course', 'status']} />
+	<FilterMenu
+		data={data.discounts}
+		bind:filteredList
+		filterKeys={['course', 'audience', 'status']}
+	/>
 	<DataTable {columns} data={filteredList} search={true} fileName="Course Discounts" />
 {/key}

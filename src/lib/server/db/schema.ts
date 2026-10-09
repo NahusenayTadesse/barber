@@ -94,6 +94,7 @@ export const enrolments = mysqlTable('enrolments', {
 	paymentOption: varchar('payment_option', { length: 255 }),
 	firstName: varchar('first_name', { length: 255 }).notNull(),
 	lastName: varchar('last_name', { length: 255 }).notNull(),
+	gender: mysqlEnum('gender', ['male', 'female']), // optional
 	phone: varchar('phone', { length: 50 }),
 	email: varchar('email', { length: 255 }).notNull(),
 	// pending = checkout started, confirmed = paid, cancelled = checkout expired
@@ -104,6 +105,26 @@ export const enrolments = mysqlTable('enrolments', {
 	discountPercentage: decimal('discount_percentage', { precision: 5, scale: 2 }),
 	stripeSessionId: varchar('stripe_session_id', { length: 255 }).unique(),
 	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()
+});
+
+// --- Discount Nullifications Table ---
+// Audit record of a discount taken off a student, e.g. a women-only discount
+// claimed by someone who isn't. The enrolment goes back to unpaid with
+// amount_due, so the student can pay the rest with their payment link.
+export const discountNullifications = mysqlTable('discount_nullifications', {
+	id: int('id').primaryKey().autoincrement(),
+	enrolmentId: int('enrolment_id')
+		.notNull()
+		.unique()
+		.references(() => enrolments.id, { onDelete: 'cascade' }),
+	// The discount that was removed, copied from the enrolment
+	discountName: varchar('discount_name', { length: 255 }).notNull(),
+	discountPercentage: decimal('discount_percentage', { precision: 5, scale: 2 }).notNull(),
+	amountPaid: decimal('amount_paid', { precision: 10, scale: 2 }).notNull(), // already paid before
+	amountDue: decimal('amount_due', { precision: 10, scale: 2 }).notNull(), // charged by the link
+	reason: text('reason').notNull(),
+	nullifiedOn: date('nullified_on', { mode: 'string' }).notNull(),
+	...secureFields
 });
 
 // --- Certificates Table ---
@@ -204,6 +225,8 @@ export const courseDiscounts = mysqlTable('course_discounts', {
 	id: int('id').primaryKey().autoincrement(),
 	name: varchar('name', { length: 255 }).notNull(), // e.g., "Summer Sale"
 	percentage: decimal('percentage', { precision: 5, scale: 2 }).notNull(), // e.g., 15.00
+	// Only for students of this gender; null = everyone
+	gender: mysqlEnum('gender', ['male', 'female']),
 	startsAt: timestamp('starts_at').defaultNow().notNull(),
 	expiresAt: timestamp('expires_at').notNull(),
 	...secureFields

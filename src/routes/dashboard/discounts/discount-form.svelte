@@ -15,6 +15,7 @@
 		id: number;
 		name: string;
 		percentage: number;
+		gender: '' | 'male' | 'female';
 		courseIds: string[];
 		startDate: string;
 		expiryDate: string;
@@ -54,12 +55,19 @@
 			id: d.id,
 			name: d.name,
 			percentage: d.percentage,
+			gender: d.gender,
 			courseIds: d.courseIds,
 			startsAt: d.startDate,
 			expiresAt: d.expiryDate,
 			isActive: d.isActive
 		};
 	}
+
+	const genderItems = [
+		{ value: '', name: 'Everyone' },
+		{ value: 'female', name: 'Women only' },
+		{ value: 'male', name: 'Men only' }
+	];
 
 	$effect(() => {
 		if ($message) {
@@ -98,6 +106,17 @@
 			max="100"
 			required={true}
 		/>
+		<InputComp
+			{form}
+			{errors}
+			label="Who Gets It"
+			type="select"
+			name="gender"
+			items={genderItems}
+		/>
+		<p class="-mt-2 text-xs text-muted-foreground">
+			For women or men only, students choose their gender when they enrol to get it.
+		</p>
 		<InputComp
 			{form}
 			{errors}

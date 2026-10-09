@@ -69,6 +69,9 @@ export const load: PageServerLoad = async () => {
 			id: d.id,
 			name: d.name,
 			percentage: Number(d.percentage),
+			gender: d.gender ?? ('' as const),
+			audience:
+				d.gender === 'female' ? 'Women only' : d.gender === 'male' ? 'Men only' : 'Everyone',
 			courseIds: courseIds.map(String),
 			course:
 				names.length && names.length === allCourses.length
@@ -102,7 +105,7 @@ export const actions: Actions = {
 			);
 		}
 
-		const { name, percentage, courseIds, startsAt, expiresAt, isActive } = form.data;
+		const { name, percentage, gender, courseIds, startsAt, expiresAt, isActive } = form.data;
 
 		try {
 			await db.transaction(async (tx) => {
@@ -111,6 +114,7 @@ export const actions: Actions = {
 					.values({
 						name,
 						percentage: String(percentage),
+						gender: gender || null,
 						...toRange(startsAt, expiresAt),
 						isActive,
 						createdBy: locals.user.id
@@ -144,7 +148,7 @@ export const actions: Actions = {
 			);
 		}
 
-		const { id, name, percentage, courseIds, startsAt, expiresAt, isActive } = form.data;
+		const { id, name, percentage, gender, courseIds, startsAt, expiresAt, isActive } = form.data;
 
 		try {
 			await db.transaction(async (tx) => {
@@ -153,6 +157,7 @@ export const actions: Actions = {
 					.set({
 						name,
 						percentage: String(percentage),
+						gender: gender || null,
 						...toRange(startsAt, expiresAt),
 						isActive,
 						updatedBy: locals.user.id

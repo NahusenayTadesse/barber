@@ -3,6 +3,7 @@ import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 import Copy from '$lib/Copy.svelte';
 import DataTableActions from './data-table-actions.svelte';
 import PayLinkCell from './pay-link-cell.svelte';
+import DiscountCell from './discount-cell.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import { formatDate } from '$lib/global.svelte';
 import Statuses from '$lib/components/Table/statuses.svelte';
@@ -31,6 +32,13 @@ export const columns = [
 		// 		link: '/dashboard/customers'
 		// 	});
 		// }
+	},
+	{
+		accessorKey: 'gender',
+		header: 'Gender',
+		sortable: true,
+		cell: ({ row }) =>
+			row.original.gender === 'male' ? 'Male' : row.original.gender === 'female' ? 'Female' : '—'
 	},
 	{
 		accessorKey: 'phone',
@@ -77,7 +85,17 @@ export const columns = [
 
 	{
 		accessorKey: 'discount',
-		header: 'Discount'
+		header: 'Discount',
+		cell: ({ row }) =>
+			renderComponent(DiscountCell, {
+				id: row.original.id,
+				name: row.original.name,
+				discount: row.original.discount,
+				status: row.original.status,
+				amount: row.original.amount,
+				owedWithoutDiscount: row.original.owedWithoutDiscount,
+				nullified: row.original.nullified
+			})
 	},
 
 	{

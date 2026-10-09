@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { courses, enrolments } from '$lib/server/db/schema';
+import { courses, discountNullifications, enrolments } from '$lib/server/db/schema';
 import { enrolmentIdFromToken } from '$lib/server/payLink';
 import { stripe } from '$lib/server/stripe';
 import type { Actions, PageServerLoad } from './$types';
@@ -23,10 +23,12 @@ async function enrolmentFor(token: string) {
 						courseName: courses.name,
 						paymentOption: enrolments.paymentOption,
 						amount: enrolments.amount,
-						status: enrolments.status
+						status: enrolments.status,
+						removedDiscount: discountNullifications.discountName
 					})
 					.from(enrolments)
 					.leftJoin(courses, eq(enrolments.courseId, courses.id))
+					.leftJoin(discountNullifications, eq(discountNullifications.enrolmentId, enrolments.id))
 					.where(eq(enrolments.id, id))
 					.then((rows) => rows[0]);
 	if (!enrolment) error(404, 'This payment link is not valid');
@@ -40,7 +42,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		course: e.courseName ?? e.course ?? 'your course',
 		paymentOption: e.paymentOption ?? '',
 		amount: Number(e.amount ?? 0),
-		status: e.status
+		status: e.status,
+		// Set when a discount was taken off and this is the balance left to pay
+		removedDiscount: e.removedDiscount
 	};
 };
 

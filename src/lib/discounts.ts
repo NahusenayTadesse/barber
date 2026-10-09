@@ -1,12 +1,43 @@
 // Shared (client + server) helpers for course discounts.
 
+export type Gender = 'male' | 'female';
+
+/** Who a gender-only discount is for, as said on the website. */
+export const genderAudience: Record<Gender, string> = { male: 'men', female: 'women' };
+
 // Sent to the public site, so it deliberately has no dates: customers are
 // never told when a discount ends.
 export type ActiveDiscount = {
 	id: number;
 	name: string;
 	percentage: number;
+	/** Only for students of this gender; null = everyone */
+	gender: Gender | null;
 };
+
+/**
+ * The biggest discount a student of this gender gets. Without a gender, only
+ * discounts for everyone count.
+ */
+export function bestDiscount(
+	discounts: ActiveDiscount[],
+	gender?: Gender | '' | null
+): ActiveDiscount | undefined {
+	let best: ActiveDiscount | undefined;
+	for (const d of discounts) {
+		if (d.gender && d.gender !== gender) continue;
+		if (!best || d.percentage > best.percentage) best = d;
+	}
+	return best;
+}
+
+/** Gender-only discounts bigger than the one everyone gets (the best per gender), to advertise. */
+export function genderOffers(discounts: ActiveDiscount[]): ActiveDiscount[] {
+	const base = bestDiscount(discounts)?.percentage ?? 0;
+	return (['female', 'male'] as const)
+		.map((g) => bestDiscount(discounts, g))
+		.filter((d): d is ActiveDiscount => !!d?.gender && d.percentage > base);
+}
 
 export type BannerDiscount = {
 	name: string;
@@ -17,6 +48,8 @@ export type BannerDiscount = {
 	more: boolean;
 	/** UK date the discount ends, e.g. "8 November 2026" (shown in the popup only) */
 	endsOn: string;
+	/** Only for students of this gender; null = everyone */
+	gender: Gender | null;
 };
 
 export type DiscountStatus = 'Active' | 'Scheduled' | 'Expired' | 'Disabled';

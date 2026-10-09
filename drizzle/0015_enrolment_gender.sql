@@ -1,0 +1,1 @@
+ALTER TABLE `enrolments` ADD `gender` enum('male','female');

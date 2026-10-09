@@ -66,7 +66,6 @@ type CourseRow = {
 	basePrice: string;
 	duration: string | null;
 	level: string | null;
-	discount: { percentage: number } | null;
 };
 
 /** One course, with its current price (after any live discount). */

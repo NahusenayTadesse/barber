@@ -217,7 +217,7 @@ export const helpSections: HelpSection[] = [
 					'Course: the course they enrolled on.',
 					'Payment Option: the payment method they chose, for example Deposit to Secure, 3 Equal Instalments or Pay in Full (see Payment Methods).',
 					'Amount: what they were charged, or what they still need to pay, in pounds after any discount.',
-					'Discount: the discount that was applied, or None.',
+					'Discount: the discount that was applied, or None. A removed discount is crossed out, with the date, who removed it and why underneath.',
 					'Status: Paid (green) means the payment was received - by card through Stripe, or marked as paid by you. Unpaid (red) means they have not paid yet. Cancelled means a website payment page expired without payment, usually after 24 hours.',
 					'Payment Link: for every Unpaid student, a Copy Link button and an email button to send them their personal payment link. Paid and cancelled students show a dash.',
 					'Enrolled At: the date they enrolled.'
@@ -244,6 +244,17 @@ export const helpSections: HelpSection[] = [
 					'You do not have to send it now. Close the window whenever you like - the link is always in the Payment Link column of the table, where you can copy it or email it again.',
 					'The student opens the link, sees their course and amount, and pays securely by card. Their status changes to Paid by itself once Stripe confirms the payment.',
 					'Press Register Another Student to start a blank form.'
+				]
+			},
+			{
+				type: 'steps',
+				title: 'Removing (nullifying) a discount from a student',
+				items: [
+					"Use this when a student shouldn't have had a discount, for example they chose the wrong gender to get a women-only or men-only discount.",
+					'In the Discount column, press Nullify next to their discount.',
+					'Amount still to pay fills in with what they owe without the discount: the full price if they have not paid yet, or the discount they got if they already paid. Change it if needed, or enter 0 to remove the discount without asking for money.',
+					'Write the Reason and check the Date - both are kept for the audit record, together with your name.',
+					'Press Nullify Discount for This Student. The student becomes Unpaid and the Payment Link column has a link for the amount still to pay. Send it the usual way; their payment page explains that the discount was removed.'
 				]
 			},
 			{
@@ -428,6 +439,7 @@ export const helpSections: HelpSection[] = [
 					'Open Discounts in the sidebar and press Add Discount.',
 					'Name of Discount: the name customers will see, for example "Opening Day Discount" or "Summer Sale".',
 					'Percentage Off: how much to take off, for example 20 for 20% off.',
+					'Who Gets It: Everyone, or Women only / Men only. A women-only or men-only discount applies when the student chooses that gender on the enrolment form, which also shows a small note that a false gender means the discount is removed (see Enrollments to remove it).',
 					'Courses: tick each course the discount applies to. Use Select all to tick every course.',
 					'Starts On and Expires On: pick the first and last day of the discount from the calendars.',
 					'Leave Enabled ticked, then press Add Discount. A green message confirms it was saved.'

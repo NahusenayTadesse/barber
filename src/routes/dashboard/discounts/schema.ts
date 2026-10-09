@@ -8,6 +8,8 @@ const fields = {
 		.number('Percentage is required')
 		.gt(0, 'Percentage must be more than 0')
 		.max(100, 'Percentage cannot be more than 100'),
+	// Who gets it: '' = everyone, or one gender only
+	gender: z.enum(['male', 'female', '']).default(''),
 	// Course ids as strings, matching the checkbox values
 	courseIds: z.array(z.string()).min(1, 'Select at least one course'),
 	startsAt: isoDate,

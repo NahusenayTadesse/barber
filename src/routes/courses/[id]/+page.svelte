@@ -7,9 +7,16 @@
 
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
-import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
+	import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 	import { schema } from './schema.js';
-	import { amountSuffix, applyDiscount, methodAmountFor } from '$lib/discounts';
+	import {
+		amountSuffix,
+		applyDiscount,
+		bestDiscount,
+		genderAudience,
+		genderOffers,
+		methodAmountFor
+	} from '$lib/discounts';
 	import Seo from '$lib/components/Seo.svelte';
 	import { courseJsonLd } from '$lib/seo';
 	import { page } from '$app/state';
@@ -34,9 +41,16 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 		}
 	});
 	const selectedCourse = $derived(data.coursesList.find((c) => c.id === $form.courseId));
+	// The best discount for the chosen gender (only discounts for everyone until one is picked)
+	const discount = $derived(bestDiscount(selectedCourse?.discounts ?? [], $form.gender));
+	// Women/men-only discounts bigger than the one applied, so students know to pick their gender
+	const offers = $derived(
+		genderOffers(selectedCourse?.discounts ?? []).filter(
+			(d) => d.percentage > (discount?.percentage ?? 0)
+		)
+	);
 	/** @param {import('$lib/discounts').PaymentMethod | undefined} method */
-	const amountFor = (method) =>
-		methodAmountFor(selectedCourse, method, selectedCourse?.discount?.percentage);
+	const amountFor = (method) => methodAmountFor(selectedCourse, method, discount?.percentage);
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') toast.error($message.text);
@@ -49,14 +63,15 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 </script>
 
 {#if selectedCourse}
-	{@const price = applyDiscount(selectedCourse.basePrice, selectedCourse.discount?.percentage)}
+	{@const everyone = bestDiscount(selectedCourse.discounts)}
+	{@const price = applyDiscount(selectedCourse.basePrice, everyone?.percentage)}
 	<Seo
 		title="Enrol on the {data.course.name}"
 		description={[
 			`Enrol on the ${data.course.name} at D&D Barber Academy, London.`,
 			[selectedCourse.duration, selectedCourse.level].filter(Boolean).join(', ') + '.',
-			selectedCourse.discount
-				? `Now £${price} with ${selectedCourse.discount.percentage}% off (was £${Number(selectedCourse.basePrice)}).`
+			everyone
+				? `Now £${price} with ${everyone.percentage}% off (was £${Number(selectedCourse.basePrice)}).`
 				: `£${Number(selectedCourse.basePrice)}.`,
 			selectedCourse.methods.length
 				? `Payment options: ${selectedCourse.methods.map((m) => m.name).join(', ')}.`
@@ -80,14 +95,22 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 				no credit checks, no interest, no hassle.
 			</p>
 		</div>
-		{#if selectedCourse?.discount}
+		{#if discount}
 			<div class="urgency" style="margin-top:20px">
-				<strong
-					>{selectedCourse.discount.name}: {selectedCourse.discount.percentage}% off this course</strong
-				>
-				— applied to every payment option below.
+				<strong>{discount.name}: {discount.percentage}% off this course</strong>
+				{discount.gender ? `for ${genderAudience[discount.gender]}` : ''} — applied to every payment option
+				below.
 			</div>
 		{/if}
+		{#each offers as offer (offer.id)}
+			<div class="urgency" style="margin-top:20px">
+				<strong
+					>{offer.name}: {offer.percentage}% off this course for {offer.gender &&
+						genderAudience[offer.gender]}</strong
+				>
+				— choose your gender in the form below to get it.
+			</div>
+		{/each}
 		<div class="selbanner" id="selbanner">
 			Course selected: <strong id="selname"></strong> — Choose your payment method below
 		</div>
@@ -141,6 +164,20 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 						placeholder="+44 7700 000000"
 					/>
 				</div>
+			</div>
+			<div class="fg">
+				<label for="gender">Gender (optional)</label>
+				<select id="gender" name="gender" bind:value={$form.gender}>
+					<option value="">Prefer not to say</option>
+					<option value="male">Male</option>
+					<option value="female">Female</option>
+				</select>
+				{#if selectedCourse?.discounts.some((d) => d.gender)}
+					<p class="gender-note">
+						Women/men-only discounts are given on the gender you choose. If it's found to be false,
+						the discount is removed and the remaining balance becomes due.
+					</p>
+				{/if}
 			</div>
 			<div class="fg">
 				<label id="ee" for="paymentOptions">Payment Options</label>
@@ -222,3 +259,12 @@ import { Mail, MapPin, Phone, MessageCircle } from '@lucide/svelte';
 		</div>
 	</div>
 </div>
+
+<style>
+	.gender-note {
+		margin-top: 4px;
+		font-size: 10px;
+		line-height: 1.4;
+		color: var(--grey);
+	}
+</style>
