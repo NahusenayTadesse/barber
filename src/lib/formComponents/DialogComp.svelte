@@ -45,7 +45,7 @@
 			<Dialog.Title>{title}</Dialog.Title>
 		</Dialog.Header>
 		<ScrollArea class="h-auto w-full! min-w-0!  px-2 pr-4" orientation="both">
-			<div class="h-auto max-h-96 w-full lg:max-h-[calc(100vh-10rem)]">
+			<div class="h-auto max-h-[75dvh] w-full sm:max-h-96 lg:max-h-[calc(100vh-10rem)]">
 				{@render children()}
 			</div>
 		</ScrollArea>

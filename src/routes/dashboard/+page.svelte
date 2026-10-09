@@ -169,9 +169,9 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<div class="space-y-8">
-	<div class="flex items-center justify-between">
-		<h2 class="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+<div class="space-y-6 md:space-y-8">
+	<div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+		<h2 class="text-2xl font-bold tracking-tight md:text-3xl">Dashboard Overview</h2>
 		<div class="flex items-center space-x-2 text-sm text-muted-foreground">
 			<Calendar class="h-4 w-4" />
 			<span>Today, {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}</span
@@ -179,7 +179,7 @@
 		</div>
 	</div>
 
-	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+	<div class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3">
 		<Card.Root class="overflow-hidden transition-all hover:shadow-md">
 			<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 				<Card.Title class="text-sm font-medium">New Enrolments</Card.Title>
@@ -209,7 +209,7 @@
 		</Card.Root>
 
 		<Card.Root
-			class="overflow-hidden border-primary/20 bg-primary/5 transition-all hover:shadow-md md:col-span-2 lg:col-span-1"
+			class="col-span-2 overflow-hidden border-primary/20 bg-primary/5 transition-all hover:shadow-md lg:col-span-1"
 		>
 			<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 				<Card.Title class="text-sm font-medium">Total Engagement</Card.Title>
@@ -222,7 +222,7 @@
 		</Card.Root>
 	</div>
 
-	<div class="flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground">
+	<div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground md:gap-x-8">
 		<span><strong class="text-foreground">{data.totals.paidStudents}</strong> paid students</span>
 		<span
 			><strong class="text-foreground">{data.totals.certificates}</strong> certificates issued</span
@@ -270,15 +270,19 @@
 				<Card.Title>Quick actions</Card.Title>
 			</Card.Header>
 			<Card.Content>
-				<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+				<div class="grid grid-cols-4 gap-x-2 gap-y-4 sm:gap-2">
 					{#each quickActions as action (action.href)}
 						<a
 							href={action.href}
 							target={action.external ? '_blank' : undefined}
 							rel={action.external ? 'noopener' : undefined}
-							class="flex flex-col items-center gap-2 rounded-lg border p-3 text-center text-sm font-medium transition-colors hover:border-primary hover:bg-primary/5"
+							class="flex flex-col items-center gap-2 text-center text-[11px] leading-tight font-medium transition-colors active:scale-95 sm:rounded-lg sm:border sm:p-3 sm:text-sm sm:hover:border-primary sm:hover:bg-primary/5"
 						>
-							<action.icon class="h-5 w-5 text-primary" />
+							<span
+								class="flex size-12 items-center justify-center rounded-2xl bg-primary/10 sm:size-auto sm:rounded-none sm:bg-transparent"
+							>
+								<action.icon class="h-5 w-5 text-primary" />
+							</span>
 							{action.title}
 						</a>
 					{/each}
@@ -292,7 +296,7 @@
 		<p class="mb-4 text-sm text-muted-foreground">
 			Everything you can manage, and where to find it.
 		</p>
-		<div class="grid gap-6 md:grid-cols-2">
+		<div class="grid gap-4 md:grid-cols-2 md:gap-6">
 			{#each siteMap as { group, links } (group)}
 				<Card.Root>
 					<Card.Header>

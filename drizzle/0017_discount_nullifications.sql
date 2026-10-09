@@ -14,7 +14,7 @@ CREATE TABLE `discount_nullifications` (
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3),
 	CONSTRAINT `discount_nullifications_id` PRIMARY KEY(`id`),
 	CONSTRAINT `discount_nullifications_enrolment_id_unique` UNIQUE(`enrolment_id`)
-);
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 --> statement-breakpoint
 ALTER TABLE `discount_nullifications` ADD CONSTRAINT `discount_nullifications_enrolment_id_enrolments_id_fk` FOREIGN KEY (`enrolment_id`) REFERENCES `enrolments`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `discount_nullifications` ADD CONSTRAINT `discount_nullifications_created_by_user_id_fk` FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint

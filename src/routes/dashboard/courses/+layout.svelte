@@ -7,7 +7,9 @@
 	let { children } = $props();
 </script>
 
-<div class="mb-8 flex flex-row items-center justify-start gap-2">
+<div
+	class="mb-6 grid grid-cols-2 gap-2 md:mb-8 md:flex md:flex-row md:items-center md:justify-start"
+>
 	<Button
 		href="/dashboard/courses"
 		variant={page.url.pathname === '/dashboard/courses' ? 'default' : 'outline'}

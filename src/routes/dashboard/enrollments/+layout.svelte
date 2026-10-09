@@ -6,7 +6,7 @@
 	let { data, children } = $props();
 </script>
 
-<div class="mb-8 flex flex-row items-center justify-start gap-2">
+<div class="mb-4 flex flex-row items-center justify-start gap-2 md:mb-8">
 	<Button href="/dashboard/enrollments"><Sheet /> All Enrollments</Button>
 	<!-- <DialogComp title="Add New Customer" variant="default">
 		<AddCustomer data={data?.form} action="/dashboard/customers?/addCustomer" />

@@ -136,9 +136,9 @@
 				<CardTitle>Filter Table</CardTitle>
 				<CardDescription>Filter table using the below parameters</CardDescription>
 			</CardHeader>
-			<CardContent class="">
+			<CardContent class="px-3 md:px-6">
 				<div
-					class="space-y-2 rounded-xl border border-border/50 bg-background bg-linear-to-br from-card to-card/50 p-6 shadow-sm"
+					class="space-y-2 rounded-xl border border-border/50 bg-background bg-linear-to-br from-card to-card/50 p-3 shadow-sm md:p-6"
 				>
 					<!-- Filter Header -->
 					<div class="flex items-center justify-between">
@@ -166,7 +166,7 @@
 					<!-- Filter Controls -->
 					<div class="flex flex-row flex-wrap gap-4">
 						{#each filterKeys as filterKey (filterKey)}
-							<div class="min-w-50 space-y-2">
+							<div class="w-full space-y-2 sm:w-auto sm:min-w-50">
 								<Label for={filterKey} class="text-sm font-medium text-foreground capitalize">
 									{pluralize(filterKey).replace(/([a-z])([A-Z])/g, '$1 $2')}
 								</Label>

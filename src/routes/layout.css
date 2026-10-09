@@ -2113,3 +2113,63 @@ footer::before {
 		gap: 6px;
 	}
 }
+
+/* ── Dashboard: app-like behaviour on phones ── */
+html[data-app='dashboard'] {
+	-webkit-tap-highlight-color: transparent;
+	overscroll-behavior-y: none;
+}
+
+@media (max-width: 639px) {
+	/* Dialogs slide up from the bottom like a native sheet instead of floating mid-screen */
+	html[data-app='dashboard'] [data-slot='dialog-content'] {
+		top: auto !important;
+		bottom: 0 !important;
+		left: 0 !important;
+		translate: none !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		max-height: 92dvh;
+		overflow-y: auto;
+		border-radius: 1.25rem 1.25rem 0 0;
+		padding: 1.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
+		font-size: 0.875rem;
+	}
+	/* Grab handle */
+	html[data-app='dashboard'] [data-slot='dialog-content']::before {
+		content: '';
+		position: absolute;
+		top: 0.5rem;
+		left: 50%;
+		width: 2.5rem;
+		height: 0.25rem;
+		border-radius: 9999px;
+		background: var(--muted-foreground);
+		opacity: 0.4;
+		translate: -50% 0;
+	}
+	html[data-app='dashboard'] [data-slot='dialog-content'][data-state='open'] {
+		animation: dash-sheet-up 220ms cubic-bezier(0.32, 0.72, 0, 1);
+	}
+	html[data-app='dashboard'] [data-slot='dialog-content'][data-state='closed'] {
+		animation: dash-sheet-down 160ms ease-in forwards;
+	}
+	/* 16px inputs stop iOS zooming in on focus */
+	html[data-app='dashboard'] :is(input, select, textarea) {
+		font-size: 16px;
+	}
+}
+
+@keyframes dash-sheet-up {
+	from {
+		transform: translateY(100%);
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+@keyframes dash-sheet-down {
+	to {
+		transform: translateY(100%);
+	}
+}

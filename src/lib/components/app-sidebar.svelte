@@ -1,78 +1,12 @@
 <script lang="ts">
-	import {
-		Users,
-		Mail,
-		LayoutDashboard,
-		BookText,
-		Plus,
-		Sheet,
-		SprayCan,
-		Images,
-		Clock3,
-		CircleHelp,
-		BadgePercent,
-		CreditCard,
-		Award
-	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { bgGradient } from '$lib/global.svelte';
-	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
+	import { navigation } from '$lib/dashboard-nav';
 
 	import NavMain from './NavMain.svelte';
 
-	const navigation = [
-		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-		{ title: 'Enrollments', url: '/dashboard/enrollments', icon: Users },
-		{ title: 'Certificates', url: '/dashboard/certificates', icon: Award },
-		{ title: 'Services', url: '/dashboard/services', icon: SprayCan },
-		{ title: 'Gallery', url: '/dashboard/gallery', icon: Images },
-		{ title: 'Opening Hours', url: '/dashboard/hours', icon: Clock3 },
-
-		{
-			title: 'Courses',
-			url: '/dashboard/courses',
-			icon: BookText,
-			items: [
-				{ title: 'All Courses', url: '/dashboard/courses', icon: Sheet },
-				{ title: 'Add Course', url: '/dashboard/courses/add-course', icon: Plus }
-			]
-		},
-
-		{ title: 'Discounts', url: '/dashboard/discounts', icon: BadgePercent },
-		{ title: 'Payment Methods', url: '/dashboard/payment-methods', icon: CreditCard },
-
-		{
-			title: 'Messages',
-			url: '/dashboard/messages',
-			icon: Mail
-		},
-
-		{ title: 'Help', url: '/dashboard/help', icon: CircleHelp }
-
-		// {
-		// 	title: 'Admin Panel',
-		// 	url: '/dashboard/admin-panel',
-		// 	icon: UserRoundCog,
-		// 	items: [
-		// 		{ title: 'Users', url: '/dashboard/admin-panel/users', icon: Users },
-		// 		{ title: 'Roles', url: '/dashboard/admin-panel/roles', icon: Users }
-		// 	]
-		// }
-	];
-
 	let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
-
-	const on = 'bg-sidebar-primary text-sidebar-primary-foreground';
-	const off = 'text-sidebar-foreground';
-
-	const sidebar = useSidebar();
-
-	// function closeSidebar() {
-	// 	if (sidebar.isMobile) {
-	// 		sidebar.setOpenMobile(false);
-	// 	}
-	// }
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
