@@ -13,6 +13,7 @@
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import FormCard from '$lib/formComponents/FormCard.svelte';
 	import InputComp from '$lib/formComponents/InputComp.svelte';
+	import { audienceItems } from '$lib/courses';
 
 	let { data } = $props();
 
@@ -73,6 +74,7 @@
 			placeholder="Enter Course Name"
 			required
 		/>
+		<InputComp {form} {errors} type="select" name="audience" label="For" items={audienceItems} />
 		<InputComp
 			{form}
 			{errors}
@@ -141,6 +143,15 @@
 			name="minPriceMessage"
 			label="Minimum Price Message"
 			placeholder="Enter Minimum Price Message"
+		/>
+
+		<InputComp
+			{form}
+			{errors}
+			type="file"
+			name="featuredImage"
+			label="Featured Image (optional)"
+			placeholder="JPG, PNG or WebP (Max 10MB)"
 		/>
 
 		<InputComp

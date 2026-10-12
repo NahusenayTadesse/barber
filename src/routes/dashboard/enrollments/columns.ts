@@ -3,10 +3,12 @@ import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 import Copy from '$lib/Copy.svelte';
 import DataTableActions from './data-table-actions.svelte';
 import PayLinkCell from './pay-link-cell.svelte';
+import WelcomeEmailCell from './welcome-email-cell.svelte';
+import EditStudentCell from './edit-student-cell.svelte';
 import DiscountCell from './discount-cell.svelte';
+import PaymentCell from './payment-cell.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import { formatDate } from '$lib/global.svelte';
-import Statuses from '$lib/components/Table/statuses.svelte';
 
 export const columns = [
 	{
@@ -23,7 +25,16 @@ export const columns = [
 				name: 'Name',
 				onclick: column.getToggleSortingHandler()
 			}),
-		sortable: true
+		sortable: true,
+		cell: ({ row }) =>
+			renderComponent(EditStudentCell, {
+				id: row.original.id,
+				name: row.original.name,
+				firstName: row.original.firstName,
+				lastName: row.original.lastName,
+				email: row.original.email,
+				phone: row.original.phone
+			})
 		// cell: ({ row }) => {
 		// 	// You can pass whatever you need from `row.original` to the component
 		// 	return renderComponent(DataTableLinks, {
@@ -32,13 +43,6 @@ export const columns = [
 		// 		link: '/dashboard/customers'
 		// 	});
 		// }
-	},
-	{
-		accessorKey: 'gender',
-		header: 'Gender',
-		sortable: true,
-		cell: ({ row }) =>
-			row.original.gender === 'male' ? 'Male' : row.original.gender === 'female' ? 'Female' : '—'
 	},
 	{
 		accessorKey: 'phone',
@@ -57,6 +61,15 @@ export const columns = [
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
 				name: 'Course',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true
+	},
+	{
+		accessorKey: 'audience',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'For',
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true
@@ -106,11 +119,25 @@ export const columns = [
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true,
-		cell: ({ row }) => {
-			return renderComponent(Statuses, {
-				status: row.original.status
-			});
-		}
+		cell: ({ row }) =>
+			renderComponent(PaymentCell, {
+				id: row.original.id,
+				name: row.original.name,
+				status: row.original.status,
+				paidBy: row.original.paidBy,
+				paidByStripe: row.original.paidByStripe,
+				paymentWayId: row.original.paymentWayId
+			})
+	},
+
+	{
+		accessorKey: 'paidBy',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Paid By',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true
 	},
 
 	{
@@ -121,6 +148,17 @@ export const columns = [
 				id: row.original.id,
 				link: row.original.payLink,
 				email: row.original.email
+			})
+	},
+
+	{
+		accessorKey: 'welcomeEmail',
+		header: 'Welcome Email',
+		cell: ({ row }) =>
+			renderComponent(WelcomeEmailCell, {
+				id: row.original.id,
+				email: row.original.email,
+				status: row.original.status
 			})
 	},
 

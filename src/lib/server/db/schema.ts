@@ -25,6 +25,8 @@ const timestamps = () => ({
 export const courses = mysqlTable('courses', {
 	id: int('id').primaryKey().autoincrement(),
 	name: varchar('name', { length: 255 }).notNull(), // e.g., "The Master Barber"
+	// Whose hair the course teaches you to style
+	audience: mysqlEnum('audience', ['men', 'women']).default('men').notNull(),
 	level: varchar('level', { length: 100 }), // e.g., "Beginner to Advanced"
 	duration: varchar('duration', { length: 100 }), // e.g., "10 Weeks"
 	description: text('description'),
@@ -34,6 +36,8 @@ export const courses = mysqlTable('courses', {
 	minPriceMessage: varchar('min_price_message', { length: 255 }),
 	basePrice: decimal('base_price', { precision: 10, scale: 2 }).notNull(),
 	slug: varchar('slug', { length: 255 }).unique(),
+	// Stored file name of the uploaded featured image (served from /files/)
+	featuredImage: varchar('featured_image', { length: 255 }),
 	...secureFields
 });
 
@@ -80,6 +84,18 @@ export const coursePaymentMethods = mysqlTable(
 	(table) => [primaryKey({ columns: [table.courseId, table.methodId] })]
 );
 
+// --- Payment Ways Table ---
+// How a student actually paid: Stripe (set automatically when a checkout is
+// paid, and never changed by hand), bank transfer or cash (recorded by staff).
+// Seeded by drizzle/seed/payment_ways.sql; the code finds Stripe by its slug.
+export const paymentWays = mysqlTable('payment_ways', {
+	id: int('id').primaryKey().autoincrement(),
+	name: varchar('name', { length: 100 }).notNull(), // e.g. "Bank Transfer"
+	slug: varchar('slug', { length: 50 }).notNull().unique(), // 'stripe', 'bank_transfer', 'cash'
+	sortOrder: int('sort_order').default(0).notNull(),
+	...timestamps()
+});
+
 // --- Enrolments Table ---
 // Based on the 'submitEnrol' function and payment selection
 export const enrolments = mysqlTable('enrolments', {
@@ -92,9 +108,10 @@ export const enrolments = mysqlTable('enrolments', {
 		onDelete: 'set null'
 	}),
 	paymentOption: varchar('payment_option', { length: 255 }),
+	// How they paid; set once paid (Stripe automatically, otherwise by staff)
+	paymentWayId: int('payment_way_id').references(() => paymentWays.id, { onDelete: 'set null' }),
 	firstName: varchar('first_name', { length: 255 }).notNull(),
 	lastName: varchar('last_name', { length: 255 }).notNull(),
-	gender: mysqlEnum('gender', ['male', 'female']), // optional
 	phone: varchar('phone', { length: 50 }),
 	email: varchar('email', { length: 255 }).notNull(),
 	// pending = checkout started, confirmed = paid, cancelled = checkout expired
@@ -108,9 +125,9 @@ export const enrolments = mysqlTable('enrolments', {
 });
 
 // --- Discount Nullifications Table ---
-// Audit record of a discount taken off a student, e.g. a women-only discount
-// claimed by someone who isn't. The enrolment goes back to unpaid with
-// amount_due, so the student can pay the rest with their payment link.
+// Audit record of a discount taken off a student who shouldn't have had it.
+// The enrolment goes back to unpaid with amount_due, so the student can pay
+// the rest with their payment link.
 export const discountNullifications = mysqlTable('discount_nullifications', {
 	id: int('id').primaryKey().autoincrement(),
 	enrolmentId: int('enrolment_id')
@@ -225,8 +242,6 @@ export const courseDiscounts = mysqlTable('course_discounts', {
 	id: int('id').primaryKey().autoincrement(),
 	name: varchar('name', { length: 255 }).notNull(), // e.g., "Summer Sale"
 	percentage: decimal('percentage', { precision: 5, scale: 2 }).notNull(), // e.g., 15.00
-	// Only for students of this gender; null = everyone
-	gender: mysqlEnum('gender', ['male', 'female']),
 	startsAt: timestamp('starts_at').defaultNow().notNull(),
 	expiresAt: timestamp('expires_at').notNull(),
 	...secureFields
@@ -245,3 +260,12 @@ export const courseDiscountCourses = mysqlTable(
 	},
 	(table) => [primaryKey({ columns: [table.discountId, table.courseId] })]
 );
+
+// --- Notification Emails Table ---
+// Addresses told about every new enrolment, as well as SMTP_USER (always
+// notified). Just emails: they don't need a dashboard account.
+export const notificationEmails = mysqlTable('notification_emails', {
+	id: int('id').primaryKey().autoincrement(),
+	email: varchar('email', { length: 255 }).notNull().unique(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});

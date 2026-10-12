@@ -39,12 +39,8 @@
 		return currentPath.startsWith(url) && currentPath !== '/dashboard';
 	}
 	function variantChecker2(url: string) {
-		const currentPath = page.url.pathname;
-
-		// Special case for root dashboard
-
-		// For other items, check if current path starts with their URL but is not just /dashboard
-		return currentPath === url;
+		// Includes the query, so "All Courses" and "Men's Courses" (?for=men) light up separately
+		return page.url.pathname + page.url.search === url;
 	}
 
 	const formatCount = (count: number): string => {

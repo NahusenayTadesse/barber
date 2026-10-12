@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { audiences } from '$lib/courses';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 5MB limit
 const ACCEPTED_FILE_TYPES = [
 	'image/jpeg', // Common for both platforms
@@ -9,8 +10,17 @@ const ACCEPTED_FILE_TYPES = [
 	'application/pdf' // Document format, kept from original
 ];
 
+// Featured image: an optional photo shown on the course card and course page
+export const featuredImage = z
+	.file()
+	.max(10 * 1024 * 1024, 'Image must be 10MB or smaller.')
+	.mime(['image/jpeg', 'image/png', 'image/webp'], 'Upload a JPG, PNG or WebP image.')
+	.optional();
+
 export const add = z.object({
 	name: z.string().min(1, 'Course Name is required.'),
+	// Whose hair the course teaches you to style
+	audience: z.enum(audiences, 'Choose who the course is for'),
 	level: z.string().optional(),
 	duration: z.string().optional(),
 	basePrice: z.number('Base Price is required'),
@@ -20,6 +30,7 @@ export const add = z.object({
 	experience: z.string().optional(),
 	// Payment method ids as strings, matching the checkbox values
 	methodIds: z.array(z.string()).min(1, 'Choose at least one payment method'),
+	featuredImage,
 
 	description: z
 		.string()

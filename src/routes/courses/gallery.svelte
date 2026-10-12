@@ -4,37 +4,37 @@
 			id: '01',
 			title: 'Real Clients. Week One.',
 			description: 'Real people. Real cuts. Real shop experience from the start.',
-			image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80'
+			image: '/images/real-client-cut.webp'
 		},
 		// {
 		// 	id: '02',
 		// 	title: 'Tutors Still in the Chair.',
 		// 	description: 'Learn from working barbers who still cut every week.',
-		// 	image: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600&q=70&fm=webp'
+		// 	image: '/images/student-client.webp'
 		// },
 		{
 			id: '02',
 			title: 'Walk Out Job-Ready.',
 			description: 'Build the confidence to step into a shop and start working.',
-			image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=70&fm=webp'
+			image: '/images/barber-cutting.webp'
 		},
 		// {
 		// 	id: '04',
 		// 	title: 'Small Groups. Big Progress.',
 		// 	description: 'Small groups. Direct feedback. No getting lost in the room.',
-		// 	image: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=600&q=80'
+		// 	image: '/images/training-stations.webp'
 		// },
 		// {
 		// 	id: '05',
 		// 	title: 'Every Texture. Every Style.',
 		// 	description: 'Fades, beard work, texture and clean finishes across real clients.',
-		// 	image: 'https://images.unsplash.com/photo-1622296089863-eb7fc530daa8?w=600&q=80'
+		// 	image: '/images/mannequin-wall.webp'
 		// },
 		{
 			id: '03',
 			title: 'Start for £299 Deposit.',
 			description: 'Secure your place fast with a deposit and flexible payment options.',
-			image: 'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=600&q=80'
+			image: '/images/shopfront.webp'
 		}
 	];
 </script>
@@ -238,21 +238,21 @@
 	}
 
 	.wc-img-1 {
-		background-image: url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80');
+		background-image: url('/images/real-client-cut.webp');
 	}
 	.wc-img-2 {
-		background-image: url('https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600&q=70&fm=webp');
+		background-image: url('/images/student-client.webp');
 	}
 	.wc-img-3 {
-		background-image: url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=70&fm=webp');
+		background-image: url('/images/textured-hair-mannequin.webp');
 	}
 	.wc-img-4 {
-		background-image: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=600&q=80');
+		background-image: url('/images/training-stations.webp');
 	}
 	.wc-img-5 {
-		background-image: url('https://images.unsplash.com/photo-1622296089863-eb7fc530daa8?w=600&q=80');
+		background-image: url('/images/mannequin-wall.webp');
 	}
 	.wc-img-6 {
-		background-image: url('https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=600&q=80');
+		background-image: url('/images/shopfront.webp');
 	}
 </style>

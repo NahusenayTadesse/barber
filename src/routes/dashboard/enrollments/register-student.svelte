@@ -1,13 +1,15 @@
 <script module lang="ts">
 	import type { ActiveDiscount, PaymentMethod } from '$lib/discounts';
+	import type { Audience } from '$lib/courses';
 
 	export type CourseOption = {
 		id: number;
 		name: string;
+		audience: Audience;
 		basePrice: string;
 		minPrice: string | null;
 		isActive: boolean;
-		/** Live discounts, including women/men-only ones */
+		/** Live discounts; the biggest one applies */
 		discounts: ActiveDiscount[];
 		methods: PaymentMethod[];
 	};
@@ -29,6 +31,7 @@
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
 	import { amountSuffix, bestDiscount, methodAmountFor } from '$lib/discounts';
+	import { courseLabel } from '$lib/courses';
 	import { registerStudent, type RegisterStudent } from './schema';
 
 	let {
@@ -84,13 +87,13 @@
 				};
 			},
 			onChange(event) {
-				// Suggest today's price when the course, option or gender changes; it can still be edited
-				if (event.paths.some((p) => ['courseId', 'paymentMethodId', 'gender'].includes(p))) {
+				// Suggest today's price when the course or option changes; it can still be edited
+				if (event.paths.some((p) => ['courseId', 'paymentMethodId'].includes(p))) {
 					const course = coursesList.find((c) => String(c.id) === $form.courseId);
 					const method = course?.methods.find((m) => String(m.id) === $form.paymentMethodId);
 					// A method the newly chosen course doesn't offer
 					if (!method && $form.paymentMethodId) $form.paymentMethodId = '';
-					const percentage = bestDiscount(course?.discounts ?? [], $form.gender)?.percentage;
+					const percentage = bestDiscount(course?.discounts ?? [])?.percentage;
 					const amount = methodAmountFor(course, method, percentage);
 					if (amount > 0) $form.amount = amount;
 				}
@@ -101,23 +104,20 @@
 	const courseItems = $derived(
 		coursesList.map((c) => ({
 			value: String(c.id),
-			name: c.isActive ? c.name : `${c.name} (inactive)`
+			name: c.isActive ? courseLabel(c) : `${courseLabel(c)} (inactive)`
 		}))
 	);
 	// The payment methods the chosen course offers
 	const selectedCourse = $derived(coursesList.find((c) => String(c.id) === $form.courseId));
-	const discount = $derived(bestDiscount(selectedCourse?.discounts ?? [], $form.gender));
+	const discount = $derived(bestDiscount(selectedCourse?.discounts ?? []));
 	const optionItems = $derived(
 		(selectedCourse?.methods ?? []).map((m) => ({
 			value: String(m.id),
 			name: `${m.name} — £${methodAmountFor(selectedCourse, m, discount?.percentage)}${amountSuffix(m)}`
 		}))
 	);
-	const genderItems = [
-		{ value: '', name: 'Not specified' },
-		{ value: 'male', name: 'Male' },
-		{ value: 'female', name: 'Female' }
-	];
+	// Bank Transfer, Cash... Students who pay online through Stripe are recorded automatically.
+	const paymentWayItems = $derived(page.data.paymentWays ?? []);
 	const statusItems = [
 		{ value: 'unpaid', name: 'Unpaid — send a payment link' },
 		{ value: 'paid', name: 'Paid' }
@@ -248,17 +248,14 @@
 				<InputComp {form} {errors} label="Last Name" type="text" name="lastName" required={true} />
 			</div>
 			<InputComp {form} {errors} label="Email" type="email" name="email" required={true} />
-			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-				<InputComp
-					{form}
-					{errors}
-					label="Phone"
-					type="tel"
-					name="phone"
-					placeholder="+44 7700 000000"
-				/>
-				<InputComp {form} {errors} label="Gender" type="select" name="gender" items={genderItems} />
-			</div>
+			<InputComp
+				{form}
+				{errors}
+				label="Phone"
+				type="tel"
+				name="phone"
+				placeholder="+44 7700 000000"
+			/>
 			<InputComp {form} {errors} label="Course" type="select" name="courseId" items={courseItems} />
 			<InputComp
 				{form}
@@ -267,8 +264,13 @@
 				type="select"
 				name="paymentMethodId"
 				items={optionItems}
+				disabled={!selectedCourse}
 			/>
-			{#if selectedCourse && !optionItems.length}
+			{#if !selectedCourse}
+				<p class="text-xs text-muted-foreground">
+					Choose a course first to see its payment options.
+				</p>
+			{:else if !optionItems.length}
 				<p class="text-xs text-muted-foreground">
 					This course has no payment methods. Add some on the course's page.
 				</p>
@@ -277,10 +279,19 @@
 				<InputComp {form} {errors} label="Amount (£)" type="number" name="amount" min="0" />
 				<InputComp {form} {errors} label="Status" type="select" name="status" items={statusItems} />
 			</div>
+			{#if $form.status === 'paid'}
+				<InputComp
+					{form}
+					{errors}
+					label="Paid By"
+					type="select"
+					name="paymentWayId"
+					items={paymentWayItems}
+				/>
+			{/if}
 			<p class="text-xs text-muted-foreground">
-				The amount is filled in with today's price (including any discount, and women/men-only
-				discounts for the gender chosen). Change it if you agreed a different amount. For unpaid
-				students, it's what the link charges.
+				The amount is filled in with today's price (including any discount). Change it if you agreed
+				a different amount. For unpaid students, it's what the link charges.
 			</p>
 
 			<Button type="submit" class="mt-4" form="register-student">

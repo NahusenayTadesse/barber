@@ -1,13 +1,19 @@
 import { db } from '$lib/server/db';
 import { courses as products, pricingOptions as prices } from '$lib/server/db/schema';
 import { getActiveDiscounts } from '$lib/server/discounts';
-import type { PageServerLoad } from '../$types';
-export const load: PageServerLoad = async () => {
+import { audienceParam, byAudience } from '$lib/courses';
+import { eq } from 'drizzle-orm';
+import type { PageServerLoad } from './$types';
+export const load: PageServerLoad = async ({ url }) => {
+	// ?for=men or ?for=women shows only those courses
+	const audience = audienceParam(url);
+
 	// First, get products
 	const productsData = await db
 		.select({
 			id: products.id,
 			name: products.name,
+			audience: products.audience,
 			basePrice: products.basePrice,
 			level: products.level,
 			target: products.target,
@@ -18,7 +24,9 @@ export const load: PageServerLoad = async () => {
 			description: products.description,
 			status: products.isActive
 		})
-		.from(products);
+		.from(products)
+		.where(audience ? eq(products.audience, audience) : undefined)
+		.then((rows) => rows.sort(byAudience));
 
 	// Then, get prices for those products
 	const productIds = productsData.map((p) => p.id);
@@ -43,6 +51,7 @@ export const load: PageServerLoad = async () => {
 	}));
 
 	return {
-		productList
+		productList,
+		audience
 	};
 };

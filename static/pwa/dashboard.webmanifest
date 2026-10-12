@@ -1,0 +1,49 @@
+{
+	"id": "/dashboard",
+	"name": "D&D Barber Academy Dashboard",
+	"short_name": "D&D Admin",
+	"description": "Manage enrolments, courses, certificates and messages for D&D Barber Academy.",
+	"start_url": "/dashboard",
+	"scope": "/dashboard",
+	"display": "standalone",
+	"background_color": "#0c0c0c",
+	"theme_color": "#0c0c0c",
+	"icons": [
+		{ "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+		{ "src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+		{
+			"src": "/pwa/icon-maskable-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/pwa/icon-maskable-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Register Student",
+			"url": "/dashboard/enrollments?register",
+			"icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Issue Certificate",
+			"url": "/dashboard/certificates?issue",
+			"icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Enrollments",
+			"url": "/dashboard/enrollments",
+			"icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Messages",
+			"url": "/dashboard/messages",
+			"icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }]
+		}
+	]
+}

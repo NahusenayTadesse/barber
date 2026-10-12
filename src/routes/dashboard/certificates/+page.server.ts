@@ -54,6 +54,8 @@ export const load: PageServerLoad = async ({ url }) => {
 			id: enrolments.id,
 			name: sql<string>`TRIM(CONCAT_WS(' ', ${enrolments.firstName}, ${enrolments.lastName}))`,
 			course: sql<string>`COALESCE(${courses.name}, ${enrolments.course})`,
+			// Null when the enrolment's course no longer exists
+			liveCourseId: courses.id,
 			duration: courses.duration,
 			level: courses.level,
 			status: enrolments.status
@@ -70,6 +72,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		name: e.name,
 		course: e.course ?? '',
 		courseDetails: courseDetailsOf(e.duration, e.level),
+		courseDeleted: e.liveCourseId === null,
 		paid: e.status === 'confirmed',
 		hasCertificate: certified.has(e.id)
 	}));

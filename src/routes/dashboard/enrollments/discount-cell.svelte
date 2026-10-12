@@ -78,9 +78,8 @@
 				<input type="hidden" name="enrolmentId" value={id} />
 				<h3 class="text-lg font-semibold">Nullify discount for this student</h3>
 				<p class="text-sm text-muted-foreground">
-					Removes <strong>{discount}</strong> from {name}, for example if they gave the wrong gender
-					for a women/men-only discount. They become <strong>Unpaid</strong> and their payment link charges
-					the amount below.
+					Removes <strong>{discount}</strong> from {name}, for example if it was given by mistake.
+					They become <strong>Unpaid</strong> and their payment link charges the amount below.
 				</p>
 				<p class="text-sm">
 					{status === 'paid' ? `Already paid: £${amount}` : `Currently due: £${amount}`}
@@ -113,7 +112,7 @@
 						required
 						minlength={5}
 						maxlength={1000}
-						placeholder="e.g. Claimed the women-only discount but is male (confirmed on ID at induction)"
+						placeholder="e.g. Enrolled after the discount ended; given by mistake"
 					/>
 				</div>
 

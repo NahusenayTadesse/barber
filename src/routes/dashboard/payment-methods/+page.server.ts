@@ -6,6 +6,7 @@ import { add as schema, edit as editSchema, deleteMethod } from './schema.js';
 import { db } from '$lib/server/db';
 import { coursePaymentMethods, courses, paymentMethods } from '$lib/server/db/schema';
 import { paymentMethodKindLabels } from '$lib/discounts';
+import { byAudience, courseLabel } from '$lib/courses';
 import type { Actions, PageServerLoad } from './$types.js';
 
 export const load: PageServerLoad = async () => {
@@ -15,7 +16,12 @@ export const load: PageServerLoad = async () => {
 	const editForm = await superValidate(zod4(editSchema));
 	const deleteForm = await superValidate(zod4(deleteMethod));
 
-	const allCourses = await db.select({ id: courses.id, name: courses.name }).from(courses);
+	const allCourses = (
+		await db
+			.select({ id: courses.id, name: courses.name, audience: courses.audience })
+			.from(courses)
+			.orderBy(courses.name)
+	).sort(byAudience);
 	const links = await db.select().from(coursePaymentMethods);
 	const rows = await db
 		.select()
@@ -24,7 +30,7 @@ export const load: PageServerLoad = async () => {
 
 	const methods = rows.map((m) => {
 		const courseIds = links.filter((l) => l.methodId === m.id).map((l) => l.courseId);
-		const names = allCourses.filter((c) => courseIds.includes(c.id)).map((c) => c.name);
+		const names = allCourses.filter((c) => courseIds.includes(c.id)).map(courseLabel);
 		return {
 			id: m.id,
 			name: m.name,
@@ -45,7 +51,7 @@ export const load: PageServerLoad = async () => {
 		};
 	});
 
-	const courseItems = allCourses.map((c) => ({ value: String(c.id), name: c.name }));
+	const courseItems = allCourses.map((c) => ({ value: String(c.id), name: courseLabel(c) }));
 
 	return { form, editForm, deleteForm, methods, courseItems };
 };

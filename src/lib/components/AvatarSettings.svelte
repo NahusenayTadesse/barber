@@ -2,7 +2,8 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 
-	import { LogOut, KeyRound, User } from '@lucide/svelte';
+	import { LogOut, KeyRound, Download } from '@lucide/svelte';
+	import { dashboardApp } from '$lib/pwa.svelte';
 	import { enhance } from '$app/forms';
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
 	import { goto } from '$app/navigation';
@@ -32,6 +33,11 @@
 			<DropdownMenu.Item onclick={() => goto('/dashboard/change-password')}>
 				<KeyRound /> Change Password
 			</DropdownMenu.Item>
+			{#if dashboardApp.installable}
+				<DropdownMenu.Item onclick={() => dashboardApp.install()}>
+					<Download /> Install app
+				</DropdownMenu.Item>
+			{/if}
 			<DropdownMenu.Item>
 				<form
 					method="post"

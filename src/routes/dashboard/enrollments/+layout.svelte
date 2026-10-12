@@ -1,13 +1,14 @@
 <script>
-	import Button from '$lib/components/ui/button/button.svelte';
 	import DialogComp from '$lib/formComponents/DialogComp.svelte';
 	import AddCustomer from '$lib/forms/AddCustomer.svelte';
-	import { Sheet } from '@lucide/svelte';
+	import AudienceTabs from '$lib/components/AudienceTabs.svelte';
 	let { data, children } = $props();
 </script>
 
-<div class="mb-4 flex flex-row items-center justify-start gap-2 md:mb-8">
-	<Button href="/dashboard/enrollments"><Sheet /> All Enrollments</Button>
+<div
+	class="mb-4 grid grid-cols-1 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:justify-start md:mb-8"
+>
+	<AudienceTabs href="/dashboard/enrollments" noun="Students" />
 	<!-- <DialogComp title="Add New Customer" variant="default">
 		<AddCustomer data={data?.form} action="/dashboard/customers?/addCustomer" />
 	</DialogComp> -->

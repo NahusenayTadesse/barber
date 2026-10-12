@@ -35,3 +35,6 @@ test-results
 
 # Content plan PDFs
 *.pdf
+
+# Mailbox credentials (plaintext passwords)
+emails.md

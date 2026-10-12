@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { courses, discountNullifications, enrolments } from '$lib/server/db/schema';
 import { enrolmentIdFromToken } from '$lib/server/payLink';
-import { stripe } from '$lib/server/stripe';
+import { confirmEnrolment, stripe } from '$lib/server/stripe';
 import type { Actions, PageServerLoad } from './$types';
 
 /** The registration a payment link points to, or a 404 for a wrong or edited link. */
@@ -24,6 +24,7 @@ async function enrolmentFor(token: string) {
 						paymentOption: enrolments.paymentOption,
 						amount: enrolments.amount,
 						status: enrolments.status,
+						stripeSessionId: enrolments.stripeSessionId,
 						removedDiscount: discountNullifications.discountName
 					})
 					.from(enrolments)
@@ -54,6 +55,35 @@ export const actions: Actions = {
 		const amount = Number(e.amount ?? 0);
 		if (e.status !== 'pending' || amount <= 0) {
 			return fail(400, { message: 'This enrolment has nothing left to pay.' });
+		}
+
+		// Only one checkout can be payable at a time: a second open one (another tab,
+		// the back button) could also be paid, and only the latest is linked here
+		if (e.stripeSessionId) {
+			let previous;
+			try {
+				previous = await stripe.checkout.sessions.retrieve(e.stripeSessionId);
+				if (previous.status === 'open') {
+					previous = await stripe.checkout.sessions.expire(previous.id);
+				}
+			} catch (err) {
+				console.error(
+					'Pay link: previous checkout check failed:',
+					err instanceof Error ? err.message : err
+				);
+				return fail(500, {
+					message: "We couldn't start the payment. Please try again, or call us on 020 3700 3997."
+				});
+			}
+			if (previous.status === 'complete') {
+				// Already paid in another tab
+				if (await confirmEnrolment(previous)) {
+					redirect(303, `/courses/success?session_id=${previous.id}`);
+				}
+				return fail(400, {
+					message: 'Your last payment is still being processed. Please check back shortly.'
+				});
+			}
 		}
 
 		let checkoutUrl: string | null = null;

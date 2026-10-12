@@ -13,6 +13,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { edit } from './schema';
+import { saveUploadedFile } from '$lib/server/upload';
 import { asc, count, eq } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 import { fail, error } from '@sveltejs/kit';
@@ -23,6 +24,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.select({
 			id: products.id,
 			name: products.name,
+			audience: products.audience,
 			basePrice: products.basePrice,
 			level: products.level,
 			target: products.target,
@@ -31,6 +33,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			experience: products.experience,
 			duration: products.duration,
 			description: products.description,
+			featuredImage: products.featuredImage,
 			status: products.isActive,
 			createdAt: products.createdAt
 		})
@@ -51,7 +54,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		.orderBy(asc(paymentMethods.sortOrder), asc(paymentMethods.id));
 
 	const form = await superValidate(
-		{ ...course, methodIds: offered.map((m) => String(m.id)) },
+		// The stored image is a file name, not an upload: the form only takes a new file
+		{ ...course, featuredImage: undefined, methodIds: offered.map((m) => String(m.id)) },
 		zod4(edit)
 	);
 
@@ -77,6 +81,7 @@ export const actions: Actions = {
 
 		const {
 			name,
+			audience,
 			level,
 			duration,
 			basePrice,
@@ -86,28 +91,34 @@ export const actions: Actions = {
 			target,
 			experience,
 			status,
-			methodIds
+			methodIds,
+			featuredImage
 		} = form.data;
 
 		try {
+			// Save the image before the transaction so it isn't held open during file I/O
+			const featuredImageFile = featuredImage ? await saveUploadedFile(featuredImage) : null;
+
 			await db.transaction(async (tx) => {
-				// 1. Upload images first (usually done before the DB transaction starts
-				// to avoid keeping a DB connection open during slow network I/O)
 
 				// 2. Insert the main product
 				await tx
 					.update(products)
 					.set({
 						name,
-						level,
-						duration,
+						audience,
+						// Empty optional fields are stored as nothing rather than ''
+						level: level || null,
+						duration: duration || null,
 						basePrice: String(basePrice),
-						description,
-						minPrice: String(minPrice),
-						minPriceMessage,
-						target,
-						experience,
+						description: description || null,
+						minPrice: minPrice == null ? null : String(minPrice),
+						minPriceMessage: minPriceMessage || null,
+						target: target || null,
+						experience: experience || null,
 						isActive: status,
+						// Only replaced when a new image was uploaded
+						...(featuredImageFile && { featuredImage: featuredImageFile }),
 						updatedBy: locals.user.id
 					})
 					.where(eq(products.id, Number(id)));

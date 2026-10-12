@@ -13,7 +13,12 @@ const config = {
 			return isExternalLibrary ? undefined : true;
 		}
 	},
-	kit: { adapter: adapter() }
+	kit: {
+		adapter: adapter(),
+		// The service worker is for the installable dashboard only; its layout registers
+		// it with scope /dashboard so the public site never runs it
+		serviceWorker: { register: false }
+	}
 };
 
 export default config;

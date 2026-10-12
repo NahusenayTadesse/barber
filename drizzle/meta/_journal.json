@@ -127,6 +127,34 @@
       "when": 1791566073391,
       "tag": "0017_discount_nullifications",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1791643377427,
+      "tag": "0018_notification_emails",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1791803455072,
+      "tag": "0019_course_audience",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1791805573250,
+      "tag": "0020_payment_ways",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1791821420531,
+      "tag": "0021_course_featured_image",
+      "breakpoints": true
     }
   ]
 }

@@ -7,7 +7,8 @@
 	import { fade, fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { tick } from 'svelte';
-	import { applyDiscount, genderAudience } from '$lib/discounts';
+	import { applyDiscount } from '$lib/discounts';
+	import { audienceLabels, audiences, type Audience } from '$lib/courses';
 	import Seo, { discountLine } from '$lib/components/Seo.svelte';
 	import { businessJsonLd, courseJsonLd } from '$lib/seo';
 	import { page } from '$app/state';
@@ -74,6 +75,25 @@
 					.map((img) => (img.startsWith('/files/') ? `${img}?w=1280&q=68` : img))
 			: ['/images (18).webp']
 	);
+	// Gallery under the hero: uploaded gallery images, or shop photos until some are uploaded
+	const galleryImages = $derived(
+		data.imagesList?.length
+			? data.imagesList
+					.filter((img): img is string => !!img)
+					.map((img) => (img.startsWith('http') || img.startsWith('/') ? img : `/files/${img}`))
+					.map((img) => (img.startsWith('/files/') ? `${img}?w=700&q=68` : img))
+			: [
+					'/images/real-client-cut.webp',
+					'/images/hex-light-interior.webp',
+					'/images/barber-cutting.webp',
+					'/images/mannequin-wall.webp',
+					'/images/training-stations.webp',
+					'/images/fade-finish.webp',
+					'/images/barber-chairs.webp',
+					'/images/shopfront.webp'
+				]
+	);
+
 	let heroIndex = $state(0);
 	$effect(() => {
 		if (heroImages.length < 2) return;
@@ -83,21 +103,20 @@
 		return () => clearInterval(t);
 	});
 
-	const minDeposit = $derived(
-		data.coursesList.length
-			? Math.min(
-					...data.coursesList.map((c) =>
-						Math.floor(applyDiscount(c.minPrice ?? c.basePrice, c.discount?.percentage))
-					)
-				)
-			: 0
-	);
-
-	const sortedByPrice = $derived(
-		[...data.coursesList].sort((a, b) => Number(a.basePrice) - Number(b.basePrice))
+	// Men's courses, then women's (the list arrives in that order)
+	const groups = $derived(
+		audiences
+			.map((audience) => ({
+				audience,
+				courses: data.coursesList.filter((c) => c.audience === audience)
+			}))
+			.filter((g) => g.courses.length)
 	);
 
 	// --- "Which course is yours?" quiz ---
+	// With men's and women's courses, the quiz first asks whose hair they want to style
+	const askAudience = $derived(groups.length > 1);
+	let quizAudience = $state<Audience | null>(null);
 	let quizStep = $state(1);
 	let quizScore = $state(0);
 	let quizAnswered = $state(0);
@@ -109,6 +128,7 @@
 	}
 
 	function restartQuiz() {
+		quizAudience = null;
 		quizScore = 0;
 		quizAnswered = 0;
 		quizStep = 1;
@@ -124,10 +144,22 @@
 	let quizViewportHeight = $state<number>();
 	$effect(() => {
 		quizStep;
+		quizAudience;
 		tick().then(() => {
 			if (quizPanelEl) quizViewportHeight = quizPanelEl.offsetHeight;
 		});
 	});
+
+	const audienceQuestion = $derived(askAudience && !quizAudience);
+	const quizQuestions = $derived(askAudience ? 4 : 3);
+	const quizDone = $derived((askAudience && quizAudience ? 1 : 0) + Math.min(quizStep - 1, 3));
+
+	// The courses the quiz picks from: those for the hair chosen
+	const sortedByPrice = $derived(
+		[...((groups.find((g) => g.audience === quizAudience) ?? groups[0])?.courses ?? [])].sort(
+			(a, b) => Number(a.basePrice) - Number(b.basePrice)
+		)
+	);
 
 	const recommendedCourse = $derived.by(() => {
 		if (!sortedByPrice.length) return null;
@@ -238,6 +270,20 @@
 	</div>
 </div>
 
+<section class="gsec" aria-labelledby="gallery-title">
+	<div class="gsec-head">
+		<div class="ey"><span>Inside the academy</span></div>
+		<h2 class="sec-title" id="gallery-title">SEE WHERE<br />YOU'LL <span class="g">TRAIN</span></h2>
+	</div>
+	<div class="ggrid">
+		{#each galleryImages as img, i (img)}
+			<figure class="gitem">
+				<img src={img} alt="D&D Barber Academy, photo {i + 1}" loading="lazy" decoding="async" />
+			</figure>
+		{/each}
+	</div>
+</section>
+
 <section class="proof-strip">
 	<div class="proof-inner">
 		<div class="proof-item">
@@ -248,16 +294,107 @@
 			<div class="proof-num">Wk 1</div>
 			<div class="proof-label">Your first real client</div>
 		</div>
-		<div class="proof-item">
-			<div class="proof-num">£{minDeposit}</div>
-			<div class="proof-label">Deposit to start</div>
-		</div>
-		<div class="proof-item">
-			<div class="proof-num">0%</div>
-			<div class="proof-label">Interest, no credit check</div>
-		</div>
 	</div>
 </section>
+
+<div class="section">
+	<div
+		class="fi"
+		style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px"
+	>
+		<div>
+			<div class="ey"><span>Our Courses</span></div>
+			<h2 class="sec-title">WHERE DO<br />YOU <span class="g">START?</span></h2>
+		</div>
+	</div>
+	{#if groups.length > 1}
+		<nav class="aud-jump" aria-label="Course types">
+			{#each groups as g (g.audience)}
+				<a href="#{g.audience}">{audienceLabels[g.audience]} hair courses</a>
+			{/each}
+		</nav>
+	{/if}
+	<p class="courses-disclaimer">
+		A 50% non-refundable deposit secures your place, and the remaining 50% is paid in equal
+		instalments every two weeks. Full payment is required before certification.
+	</p>
+</div>
+
+<div id="courses">
+	{#each groups as group (group.audience)}
+		<div class="aud-head" id={group.audience}>
+			<div class="ey"><span>{audienceLabels[group.audience]} hair</span></div>
+			<h3 class="aud-title">
+				COURSES FOR <span class="g">{group.audience === 'men' ? 'MEN' : 'WOMEN'}</span>
+			</h3>
+		</div>
+		<div class="crsgrid">
+			{#each group.courses as course (course.id)}
+				<div class="crscard fi" class:pop={course.id === Number(mostPopularCourseId)}>
+					<div class="crsstripe"></div>
+					{#if course.featuredImage}
+						<a class="crsimg" href="/courses/{course.id}" tabindex="-1" aria-hidden="true">
+							<img
+								src="/files/{course.featuredImage}?w=700&q=68"
+								alt=""
+								loading="lazy"
+								decoding="async"
+							/>
+						</a>
+					{/if}
+					<div class="crstop">
+						{#if course.id === Number(mostPopularCourseId)}
+							<div class="crstag">Most Popular</div>
+						{/if}
+						<div class="crslv">{course.level} — {course.target}</div>
+						<a class="crsnm" href="/courses/{course.id}">{course.name}</a>
+						<div class="crsdur">{course.duration} · {course.experience}</div>
+						<div class="crs-prow">
+							{#if course.discount}
+								<div class="crsprice">
+									£{applyDiscount(course.basePrice, course.discount.percentage)}
+								</div>
+								<div class="crspnote"><s>£{course.basePrice}</s> full course</div>
+							{:else}
+								<div class="crsprice">£{course.basePrice}</div>
+								<div class="crspnote">full course</div>
+							{/if}
+						</div>
+					</div>
+					<div class="crsbody">
+						{#if course.discount}
+							<div class="urgency crsdisc">
+								<strong>{course.discount.name}: {course.discount.percentage}% off</strong>
+							</div>
+						{/if}
+						{#if course.minPrice && Number(course.minPrice) > 0}
+							<div class="urgency">
+								<strong
+									>Enrol from £{Math.floor(
+										applyDiscount(course.minPrice, course.discount?.percentage)
+									)} deposit</strong
+								>
+								{#if course.minPriceMessage}— {course.minPriceMessage}{/if}
+							</div>
+						{/if}
+						<div class="incl">What You'll Learn & Get</div>
+						<ul class="buls">
+							{#each course?.description?.split(/\n+/).filter(Boolean) as point}
+								<li class="capitalize">{point.trim()}</li>
+							{/each}
+						</ul>
+						<a
+							class="btn-gold flex! flex-row! items-center! justify-center!"
+							href="/courses/{course.id}"
+							onclick={() => ($form.courseId = course.id)}
+							style="width:100%;padding:16px;font-size:14px">Reserve My Place</a
+						>
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/each}
+</div>
 
 <section class="qsec" id="quiz">
 	<div class="pinner">
@@ -269,18 +406,25 @@
 
 		<div class="quiz">
 			<div class="q-progress">
-				<div class="q-progress-bar" style="width:{Math.min(quizStep - 1, 3) * (100 / 3)}%"></div>
+				<div class="q-progress-bar" style="width:{quizDone * (100 / quizQuestions)}%"></div>
 			</div>
 			<div class="q-viewport" style={quizViewportHeight ? `height:${quizViewportHeight}px` : ''}>
-				{#key quizStep}
+				{#key `${audienceQuestion}-${quizStep}`}
 					<div
 						class="q-panel"
 						bind:this={quizPanelEl}
 						in:fly={{ y: 18, duration: 420, delay: 160, easing: quintOut }}
 						out:fly={{ y: -18, duration: 160, easing: quintOut }}
 					>
-						{#if quizStep === 1}
-							<p class="q-count">Question 1 of 3</p>
+						{#if audienceQuestion}
+							<p class="q-count">Question 1 of {quizQuestions}</p>
+							<h3 class="q-title">Whose hair do you want to style?</h3>
+							<div class="q-opts">
+								<button class="q-opt" onclick={() => (quizAudience = 'men')}>Men's hair</button>
+								<button class="q-opt" onclick={() => (quizAudience = 'women')}>Women's hair</button>
+							</div>
+						{:else if quizStep === 1}
+							<p class="q-count">Question {quizDone + 1} of {quizQuestions}</p>
 							<h3 class="q-title">Have you cut hair before?</h3>
 							<div class="q-opts">
 								<button class="q-opt" onclick={() => answerQuiz(0)}>Never touched a clipper</button>
@@ -291,7 +435,7 @@
 								>
 							</div>
 						{:else if quizStep === 2}
-							<p class="q-count">Question 2 of 3</p>
+							<p class="q-count">Question {quizDone + 1} of {quizQuestions}</p>
 							<h3 class="q-title">What do you want at the end of it?</h3>
 							<div class="q-opts">
 								<button class="q-opt" onclick={() => answerQuiz(0)}
@@ -305,7 +449,7 @@
 								>
 							</div>
 						{:else if quizStep === 3}
-							<p class="q-count">Question 3 of 3</p>
+							<p class="q-count">Question {quizDone + 1} of {quizQuestions}</p>
 							<h3 class="q-title">How much time can you give it?</h3>
 							<div class="q-opts">
 								<button class="q-opt" onclick={() => answerQuiz(0)}>A month, all in</button>
@@ -331,88 +475,6 @@
 		</div>
 	</div>
 </section>
-
-<div class="section">
-	<div
-		class="fi"
-		style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px"
-	>
-		<div>
-			<div class="ey"><span>Our Courses</span></div>
-			<h2 class="sec-title">WHERE DO<br />YOU <span class="g">START?</span></h2>
-		</div>
-	</div>
-	<p class="courses-disclaimer">
-		A 50% non-refundable deposit secures your place, and the remaining 50% is paid in equal
-		instalments every two weeks. Full payment is required before certification.
-	</p>
-</div>
-
-<div id="courses">
-	<div class="crsgrid">
-		{#each data.coursesList as course (course.id)}
-			<div class="crscard fi" class:pop={course.id === Number(mostPopularCourseId)}>
-				<div class="crsstripe"></div>
-				<div class="crstop">
-					{#if course.id === Number(mostPopularCourseId)}
-						<div class="crstag">Most Popular</div>
-					{/if}
-					<div class="crslv">{course.level} — {course.target}</div>
-					<div class="crsnm">{course.name}</div>
-					<div class="crsdur">{course.duration} · {course.experience}</div>
-					<div class="crs-prow">
-						{#if course.discount}
-							<div class="crsprice">
-								£{applyDiscount(course.basePrice, course.discount.percentage)}
-							</div>
-							<div class="crspnote"><s>£{course.basePrice}</s> full course</div>
-						{:else}
-							<div class="crsprice">£{course.basePrice}</div>
-							<div class="crspnote">full course</div>
-						{/if}
-					</div>
-				</div>
-				<div class="crsbody">
-					{#if course.discount}
-						<div class="urgency crsdisc">
-							<strong>{course.discount.name}: {course.discount.percentage}% off</strong>
-						</div>
-					{/if}
-					{#each course.genderOffers as offer (offer.id)}
-						<div class="urgency crsdisc">
-							<strong
-								>{offer.name}: {offer.percentage}% off for {offer.gender &&
-									genderAudience[offer.gender]}</strong
-							>
-						</div>
-					{/each}
-					{#if course.minPrice && Number(course.minPrice) > 0}
-						<div class="urgency">
-							<strong
-								>Enrol from £{Math.floor(
-									applyDiscount(course.minPrice, course.discount?.percentage)
-								)} deposit</strong
-							>
-							{#if course.minPriceMessage}— {course.minPriceMessage}{/if}
-						</div>
-					{/if}
-					<div class="incl">What You'll Learn & Get</div>
-					<ul class="buls">
-						{#each course?.description?.split(/\n+/).filter(Boolean) as point}
-							<li class="capitalize">{point.trim()}</li>
-						{/each}
-					</ul>
-					<a
-						class="btn-gold flex! flex-row! items-center! justify-center!"
-						href="/courses/{course.id}"
-						onclick={() => ($form.courseId = course.id)}
-						style="width:100%;padding:16px;font-size:14px">Reserve My Place</a
-					>
-				</div>
-			</div>
-		{/each}
-	</div>
-</div>
 
 <!-- // <section class="fitsec">
 // 	<div class="pinner">
@@ -639,7 +701,7 @@
 	}
 	.proof-inner {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(2, 1fr);
 		gap: 1px;
 		padding: 0;
 		max-width: none;
@@ -651,6 +713,105 @@
 	@media (max-width: 760px) {
 		.proof-inner {
 			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	/* ——— GALLERY ——— */
+	.gsec {
+		padding: clamp(48px, 7vw, 90px) clamp(16px, 4vw, 48px);
+		background: var(--black);
+	}
+	.gsec-head {
+		max-width: 1200px;
+		margin: 0 auto 28px;
+	}
+	.ggrid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 10px;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+	.gitem {
+		position: relative;
+		margin: 0;
+		aspect-ratio: 3 / 4;
+		overflow: hidden;
+		background: var(--dark2);
+		border: 1px solid rgba(212, 175, 55, 0.12);
+	}
+	.gitem img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.7s ease;
+	}
+	.gitem:hover img {
+		transform: scale(1.06);
+	}
+	@media (max-width: 900px) {
+		.ggrid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+	@media (max-width: 600px) {
+		.ggrid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 6px;
+		}
+	}
+
+	/* ——— MEN'S / WOMEN'S GROUPS ——— */
+	.aud-jump {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin-top: 20px;
+	}
+	.aud-jump a {
+		border: 1px solid rgba(212, 175, 55, 0.4);
+		color: var(--gold);
+		padding: 8px 14px;
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		border-radius: 2px;
+		transition: background 0.15s ease;
+	}
+	.aud-jump a:hover {
+		background: rgba(212, 175, 55, 0.08);
+	}
+	.aud-head {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 72px 48px 0;
+		scroll-margin-top: 80px;
+	}
+	.aud-head:first-child {
+		padding-top: 0;
+	}
+	.aud-head + .crsgrid {
+		padding-top: 28px;
+	}
+	.aud-title {
+		font-family: var(--fh);
+		font-size: clamp(30px, 4vw, 48px);
+		line-height: 1;
+	}
+	a.crsnm {
+		display: block;
+		color: inherit;
+	}
+	a.crsnm:hover {
+		color: var(--gold2);
+	}
+	@media (max-width: 640px) {
+		.aud-head {
+			padding: 44px 20px 0;
+		}
+		.aud-head:first-child {
+			padding-top: 0;
 		}
 	}
 
@@ -667,6 +828,21 @@
 	/* ——— COURSE CARD "MOST POPULAR" TAG ——— */
 	.crscard {
 		overflow: visible;
+	}
+	.crsimg {
+		display: block;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: var(--black);
+	}
+	.crsimg img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.7s ease;
+	}
+	.crscard:hover .crsimg img {
+		transform: scale(1.05);
 	}
 	.crscard.pop {
 		border-color: var(--gold);

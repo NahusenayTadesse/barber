@@ -6,6 +6,9 @@ import { add as schema, edit as editSchema, deleteDiscount } from './schema.js';
 import { db } from '$lib/server/db';
 import { courseDiscountCourses, courseDiscounts, courses } from '$lib/server/db/schema';
 import { discountStatus } from '$lib/discounts';
+import { audiences, byAudience, courseLabel } from '$lib/courses';
+
+const audienceNames = { men: 'Men', women: 'Women' } as const;
 import type { Actions, PageServerLoad } from './$types.js';
 
 // Discount days are UK calendar days, whatever timezone the server runs in
@@ -58,20 +61,29 @@ export const load: PageServerLoad = async () => {
 	const editForm = await superValidate(zod4(editSchema));
 	const deleteForm = await superValidate(zod4(deleteDiscount));
 
-	const allCourses = await db.select({ id: courses.id, name: courses.name }).from(courses);
+	const allCourses = (
+		await db
+			.select({ id: courses.id, name: courses.name, audience: courses.audience })
+			.from(courses)
+			.orderBy(courses.name)
+	).sort(byAudience);
 	const links = await db.select().from(courseDiscountCourses);
 	const rows = await db.select().from(courseDiscounts).orderBy(desc(courseDiscounts.expiresAt));
 
 	const discounts = rows.map((d) => {
 		const courseIds = links.filter((l) => l.discountId === d.id).map((l) => l.courseId);
-		const names = allCourses.filter((c) => courseIds.includes(c.id)).map((c) => c.name);
+		const linked = allCourses.filter((c) => courseIds.includes(c.id));
+		const names = linked.map(courseLabel);
 		return {
 			id: d.id,
 			name: d.name,
 			percentage: Number(d.percentage),
-			gender: d.gender ?? ('' as const),
+			// Whose courses it covers, e.g. "Men & Women"
 			audience:
-				d.gender === 'female' ? 'Women only' : d.gender === 'male' ? 'Men only' : 'Everyone',
+				audiences
+					.filter((a) => linked.some((c) => c.audience === a))
+					.map((a) => audienceNames[a])
+					.join(' & ') || 'None',
 			courseIds: courseIds.map(String),
 			course:
 				names.length && names.length === allCourses.length
@@ -86,7 +98,7 @@ export const load: PageServerLoad = async () => {
 		};
 	});
 
-	const courseItems = allCourses.map((c) => ({ value: String(c.id), name: c.name }));
+	const courseItems = allCourses.map((c) => ({ value: String(c.id), name: courseLabel(c) }));
 
 	return { form, editForm, deleteForm, discounts, courseItems };
 };
@@ -105,7 +117,7 @@ export const actions: Actions = {
 			);
 		}
 
-		const { name, percentage, gender, courseIds, startsAt, expiresAt, isActive } = form.data;
+		const { name, percentage, courseIds, startsAt, expiresAt, isActive } = form.data;
 
 		try {
 			await db.transaction(async (tx) => {
@@ -114,7 +126,6 @@ export const actions: Actions = {
 					.values({
 						name,
 						percentage: String(percentage),
-						gender: gender || null,
 						...toRange(startsAt, expiresAt),
 						isActive,
 						createdBy: locals.user.id
@@ -148,7 +159,7 @@ export const actions: Actions = {
 			);
 		}
 
-		const { id, name, percentage, gender, courseIds, startsAt, expiresAt, isActive } = form.data;
+		const { id, name, percentage, courseIds, startsAt, expiresAt, isActive } = form.data;
 
 		try {
 			await db.transaction(async (tx) => {
@@ -157,7 +168,6 @@ export const actions: Actions = {
 					.set({
 						name,
 						percentage: String(percentage),
-						gender: gender || null,
 						...toRange(startsAt, expiresAt),
 						isActive,
 						updatedBy: locals.user.id

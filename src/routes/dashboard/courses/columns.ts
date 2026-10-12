@@ -6,6 +6,7 @@ import BigText from '$lib/components/Table/bigText.svelte';
 import ImageViewer from '$lib/components/Table/image-viewer.svelte';
 import PriceList from './priceList.svelte';
 import Statuses from '$lib/components/Table/statuses.svelte';
+import { audienceLabels } from '$lib/courses';
 
 export const columns = [
 	{
@@ -31,6 +32,17 @@ export const columns = [
 				link: '/dashboard/courses'
 			});
 		}
+	},
+
+	{
+		accessorKey: 'audience',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'For',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => audienceLabels[row.original.audience]
 	},
 
 	{

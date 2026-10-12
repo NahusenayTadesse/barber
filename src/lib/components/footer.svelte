@@ -1,10 +1,11 @@
-
 <script>
-	let { courses } = $props()
+	let { courses } = $props();
 </script>
+
 <footer>
 	<div class="footer-inner">
 		<div>
+			<img src="/logo.webp?v=2" alt="D&D Barber & Academy logo" class="flogo-img" />
 			<div class="flogo">D&D Barber & Academy</div>
 			<div class="faddr">69 · London · 020 3700 3997</div>
 			<p class="fdesc">
@@ -21,7 +22,6 @@
 			<div class="fctitle">Navigate</div>
 			<ul class="flinks">
 				<li><a href="/">Home</a></li>
-				<li><a href="/haircuts">Haircuts</a></li>
 				<li><a href="contact" id="nav-contact">Contact</a></li>
 				<li><a href="/courses" class="nav-enrol">Start Your Career</a></li>
 			</ul>
@@ -29,18 +29,19 @@
 		<div>
 			<div class="fctitle">Courses</div>
 			<ul class="flinks">
-			  {#if courses.length}
-			    {#each courses as c (c.id)}
-				<li><a href="/courses/{c.id}">{c.name}</a></li>
-				{/each}
-	
-			{/if}
+				{#if courses.length}
+					{#each courses as c (c.id)}
+						<li><a href="/courses/{c.id}">{c.name}</a></li>
+					{/each}
+				{/if}
 			</ul>
 		</div>
 		<div>
 			<div class="fctitle">Follow Us</div>
 			<ul class="flinks">
-				<li><a href="https://www.instagram.com/dnd_barber_academy/" target="_blank">Instagram</a></li>
+				<li>
+					<a href="https://www.instagram.com/dnd_barber_academy/" target="_blank">Instagram</a>
+				</li>
 				<li><a href="https://www.tiktok.com/@dnd_barber_academy" target="_blank">TikTok</a></li>
 				<li><a href="https://wa.me/447846119677" target="_blank">WhatsApp</a></li>
 				<li><a href="tel:02037003997">020 3700 3997</a></li>

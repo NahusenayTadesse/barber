@@ -2,7 +2,7 @@
 	import * as Select from '$lib/components/ui/select/index.js';
 	import { selectItem, type Item } from '$lib/global.svelte';
 
-	let { value = $bindable(), items, name } = $props();
+	let { value = $bindable(), items, name, disabled = false } = $props();
 	function getItemNameById(items: any, value: any) {
 		const item = items.find((i) => i.value === value);
 		return item ? item.name : null; // returns null if not found
@@ -20,7 +20,7 @@
 	);
 </script>
 
-<Select.Root type="single" {name} bind:value>
+<Select.Root type="single" {name} bind:value {disabled}>
 	<Select.Trigger class="w-full capitalize">
 		{triggerContent}
 	</Select.Trigger>

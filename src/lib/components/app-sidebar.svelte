@@ -3,6 +3,9 @@
 	import type { ComponentProps } from 'svelte';
 	import { bgGradient } from '$lib/global.svelte';
 	import { navigation } from '$lib/dashboard-nav';
+	import { dashboardApp } from '$lib/pwa.svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { Download } from '@lucide/svelte';
 
 	import NavMain from './NavMain.svelte';
 
@@ -29,7 +32,7 @@
 					title="Go to Website Home Page"
 					target="_blank"
 				>
-					<img src="/logo.webp" class="mt-4 h-16 w-16 justify-self-center" alt="Logo" />
+					<img src="/logo.webp?v=2" class="mt-4 h-16 w-16 justify-self-center" alt="Logo" />
 				</a></Sidebar.GroupLabel
 			>
 			<Sidebar.GroupContent class="my-4">
@@ -37,4 +40,11 @@
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
 	</Sidebar.Content>
+	{#if dashboardApp.installable}
+		<Sidebar.Footer class="border-t p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+			<Button class="w-full rounded-full" onclick={() => dashboardApp.install()}>
+				<Download /> Install dashboard app
+			</Button>
+		</Sidebar.Footer>
+	{/if}
 </Sidebar.Root>

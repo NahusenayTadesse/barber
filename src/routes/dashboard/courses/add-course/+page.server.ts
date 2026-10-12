@@ -8,12 +8,18 @@ import type { Actions } from './$types';
 import type { PageServerLoad } from './$types.js';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { methodItems, setCourseMethods } from '$lib/server/paymentMethods';
+import { audienceParam } from '$lib/courses';
+import { saveUploadedFile } from '$lib/server/upload';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ url }) => {
 	const items = await methodItems();
 	// New courses offer every enabled method unless unticked
 	const form = await superValidate(
-		{ methodIds: items.filter((m) => m.isActive).map((m) => m.value) },
+		// Opened from the women's courses view (?for=women), it starts as a women's course
+		{
+			audience: audienceParam(url) ?? 'men',
+			methodIds: items.filter((m) => m.isActive).map((m) => m.value)
+		},
 		zod4(add),
 		{ errors: false }
 	);
@@ -36,6 +42,7 @@ export const actions: Actions = {
 
 		const {
 			name,
+			audience,
 			level,
 			duration,
 			basePrice,
@@ -44,19 +51,22 @@ export const actions: Actions = {
 			minPriceMessage,
 			target,
 			experience,
-			methodIds
+			methodIds,
+			featuredImage
 		} = form.data;
 
 		try {
+			// Save the image before the transaction so it isn't held open during file I/O
+			const featuredImageFile = featuredImage ? await saveUploadedFile(featuredImage) : null;
+
 			await db.transaction(async (tx) => {
-				// 1. Upload images first (usually done before the DB transaction starts
-				// to avoid keeping a DB connection open during slow network I/O)
 
 				// 2. Insert the main product
 				const [{ id }] = await tx
 					.insert(courses)
 					.values({
 						name,
+						audience,
 						level,
 						duration,
 						basePrice,
@@ -64,7 +74,8 @@ export const actions: Actions = {
 						minPrice,
 						minPriceMessage,
 						target,
-						experience
+						experience,
+						featuredImage: featuredImageFile
 					})
 					.$returningId();
 				await setCourseMethods(tx, id, methodIds);

@@ -33,7 +33,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	const methods = await getCourseMethods(allCourses.map((c) => c.id));
 	const coursesList = allCourses.map((c) => ({
 		...c,
-		// The page picks the best one for the gender the student chooses
 		discounts: discounts[c.id] ?? [],
 		// Only methods that work for this course (a deposit needs a minimum price)
 		methods: (methods[c.id] ?? []).filter((m) => methodAmountFor(c, m) > 0)
@@ -55,7 +54,7 @@ export const actions: Actions = {
 			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}
 
-		const { firstName, lastName, gender, phone, email, courseId, paymentMethodId } = form.data;
+		const { firstName, lastName, phone, email, courseId, paymentMethodId } = form.data;
 
 		// Price the enrolment from the database, never from the submitted amount,
 		// so the discount (and the price itself) can't be tampered with.
@@ -69,9 +68,7 @@ export const actions: Actions = {
 			.from(courses)
 			.where(activeCourse(courseId))
 			.then((res) => res[0]);
-		const discount = course
-			? (await getActiveDiscounts([course.id], gender || null))[course.id]
-			: undefined;
+		const discount = course ? (await getActiveDiscounts([course.id]))[course.id] : undefined;
 		// Only a method this course offers
 		const method = course
 			? (await getCourseMethods([course.id]))[course.id]?.find((m) => m.id === paymentMethodId)
@@ -96,7 +93,6 @@ export const actions: Actions = {
 				.values({
 					firstName,
 					lastName,
-					gender: gender || null,
 					phone,
 					email,
 					courseId,

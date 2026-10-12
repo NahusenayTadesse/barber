@@ -4,6 +4,7 @@
 		name: string;
 		course: string;
 		courseDetails: string;
+		courseDeleted: boolean;
 		paid: boolean;
 		hasCertificate: boolean;
 	};
@@ -89,10 +90,14 @@
 		}
 	);
 
+	// Keeps the course name saved on the enrolment, if any, so it's clear which one it was
+	const courseLabel = (e: EnrolmentOption) =>
+		e.courseDeleted ? [e.course, '(course deleted)'].filter(Boolean).join(' ') : e.course;
+
 	const enrolmentItems = $derived(
 		enrolmentOptions.map((e) => ({
 			value: String(e.id),
-			name: `${e.name} — ${e.course}${e.paid ? '' : ' (unpaid)'}${e.hasCertificate ? ' ✓ has certificate' : ''}`
+			name: `${e.name} — ${courseLabel(e)}${e.paid ? '' : ' (unpaid)'}${e.hasCertificate ? ' ✓ has certificate' : ''}`
 		}))
 	);
 

@@ -23,6 +23,7 @@
 	} from '@lucide/svelte';
 	import type { Component } from 'svelte';
 	import * as Card from '$lib/components/ui/card'; // Standard Shadcn-Svelte path
+	import InstallAppCard from '$lib/components/InstallAppCard.svelte';
 
 	let { data } = $props();
 
@@ -178,6 +179,8 @@
 			>
 		</div>
 	</div>
+
+	<InstallAppCard />
 
 	<div class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3">
 		<Card.Root class="overflow-hidden transition-all hover:shadow-md">

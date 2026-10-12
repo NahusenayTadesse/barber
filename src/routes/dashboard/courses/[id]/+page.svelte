@@ -16,11 +16,13 @@
 	import SingleView from '$lib/components/SingleView.svelte';
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import InputComp from '$lib/formComponents/InputComp.svelte';
+	import { audienceItems, audienceLabels } from '$lib/courses';
 
 	import { formatDate } from '$lib/global.svelte';
 
 	let singleTable = $derived([
 		{ name: 'Name', value: data.course?.name },
+		{ name: 'For', value: `${audienceLabels[data.course.audience]} hair` },
 		{ name: 'Level', value: data.course?.level },
 		{ name: 'Duration', value: data.course?.duration },
 		{ name: 'Experience', value: data.course?.experience },
@@ -81,12 +83,26 @@
 	</div>
 	{#if edit === false}
 		<div class="w-full p-4">
+			{#if data.course.featuredImage}
+				<img
+					src="/files/{data.course.featuredImage}?w=700&q=70"
+					alt="{data.course.name} featured image"
+					class="mb-4 max-h-72 w-full max-w-xl rounded-lg border object-cover"
+				/>
+			{/if}
 			<SingleTable {singleTable} />
 		</div>
 	{/if}
 	{#if edit}
 		<div class="w-full p-4">
-			<form action="?/edit" use:enhance class="flex flex-col gap-4" id="edit" method="post">
+			<form
+				action="?/edit"
+				use:enhance
+				class="flex flex-col gap-4"
+				id="edit"
+				method="post"
+				enctype="multipart/form-data"
+			>
 				<Errors allErrors={$allErrors} />
 				<InputComp
 					{form}
@@ -100,9 +116,17 @@
 				<InputComp
 					{form}
 					{errors}
+					type="select"
+					name="audience"
+					label="For"
+					items={audienceItems}
+				/>
+				<InputComp
+					{form}
+					{errors}
 					type="text"
 					name="level"
-					label="Course Level"
+					label="Course Level (optional)"
 					placeholder="Enter Level"
 				/>
 				<InputComp
@@ -110,7 +134,7 @@
 					{errors}
 					type="text"
 					name="duration"
-					label="Course Duration"
+					label="Course Duration (optional)"
 					placeholder="Enter Duration"
 				/>
 				<InputComp
@@ -127,7 +151,7 @@
 					{errors}
 					type="text"
 					name="target"
-					label="Target Audience"
+					label="Target Audience (optional)"
 					placeholder="Enter Target Audience"
 				/>
 
@@ -136,7 +160,7 @@
 					{errors}
 					type="text"
 					name="experience"
-					label="Experience Level to Enroll"
+					label="Experience Level to Enroll (optional)"
 					placeholder="Enter Experience Level"
 				/>
 
@@ -145,7 +169,7 @@
 					{errors}
 					type="textarea"
 					name="description"
-					label="Course Description"
+					label="Course Description (optional)"
 					placeholder="Enter Course Description"
 				/>
 
@@ -154,8 +178,8 @@
 					{errors}
 					type="number"
 					name="minPrice"
-					label="Minimum Price to Enroll"
-					placeholder="Enter Minimum Price for deposit to enroll"
+					label="Minimum Price to Enroll (optional)"
+					placeholder="Leave empty if there's no deposit / minimum"
 				/>
 
 				<InputComp
@@ -163,8 +187,8 @@
 					{errors}
 					type="textarea"
 					name="minPriceMessage"
-					label="Minimum Price Message"
-					placeholder="Enter Minimum Price Message"
+					label="Minimum Price Message (optional)"
+					placeholder="e.g. Secure your place with a deposit"
 				/>
 
 				<InputComp
@@ -183,15 +207,24 @@
 				<InputComp
 					{form}
 					{errors}
+					type="file"
+					name="featuredImage"
+					label="Featured Image (optional)"
+					image={data.course.featuredImage ?? ''}
+					placeholder="JPG, PNG or WebP (Max 10MB)"
+				/>
+
+				<InputComp
+					{form}
+					{errors}
 					type="checkbox"
 					name="methodIds"
 					label="Payment Methods Offered"
 					items={data.methodItems}
 				/>
 				<p class="text-xs text-muted-foreground">
-					Manage the methods themselves under <a href="/dashboard/payment-methods" class="underline"
-						>Payment Methods</a
-					>.
+					With none ticked, students can't pay for this course online. Manage the methods themselves
+					under <a href="/dashboard/payment-methods" class="underline">Payment Methods</a>.
 				</p>
 
 				<Button form="edit" type="submit" class="mt-4">

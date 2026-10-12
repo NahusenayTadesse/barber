@@ -1,6 +1,4 @@
 <script lang="ts" module>
-	import { genderAudience, type Gender } from '$lib/discounts';
-
 	export const SITE_NAME = 'D&D Barber & Academy';
 
 	/** "Opening Day Discount: 50% off all courses until 8 November 2026." */
@@ -11,15 +9,13 @@
 			courseLabel: string;
 			more: boolean;
 			endsOn: string;
-			gender: Gender | null;
 		} | null
 	): string {
 		if (!d) return '';
 		const what = d.more
 			? `up to ${d.percentage}% off selected courses`
 			: `${d.percentage}% off ${d.courseLabel}`;
-		const who = d.gender ? ` for ${genderAudience[d.gender]}` : '';
-		return `${d.name}: ${what}${who} until ${d.endsOn}.`;
+		return `${d.name}: ${what} until ${d.endsOn}.`;
 	}
 </script>
 

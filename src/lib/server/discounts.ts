@@ -1,12 +1,8 @@
 import { and, eq, gt, inArray, lte, type SQL } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { courseDiscountCourses, courseDiscounts, courses } from '$lib/server/db/schema';
-import {
-	bestDiscount,
-	type ActiveDiscount,
-	type BannerDiscount,
-	type Gender
-} from '$lib/discounts';
+import { bestDiscount, type ActiveDiscount, type BannerDiscount } from '$lib/discounts';
+import { courseLabel } from '$lib/courses';
 
 /** Discounts that are enabled and within their start/expiration window right now. */
 function liveDiscountsWhere() {
@@ -25,10 +21,10 @@ function liveDiscountCourses(extra?: SQL) {
 			id: courseDiscounts.id,
 			name: courseDiscounts.name,
 			percentage: courseDiscounts.percentage,
-			gender: courseDiscounts.gender,
 			expiresAt: courseDiscounts.expiresAt,
 			courseId: courseDiscountCourses.courseId,
-			courseName: courses.name
+			courseName: courses.name,
+			courseAudience: courses.audience
 		})
 		.from(courseDiscounts)
 		.innerJoin(courseDiscountCourses, eq(courseDiscountCourses.discountId, courseDiscounts.id))
@@ -36,7 +32,7 @@ function liveDiscountCourses(extra?: SQL) {
 		.where(and(liveDiscountsWhere(), eq(courses.isActive, true), extra));
 }
 
-/** Every live discount on each course id, including the ones for one gender only. */
+/** Every live discount on each course id. */
 export async function getCourseDiscounts(
 	courseIds: number[]
 ): Promise<Record<number, ActiveDiscount[]>> {
@@ -48,8 +44,7 @@ export async function getCourseDiscounts(
 		(byCourse[d.courseId] ??= []).push({
 			id: d.id,
 			name: d.name,
-			percentage: Number(d.percentage),
-			gender: d.gender
+			percentage: Number(d.percentage)
 		});
 	}
 	return byCourse;
@@ -57,18 +52,16 @@ export async function getCourseDiscounts(
 
 /**
  * Best live discount for each course id. When several discounts cover the same
- * course, the highest percentage wins. Gender-only discounts count only when
- * that gender is given.
+ * course, the highest percentage wins.
  */
 export async function getActiveDiscounts(
-	courseIds: number[],
-	gender?: Gender | null
+	courseIds: number[]
 ): Promise<Record<number, ActiveDiscount>> {
 	const all = await getCourseDiscounts(courseIds);
 
 	const best: Record<number, ActiveDiscount> = {};
 	for (const [courseId, discounts] of Object.entries(all)) {
-		const d = bestDiscount(discounts, gender);
+		const d = bestDiscount(discounts);
 		if (d) best[Number(courseId)] = d;
 	}
 	return best;
@@ -94,10 +87,9 @@ export async function getBannerDiscount(): Promise<BannerDiscount | null> {
 			covered.length >= totalCourses
 				? 'all courses'
 				: covered.length === 1
-					? covered[0].courseName
+					? courseLabel({ name: covered[0].courseName, audience: covered[0].courseAudience })
 					: 'selected courses',
 		more: new Set(live.map((d) => d.id)).size > 1,
-		gender: best.gender,
 		endsOn: best.expiresAt.toLocaleDateString('en-GB', {
 			timeZone: 'Europe/London',
 			day: 'numeric',

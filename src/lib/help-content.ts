@@ -192,6 +192,9 @@ export const helpSections: HelpSection[] = [
 			'status',
 			'paid',
 			'unpaid',
+			'cash',
+			'bank transfer',
+			'paid by',
 			'pending',
 			'course',
 			'register',
@@ -219,6 +222,7 @@ export const helpSections: HelpSection[] = [
 					'Amount: what they were charged, or what they still need to pay, in pounds after any discount.',
 					'Discount: the discount that was applied, or None. A removed discount is crossed out, with the date, who removed it and why underneath.',
 					'Status: Paid (green) means the payment was received - by card through Stripe, or marked as paid by you. Unpaid (red) means they have not paid yet. Cancelled means a website payment page expired without payment, usually after 24 hours.',
+					'Paid By: how a paid student paid - Stripe, Bank Transfer or Cash. Stripe payments are recorded automatically and show a lock: they cannot be changed.',
 					'Payment Link: for every Unpaid student, a Copy Link button and an email button to send them their personal payment link. Paid and cancelled students show a dash.',
 					'Enrolled At: the date they enrolled.'
 				]
@@ -248,9 +252,20 @@ export const helpSections: HelpSection[] = [
 			},
 			{
 				type: 'steps',
+				title: 'Recording a cash or bank transfer payment',
+				items: [
+					'In the Status column, press the pencil next to the student. Students who paid through Stripe have no pencil: their payment is recorded automatically.',
+					'Choose the Status: Paid, Unpaid or Cancelled.',
+					'For Paid, choose Paid By: Bank Transfer or Cash.',
+					'Press Save Payment. A student newly marked as paid gets their welcome email saying how they paid (for example "by cash"), and their payment link stops working. Marking a student Unpaid or Cancelled emails them too - an unpaid student gets their payment link. Everyone on the notification list is emailed about every change.',
+					'When registering a student who has already paid, choose Paid By in the Register Student form the same way.'
+				]
+			},
+			{
+				type: 'steps',
 				title: 'Removing (nullifying) a discount from a student',
 				items: [
-					"Use this when a student shouldn't have had a discount, for example they chose the wrong gender to get a women-only or men-only discount.",
+					"Use this when a student shouldn't have had a discount, for example it was given by mistake.",
 					'In the Discount column, press Nullify next to their discount.',
 					'Amount still to pay fills in with what they owe without the discount: the full price if they have not paid yet, or the discount they got if they already paid. Change it if needed, or enter 0 to remove the discount without asking for money.',
 					'Write the Reason and check the Date - both are kept for the audit record, together with your name.',
@@ -359,7 +374,10 @@ export const helpSections: HelpSection[] = [
 			'active',
 			'inactive',
 			'add course',
-			'edit course'
+			'edit course',
+			'men',
+			'women',
+			'for'
 		],
 		blocks: [
 			{
@@ -381,6 +399,7 @@ export const helpSections: HelpSection[] = [
 				title: 'Course fields',
 				items: [
 					'Course Name: required.',
+					"For: Men's hair or Women's hair - whose hair the course teaches students to style. The website lists men's courses first, then women's, and each course has its own page. A men's and a women's version of the same course are two separate courses, each with its own price.",
 					'Course Level and Duration: for example "Beginner" and "6 weeks".',
 					'Base Price: the full price of the course.',
 					'Minimum Price to Enroll and Minimum Price Message: the deposit needed to book a place, and the text explaining it to customers. The Deposit payment method charges this amount.',
@@ -439,8 +458,7 @@ export const helpSections: HelpSection[] = [
 					'Open Discounts in the sidebar and press Add Discount.',
 					'Name of Discount: the name customers will see, for example "Opening Day Discount" or "Summer Sale".',
 					'Percentage Off: how much to take off, for example 20 for 20% off.',
-					'Who Gets It: Everyone, or Women only / Men only. A women-only or men-only discount applies when the student chooses that gender on the enrolment form, which also shows a small note that a false gender means the discount is removed (see Enrollments to remove it).',
-					'Courses: tick each course the discount applies to. Use Select all to tick every course.',
+					"Courses: tick each course the discount applies to. Each course shows whether it is for men's or women's hair; tick both to give one discount to both. Use Select all to tick every course.",
 					'Starts On and Expires On: pick the first and last day of the discount from the calendars.',
 					'Leave Enabled ticked, then press Add Discount. A green message confirms it was saved.'
 				]

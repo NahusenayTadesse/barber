@@ -4,6 +4,7 @@
 	import { Sheet, SheetContent, SheetTrigger } from '$lib/components/ui/sheet';
 	import { Button } from '$lib/components/ui/button';
 	import ScrollArea from './ui/scroll-area/scroll-area.svelte';
+	import { audienceLabels, audiences, type Audience } from '$lib/courses';
 
 	// Only the fields the menu needs. Keep secureFields out of what you pass in.
 	type Course = {
@@ -12,6 +13,7 @@
 		basePrice: string; // decimal() comes back as a string
 		minPrice?: string | null;
 		minPriceMessage?: string | null;
+		audience: Audience;
 	};
 
 	let { courses = [] }: { courses?: Course[] } = $props();
@@ -34,12 +36,25 @@
 		return Number.isFinite(value) ? gbp.format(value) : '';
 	};
 
-	let menuItems = [
-		{ label: 'Home', href: '/courses' },
-		{ label: 'Haircuts', href: '/haircuts' },
-		{ label: 'Contact', href: '/contact' }
-	];
+	// Men's courses, then women's; empty groups are left out
+	const courseGroups = $derived(
+		audiences
+			.map((audience) => ({
+				audience,
+				courses: courses.filter((c) => c.audience === audience)
+			}))
+			.filter((g) => g.courses.length)
+	);
+
+	const onCoursePage = $derived(page.url.pathname.startsWith('/courses/'));
 </script>
+
+{#snippet drawerLink(label: string, href: string)}
+	<a {href} class="drawer-link" class:active={page.url.pathname === href} onclick={handleMenuClick}>
+		<span>{label}</span>
+		<span class="chev">→</span>
+	</a>
+{/snippet}
 
 <!-- ============ DESKTOP ============ -->
 <div class="hidden lg:block">
@@ -47,12 +62,30 @@
 		<!-- LEFT: Home + Contact -->
 		<ul class="nav-left">
 			<li>
-				<a href="/courses" id="nav-home" class={page.url.pathname === '/courses' ? 'al' : ''}>Home</a>
-			</li>
-			<li>
-				<a href="/haircuts" id="nav-haircuts" class={page.url.pathname === '/haircuts' ? 'al' : ''}
-					>Haircuts</a
+				<a href="/courses" id="nav-home" class={page.url.pathname === '/courses' ? 'al' : ''}
+					>Home</a
 				>
+			</li>
+			<li class="nav-drop">
+				<a href="/courses#courses" id="nav-courses" class={onCoursePage ? 'al' : ''}
+					>Courses <span class="caret">▾</span></a
+				>
+				{#if courseGroups.length}
+					<div class="drop-panel">
+						{#each courseGroups as g (g.audience)}
+							<div class="drop-col">
+								<p class="drop-label">{audienceLabels[g.audience]}</p>
+								{#each g.courses as course (course.id)}
+									<a
+										href={`/courses/${course.id}`}
+										class="drop-link"
+										class:active={page.url.pathname === `/courses/${course.id}`}>{course.name}</a
+									>
+								{/each}
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</li>
 			<li>
 				<a href="/contact" id="nav-contact" class={page.url.pathname === '/contact' ? 'al' : ''}
@@ -63,9 +96,9 @@
 
 		<!-- CENTRE: Logo -->
 		<a href="/" class="brand">
-			<div class="brand-mark">D&D</div>
+			<img src="/logo.webp?v=2" alt="D&D Barber Academy logo" class="brand-mark" />
 			<div class="brand-copy">
-				<h1>D&D Barber & Academy</h1>
+				<h1>D&D Barber Academy</h1>
 				<p>London · Barber Shop & Academy</p>
 			</div>
 		</a>
@@ -78,12 +111,12 @@
 </div>
 
 <!-- ============ MOBILE ============ -->
-<div class="flex items-center bg-black z-9999 justify-between sticky top-0 px-4 py-3 lg:hidden">
+<div class="sticky top-0 z-9999 flex items-center justify-between bg-black px-4 py-3 lg:hidden">
 	<!-- Compact brand, left-aligned -->
 	<a href="/" class="brand brand--sm">
-		<div class="brand-mark">D&D</div>
+		<img src="/logo.webp?v=2" alt="D&D Barber Academy logo" class="brand-mark" />
 		<div class="brand-copy">
-			<h1>D&D Barber & Academy</h1>
+			<h1>D&D Barber Academy</h1>
 		</div>
 	</a>
 
@@ -105,55 +138,47 @@
 				<!-- Brand header -->
 				<div class="drawer-head">
 					<a href="/" class="brand brand--stack" onclick={handleMenuClick}>
-						<div class="brand-mark">D&D</div>
+						<img src="/logo.webp?v=2" alt="D&D Barber Academy logo" class="brand-mark" />
 						<div class="brand-copy">
-							<h1>D&D Barber & Academy</h1>
-							<p>London · Barber Shop & Academy</p>
+							<h1>D&D Barber Academy</h1>
 						</div>
 					</a>
 					<button class="drawer-close" aria-label="Close menu" onclick={handleMenuClick}>
 						<XIcon class="size-5" />
 					</button>
 				</div>
-				   <ScrollArea orientation="vertical" class="h-85">
+				<ScrollArea orientation="vertical" class="h-85">
+					<!-- Scrollable body -->
 
-				<!-- Scrollable body -->
-				
 					<div class="link-group">
-						{#each menuItems as item (item.href)}
-							<a
-								href={item.href}
-								class="drawer-link"
-								class:active={page.url.pathname === item.href}
-								onclick={handleMenuClick}
-							>
-								<span>{item.label}</span>
-								<span class="chev">→</span>
-							</a>
-						{/each}
+						{@render drawerLink('Home', '/courses')}
 					</div>
 
-					{#if courses.length}
-						<p class="drawer-label">Courses</p>
+					{#each courseGroups as g (g.audience)}
+						<p class="drawer-label">{audienceLabels[g.audience]} Courses</p>
 						<div class="link-group">
-							{#each courses as course (course.id)}
-								
-								<a	href={`/courses/${course.id}`}
+							{#each g.courses as course (course.id)}
+								<a
+									href={`/courses/${course.id}`}
 									class="drawer-course"
+									class:active={page.url.pathname === `/courses/${course.id}`}
 									onclick={handleMenuClick}
 								>
-										<span class="course-price">{course.name}</span>
-								
+									<span class="course-price">{course.name}</span>
 								</a>
 							{/each}
 						</div>
-					{/if}
-			</ScrollArea>
+					{/each}
+
+					<div class="link-group drawer-after">
+						{@render drawerLink('Contact', '/contact')}
+					</div>
+				</ScrollArea>
 
 				<!-- Footer / CTA -->
 				<div class="drawer-foot">
 					<a href="/courses" class="cta" onclick={handleMenuClick}>Start Your Career</a>
-					<p class="copyright">D&D Barber & Academy © {new Date().getFullYear()}</p>
+					<p class="copyright">D&D Barber Academy © {new Date().getFullYear()}</p>
 				</div>
 			</div>
 		</SheetContent>
@@ -167,19 +192,10 @@
 		gap: 16px;
 	}
 	.brand-mark {
-		width: 58px;
-		height: 58px;
-		border-radius: 50%;
-		border: 2px solid var(--gold);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: linear-gradient(135deg, #0f0e00 0%, #1c1900 100%);
-		box-shadow: 0 0 24px rgba(212, 175, 55, 0.18);
-		font-family: var(--fh);
-		font-size: 22px;
-		letter-spacing: 1px;
-		color: var(--gold);
+		width: 64px;
+		height: 64px;
+		object-fit: contain;
+		filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.25));
 		flex-shrink: 0;
 	}
 	.brand-copy h1 {
@@ -204,10 +220,8 @@
 		gap: 10px;
 	}
 	.brand--sm .brand-mark {
-		width: 42px;
-		height: 42px;
-		font-size: 16px;
-		box-shadow: 0 0 16px rgba(212, 175, 55, 0.15);
+		width: 46px;
+		height: 46px;
 	}
 	.brand--sm .brand-copy h1 {
 		font-size: 16px;
@@ -256,7 +270,9 @@
 		border: 1px solid rgba(212, 175, 55, 0.25);
 		background: rgba(212, 175, 55, 0.06);
 		color: var(--gold);
-		transition: background 0.2s ease, transform 0.15s ease;
+		transition:
+			background 0.2s ease,
+			transform 0.15s ease;
 	}
 	.drawer-close:hover {
 		background: rgba(212, 175, 55, 0.14);
@@ -288,13 +304,17 @@
 		letter-spacing: 2px;
 		text-transform: uppercase;
 		color: #efeadb;
-		transition: background 0.2s ease, color 0.2s ease;
+		transition:
+			background 0.2s ease,
+			color 0.2s ease;
 	}
 	.drawer-link .chev {
 		color: var(--gold);
 		opacity: 0.55;
 		transform: translateX(-4px);
-		transition: transform 0.2s ease, opacity 0.2s ease;
+		transition:
+			transform 0.2s ease,
+			opacity 0.2s ease;
 	}
 	.drawer-link:hover,
 	.drawer-link:active {
@@ -340,17 +360,19 @@
 		padding: 15px 14px;
 		border-radius: 12px;
 		border: 1px solid transparent;
-		transition: background 0.2s ease, border-color 0.2s ease;
+		transition:
+			background 0.2s ease,
+			border-color 0.2s ease;
 		max-width: 80%;
 		font-size: 8px !important;
 	}
 	.drawer-course .text {
-    white-space: normal;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    flex: 1;
-    min-width: 0; /* Important for flex items */
-}
+		white-space: normal;
+		overflow-wrap: break-word;
+		word-break: break-word;
+		flex: 1;
+		min-width: 0; /* Important for flex items */
+	}
 	.drawer-course + .drawer-course {
 		margin-top: 2px;
 	}
@@ -364,13 +386,95 @@
 		font-weight: 500;
 		color: #e7e2d4;
 		text-overflow: ellipsis;
-		
 	}
 	.course-price {
 		flex-shrink: 0;
 		font-family: var(--fh);
 		font-size: 14px;
 		letter-spacing: 1px;
+		color: var(--gold);
+	}
+
+	.drawer-course.active {
+		background: rgba(212, 175, 55, 0.1);
+		border-color: rgba(212, 175, 55, 0.25);
+	}
+	.drawer-after {
+		margin-top: 20px;
+	}
+
+	/* ============ DESKTOP COURSES DROPDOWN ============ */
+	.nav-drop {
+		position: relative;
+	}
+	.caret {
+		font-size: 9px;
+		margin-left: 2px;
+	}
+	.drop-panel {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		display: flex;
+		gap: 28px;
+		min-width: 420px;
+		padding: 20px 22px;
+		margin-top: 18px;
+		background: rgba(8, 8, 8, 0.98);
+		border: 1px solid rgba(212, 175, 55, 0.2);
+		box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(6px);
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s ease,
+			visibility 0.2s;
+	}
+	/* Bridges the gap between the link and the panel so hover isn't lost */
+	.drop-panel::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: -20px;
+		height: 20px;
+	}
+	.nav-drop:hover .drop-panel,
+	.nav-drop:focus-within .drop-panel {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0);
+	}
+	.drop-col {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+	.drop-label {
+		margin-bottom: 8px;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 3px;
+		text-transform: uppercase;
+		color: var(--gold);
+	}
+	.nav-drop .drop-link {
+		padding: 7px 0;
+		font-size: 12px;
+		font-weight: 500;
+		letter-spacing: 0.5px;
+		text-transform: none;
+		white-space: normal;
+		color: #e7e2d4;
+	}
+	.nav-drop .drop-link::after {
+		display: none;
+	}
+	.nav-drop .drop-link:hover,
+	.nav-drop .drop-link.active {
 		color: var(--gold);
 	}
 
@@ -393,7 +497,9 @@
 		color: #0b0a06;
 		background: linear-gradient(90deg, var(--gold3), var(--gold), var(--gold2));
 		box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25);
-		transition: transform 0.15s ease, box-shadow 0.2s ease;
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.2s ease;
 	}
 	.cta:active {
 		transform: translateY(1px);

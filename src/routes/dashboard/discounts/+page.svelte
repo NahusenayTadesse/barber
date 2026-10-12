@@ -83,8 +83,8 @@
 	<h1 class="text-3xl font-bold tracking-tight">Course Discounts</h1>
 	<p class="text-muted-foreground">
 		Active discounts are applied automatically to course prices on the website and at checkout. If
-		more than one applies to a course, the biggest one is used. A discount for women or men only
-		applies once the student picks that gender when enrolling.
+		more than one applies to a course, the biggest one is used. One discount can cover men's and
+		women's courses alike.
 	</p>
 </div>
 

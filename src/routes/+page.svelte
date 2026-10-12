@@ -432,19 +432,11 @@
 		text-decoration: none;
 	}
 	.brand-mark {
-		width: 54px;
-		height: 54px;
-		border-radius: 50%;
-		border: 2px solid var(--gold);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: linear-gradient(135deg, #0f0e00 0%, #1c1900 100%);
-		box-shadow: 0 0 24px rgba(212, 175, 55, 0.18);
-		font-family: var(--fh);
-		font-size: 20px;
-		color: var(--gold);
-		letter-spacing: 1px;
+		width: 64px;
+		height: 64px;
+		object-fit: contain;
+		filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.25));
+		flex-shrink: 0;
 	}
 	.brand-copy h1 {
 		font-family: var(--fh);
@@ -545,7 +537,7 @@
 			linear-gradient(135deg, #0a0a0a 0%, #111111 55%, #090909 100%);
 	}
 	.hero-image {
-		background-image: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1600&q=80');
+		background-image: url('/images/barber-at-work.webp');
 		background-size: cover;
 		background-position: center;
 	}
@@ -842,34 +834,34 @@
 		background-image: url('/images (6).webp');
 	}
 	.services-grid .service-card:nth-child(7) .service-image {
-		background-image: url('https://images.unsplash.com/photo-1520975916090-3105956dac38?w=800&q=80');
+		background-image: url('/images/barber-cutting.webp');
 	}
 	.services-grid .service-card:nth-child(8) .service-image {
 		background-image: url('/images (8).webp');
 	}
 	.service-image {
-		background-image: url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80');
+		background-image: url('/images/student-client.webp');
 	}
 	.services-grid .service-card:nth-child(10) .service-image {
 		background-image: url('/images (7).webp');
 	}
 	.services-grid .service-card:nth-child(11) .service-image {
-		background-image: url('https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80');
+		background-image: url('/images/shop-floor-cuts.webp');
 	}
 	.services-grid .service-card:nth-child(12) .service-image {
-		background-image: url('https://images.unsplash.com/photo-1492724441997-5dc865305da7?w=800&q=80');
+		background-image: url('/images/styling-stations.webp');
 	}
 	.services-grid .service-card:nth-child(13) .service-image {
-		background-image: url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=80');
+		background-image: url('/images/hex-light-interior.webp');
 	}
 	.services-grid .service-card:nth-child(14) .service-image {
-		background-image: url('https://images.unsplash.com/photo-1516728778615-2d590ea1856e?w=800&q=80');
+		background-image: url('/images/barber-chairs.webp');
 	}
 	.services-grid .service-card:nth-child(15) .service-image {
-		background-image: url('https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800&q=80');
+		background-image: url('/images/fade-finish.webp');
 	}
 	.services-grid .service-card:nth-child(16) .service-image {
-		background-image: url('https://images.unsplash.com/photo-1495121605193-b116b5b09a27?w=800&q=80');
+		background-image: url('/images/shop-interior.webp');
 	}
 
 	.split-grid {
@@ -996,7 +988,7 @@
 	class="topbar mt-2 flex flex-col gap-2 justify-self-center lg:mb-12 lg:flex lg:w-7/10 lg:flex-row"
 >
 	<div class="brand">
-		<div class="brand-mark">D&D</div>
+		<img src="/logo.webp?v=2" alt="D&D Barber & Academy logo" class="brand-mark" />
 		<div class="brand-copy">
 			<h1>D&D Barber & Academy</h1>
 			<p>London · Barber Shop & Academy</p>

@@ -3,7 +3,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import { backOut } from 'svelte/easing';
 	import { X } from '@lucide/svelte';
-	import { genderAudience, type BannerDiscount } from '$lib/discounts';
+	import type { BannerDiscount } from '$lib/discounts';
 
 	let { discount }: { discount: BannerDiscount } = $props();
 
@@ -11,12 +11,11 @@
 	let closeBtn = $state<HTMLButtonElement>();
 
 	const offer = $derived(
-		(discount.more
+		discount.more
 			? 'on selected courses'
 			: discount.courseLabel === 'all courses'
 				? 'on all courses'
-				: `on ${discount.courseLabel}`) +
-			(discount.gender ? ` for ${genderAudience[discount.gender]}` : '')
+				: `on ${discount.courseLabel}`
 	);
 
 	// Shown once per browser session for each discount; a new discount shows again
