@@ -75,24 +75,6 @@
 					.map((img) => (img.startsWith('/files/') ? `${img}?w=1280&q=68` : img))
 			: ['/images (18).webp']
 	);
-	// Gallery under the hero: uploaded gallery images, or shop photos until some are uploaded
-	const galleryImages = $derived(
-		data.imagesList?.length
-			? data.imagesList
-					.filter((img): img is string => !!img)
-					.map((img) => (img.startsWith('http') || img.startsWith('/') ? img : `/files/${img}`))
-					.map((img) => (img.startsWith('/files/') ? `${img}?w=700&q=68` : img))
-			: [
-					'/images/real-client-cut.webp',
-					'/images/hex-light-interior.webp',
-					'/images/barber-cutting.webp',
-					'/images/mannequin-wall.webp',
-					'/images/training-stations.webp',
-					'/images/fade-finish.webp',
-					'/images/barber-chairs.webp',
-					'/images/shopfront.webp'
-				]
-	);
 
 	let heroIndex = $state(0);
 	$effect(() => {
@@ -253,7 +235,13 @@
 				<a class="btn-out" href="#quiz" onclick={scrollToQuiz}>Not Sure? Take The Quiz</a>
 			</div>
 			<p class="hero-reply">
-				<span class="dot"></span> Message us on WhatsApp — we reply within about 2 hours, Mon–Sat
+				<span class="dot"></span>
+				<span>
+					<a href="https://wa.me/447846119677" target="_blank" rel="noopener"
+						>Message us on WhatsApp</a
+					>
+					— we reply within about 2 hours, Mon–Sat
+				</span>
 			</p>
 		</div>
 	</div>
@@ -270,20 +258,6 @@
 	</div>
 </div>
 
-<section class="gsec" aria-labelledby="gallery-title">
-	<div class="gsec-head">
-		<div class="ey"><span>Inside the academy</span></div>
-		<h2 class="sec-title" id="gallery-title">SEE WHERE<br />YOU'LL <span class="g">TRAIN</span></h2>
-	</div>
-	<div class="ggrid">
-		{#each galleryImages as img, i (img)}
-			<figure class="gitem">
-				<img src={img} alt="D&D Barber Academy, photo {i + 1}" loading="lazy" decoding="async" />
-			</figure>
-		{/each}
-	</div>
-</section>
-
 <section class="proof-strip">
 	<div class="proof-inner">
 		<div class="proof-item">
@@ -297,104 +271,25 @@
 	</div>
 </section>
 
-<div class="section">
-	<div
-		class="fi"
-		style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px"
-	>
-		<div>
-			<div class="ey"><span>Our Courses</span></div>
-			<h2 class="sec-title">WHERE DO<br />YOU <span class="g">START?</span></h2>
-		</div>
+<section class="gsec" aria-labelledby="gallery-title">
+	<div class="gsec-head">
+		<div class="ey"><span>Inside the academy</span></div>
+		<h2 class="sec-title" id="gallery-title">SEE WHERE<br />YOU'LL <span class="g">TRAIN</span></h2>
 	</div>
-	{#if groups.length > 1}
-		<nav class="aud-jump" aria-label="Course types">
-			{#each groups as g (g.audience)}
-				<a href="#{g.audience}">{audienceLabels[g.audience]} hair courses</a>
-			{/each}
-		</nav>
-	{/if}
-	<p class="courses-disclaimer">
-		A 50% non-refundable deposit secures your place, and the remaining 50% is paid in equal
-		instalments every two weeks. Full payment is required before certification.
-	</p>
-</div>
-
-<div id="courses">
-	{#each groups as group (group.audience)}
-		<div class="aud-head" id={group.audience}>
-			<div class="ey"><span>{audienceLabels[group.audience]} hair</span></div>
-			<h3 class="aud-title">
-				COURSES FOR <span class="g">{group.audience === 'men' ? 'MEN' : 'WOMEN'}</span>
-			</h3>
-		</div>
-		<div class="crsgrid">
-			{#each group.courses as course (course.id)}
-				<div class="crscard fi" class:pop={course.id === Number(mostPopularCourseId)}>
-					<div class="crsstripe"></div>
-					{#if course.featuredImage}
-						<a class="crsimg" href="/courses/{course.id}" tabindex="-1" aria-hidden="true">
-							<img
-								src="/files/{course.featuredImage}?w=700&q=68"
-								alt=""
-								loading="lazy"
-								decoding="async"
-							/>
-						</a>
-					{/if}
-					<div class="crstop">
-						{#if course.id === Number(mostPopularCourseId)}
-							<div class="crstag">Most Popular</div>
-						{/if}
-						<div class="crslv">{course.level} — {course.target}</div>
-						<a class="crsnm" href="/courses/{course.id}">{course.name}</a>
-						<div class="crsdur">{course.duration} · {course.experience}</div>
-						<div class="crs-prow">
-							{#if course.discount}
-								<div class="crsprice">
-									£{applyDiscount(course.basePrice, course.discount.percentage)}
-								</div>
-								<div class="crspnote"><s>£{course.basePrice}</s> full course</div>
-							{:else}
-								<div class="crsprice">£{course.basePrice}</div>
-								<div class="crspnote">full course</div>
-							{/if}
-						</div>
-					</div>
-					<div class="crsbody">
-						{#if course.discount}
-							<div class="urgency crsdisc">
-								<strong>{course.discount.name}: {course.discount.percentage}% off</strong>
-							</div>
-						{/if}
-						{#if course.minPrice && Number(course.minPrice) > 0}
-							<div class="urgency">
-								<strong
-									>Enrol from £{Math.floor(
-										applyDiscount(course.minPrice, course.discount?.percentage)
-									)} deposit</strong
-								>
-								{#if course.minPriceMessage}— {course.minPriceMessage}{/if}
-							</div>
-						{/if}
-						<div class="incl">What You'll Learn & Get</div>
-						<ul class="buls">
-							{#each course?.description?.split(/\n+/).filter(Boolean) as point}
-								<li class="capitalize">{point.trim()}</li>
-							{/each}
-						</ul>
-						<a
-							class="btn-gold flex! flex-row! items-center! justify-center!"
-							href="/courses/{course.id}"
-							onclick={() => ($form.courseId = course.id)}
-							style="width:100%;padding:16px;font-size:14px">Reserve My Place</a
-						>
-					</div>
-				</div>
-			{/each}
-		</div>
-	{/each}
-</div>
+	<div class="gvid">
+		<video
+			src="/videos/academy.mp4"
+			poster="/videos/academy-poster.webp"
+			autoplay
+			muted
+			loop
+			playsinline
+			controls
+			preload="metadata"
+			aria-label="A look inside D&D Barber Academy"
+		></video>
+	</div>
+</section>
 
 <section class="qsec" id="quiz">
 	<div class="pinner">
@@ -520,50 +415,104 @@
 // 	</div>
 // </section> -->
 
-<section class="psec">
-	<div class="pinner">
-		<div class="ey"><span>Paying for it</span></div>
-		<h2 class="sec-title" style="font-size:clamp(36px,5vw,64px)">
-			YOU DON'T PAY<br />IT ALL AT <span class="g">ONCE.</span>
-		</h2>
-		<p class="sec-sub" style="margin-bottom:20px">
-			Your career shouldn't wait on cash flow. Here's exactly how the money works...
-		</p>
-		<div class="pstep-grid">
-			<div class="pstep">
-				<div class="psn">01</div>
-				<div>
-					<div class="pst">Pay the deposit</div>
-					<div class="psd">
-						A deposit secures your place on the next intake. It's non-refundable once paid.
+<div class="section">
+	<div
+		class="fi"
+		style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px"
+	>
+		<div>
+			<div class="ey"><span>Our Courses</span></div>
+			<h2 class="sec-title">WHERE DO<br />YOU <span class="g">START?</span></h2>
+		</div>
+	</div>
+	{#if groups.length > 1}
+		<nav class="aud-jump" aria-label="Course types">
+			{#each groups as g (g.audience)}
+				<a href="#{g.audience}">{audienceLabels[g.audience]} hair courses</a>
+			{/each}
+		</nav>
+	{/if}
+	<p class="courses-disclaimer">
+		A 50% non-refundable deposit secures your place, and the remaining 50% is paid in equal
+		instalments every two weeks. Full payment is required before certification.
+	</p>
+</div>
+
+<div id="courses">
+	{#each groups as group (group.audience)}
+		<div class="aud-head" id={group.audience}>
+			<div class="ey"><span>{audienceLabels[group.audience]} hair</span></div>
+			<h3 class="aud-title">
+				COURSES FOR <span class="g">{group.audience === 'men' ? 'MEN' : 'WOMEN'}</span>
+			</h3>
+		</div>
+		<div class="crsgrid">
+			{#each group.courses as course (course.id)}
+				<div class="crscard fi" class:pop={course.id === Number(mostPopularCourseId)}>
+					<div class="crsstripe"></div>
+					{#if course.featuredImage}
+						<a class="crsimg" href="/courses/{course.id}" tabindex="-1" aria-hidden="true">
+							<img
+								src="/files/{course.featuredImage}?w=700&q=68"
+								alt=""
+								loading="lazy"
+								decoding="async"
+							/>
+						</a>
+					{/if}
+					<div class="crstop">
+						{#if course.id === Number(mostPopularCourseId)}
+							<div class="crstag">Most Popular</div>
+						{/if}
+						<div class="crslv">{course.level} — {course.target}</div>
+						<a class="crsnm" href="/courses/{course.id}">{course.name}</a>
+						<div class="crsdur">{course.duration} · {course.experience}</div>
+						<div class="crs-prow">
+							{#if course.discount}
+								<div class="crsprice">
+									£{applyDiscount(course.basePrice, course.discount.percentage)}
+								</div>
+								<div class="crspnote"><s>£{course.basePrice}</s> full course</div>
+							{:else}
+								<div class="crsprice">£{course.basePrice}</div>
+								<div class="crspnote">full course</div>
+							{/if}
+						</div>
 					</div>
-				</div>
-			</div>
-			<div class="pstep">
-				<div class="psn">02</div>
-				<div>
-					<div class="pst">Spread the rest</div>
-					<div class="psd">
-						Pay the remaining balance in equal installments while you train, <span
-							class="text-primary">Interest-free</span
+					<div class="crsbody">
+						{#if course.discount}
+							<div class="urgency crsdisc">
+								<strong>{course.discount.name}: {course.discount.percentage}% off</strong>
+							</div>
+						{/if}
+						{#if course.minPrice && Number(course.minPrice) > 0}
+							<div class="urgency">
+								<strong
+									>Enrol from £{Math.floor(
+										applyDiscount(course.minPrice, course.discount?.percentage)
+									)} deposit</strong
+								>
+								{#if course.minPriceMessage}— {course.minPriceMessage}{/if}
+							</div>
+						{/if}
+						<div class="incl">What You'll Learn & Get</div>
+						<ul class="buls">
+							{#each course?.description?.split(/\n+/).filter(Boolean) as point}
+								<li class="capitalize">{point.trim()}</li>
+							{/each}
+						</ul>
+						<a
+							class="btn-gold flex! flex-row! items-center! justify-center!"
+							href="/courses/{course.id}"
+							onclick={() => ($form.courseId = course.id)}
+							style="width:100%;padding:16px;font-size:14px">Reserve My Place</a
 						>
 					</div>
 				</div>
-			</div>
-			<div class="pstep">
-				<div class="psn">03</div>
-				<div>
-					<div class="pst">Finish paid up</div>
-					<div class="psd">
-						All fees are cleared before certification, with <span class="text-primary">
-							no hidden costs</span
-						>.
-					</div>
-				</div>
-			</div>
+			{/each}
 		</div>
-	</div>
-</section>
+	{/each}
+</div>
 
 <section class="why-section">
 	<div class="why-inner">
@@ -606,6 +555,51 @@
 					<div class="wc-num">03</div>
 					<div class="wc-title">Afro &amp; Textured Hair</div>
 					<div class="wc-copy">Taught as core skill, not an optional add-on module.</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="psec">
+	<div class="pinner">
+		<div class="ey"><span>Paying for it</span></div>
+		<h2 class="sec-title" style="font-size:clamp(36px,5vw,64px)">
+			YOU DON'T PAY<br />IT ALL AT <span class="g">ONCE.</span>
+		</h2>
+		<p class="sec-sub" style="margin-bottom:20px">
+			Your career shouldn't wait on cash flow. Here's exactly how the money works...
+		</p>
+		<div class="pstep-grid">
+			<div class="pstep">
+				<div class="psn">01</div>
+				<div>
+					<div class="pst">Pay the deposit</div>
+					<div class="psd">
+						A deposit secures your place on the next intake. It's non-refundable once paid.
+					</div>
+				</div>
+			</div>
+			<div class="pstep">
+				<div class="psn">02</div>
+				<div>
+					<div class="pst">Spread the rest</div>
+					<div class="psd">
+						Pay the remaining balance in equal installments while you train, <span
+							class="text-primary">Interest-free</span
+						>
+					</div>
+				</div>
+			</div>
+			<div class="pstep">
+				<div class="psn">03</div>
+				<div>
+					<div class="pst">Finish paid up</div>
+					<div class="psd">
+						All fees are cleared before certification, with <span class="text-primary">
+							no hidden costs</span
+						>.
+					</div>
 				</div>
 			</div>
 		</div>
@@ -725,40 +719,19 @@
 		max-width: 1200px;
 		margin: 0 auto 28px;
 	}
-	.ggrid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 10px;
-		max-width: 1200px;
+	.gvid {
+		width: min(100%, 420px);
+		aspect-ratio: 9 / 16;
 		margin: 0 auto;
-	}
-	.gitem {
-		position: relative;
-		margin: 0;
-		aspect-ratio: 3 / 4;
 		overflow: hidden;
 		background: var(--dark2);
 		border: 1px solid rgba(212, 175, 55, 0.12);
 	}
-	.gitem img {
+	.gvid video {
+		display: block;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		transition: transform 0.7s ease;
-	}
-	.gitem:hover img {
-		transform: scale(1.06);
-	}
-	@media (max-width: 900px) {
-		.ggrid {
-			grid-template-columns: repeat(3, 1fr);
-		}
-	}
-	@media (max-width: 600px) {
-		.ggrid {
-			grid-template-columns: repeat(2, 1fr);
-			gap: 6px;
-		}
 	}
 
 	/* ——— MEN'S / WOMEN'S GROUPS ——— */
@@ -916,6 +889,11 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
+	}
+	.hero-reply a {
+		color: var(--gold);
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 	.hero-reply .dot {
 		width: 7px;
