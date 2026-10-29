@@ -40,6 +40,11 @@
 		expired: { icon: OctagonMinus, colour: 'bg-gray-500' },
 		disabled: { icon: OctagonMinus, colour: 'bg-red-500' },
 
+		/* classes */
+		upcoming: { icon: Loader, colour: 'bg-yellow-500' },
+		running: { icon: BadgeCheck, colour: 'bg-green-400' },
+		finished: { icon: OctagonMinus, colour: 'bg-gray-500' },
+
 		yes: { icon: BadgeCheck, colour: 'bg-green-400' },
 		no: { icon: OctagonMinus, colour: 'bg-red-500' },
 

@@ -155,6 +155,20 @@
       "when": 1791821420531,
       "tag": "0021_course_featured_image",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1792478544070,
+      "tag": "0022_class_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1793292601768,
+      "tag": "0023_enrolment_notes",
+      "breakpoints": true
     }
   ]
 }

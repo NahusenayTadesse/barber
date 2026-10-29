@@ -40,7 +40,8 @@ export async function tryNotifyAdmins(enrolmentId: number, source: string) {
 				paymentWaySlug: paymentWays.slug,
 				paymentWayName: paymentWays.name,
 				discountName: enrolments.discountName,
-				discountPercentage: enrolments.discountPercentage
+				discountPercentage: enrolments.discountPercentage,
+				notes: enrolments.notes
 			})
 			.from(enrolments)
 			.leftJoin(courses, eq(enrolments.courseId, courses.id))
@@ -63,7 +64,8 @@ export async function tryNotifyAdmins(enrolmentId: number, source: string) {
 			),
 			discount: e.discountName ? `${e.discountName} (${Number(e.discountPercentage)}%)` : null,
 			reference: e.id,
-			source
+			source,
+			notes: e.notes
 		});
 
 		const recipients = await notificationRecipients();

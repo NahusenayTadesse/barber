@@ -193,6 +193,172 @@ export function paymentLinkEmail(o: {
 	return { subject: `Complete your enrolment: ${o.courseName}`, text, html };
 }
 
+/**
+ * An email written by staff in the dashboard. The message is plain text: blank
+ * lines start a new paragraph. Each student is greeted by their first name.
+ */
+export function customEmail(o: { firstName: string; subject: string; message: string }) {
+	const name = o.firstName.trim() || 'there';
+	const message = o.message.trim();
+	const text = [
+		`Hi ${name},`,
+		'',
+		message,
+		'',
+		contactLine,
+		'',
+		'D&D Barber Academy',
+		siteUrl()
+	].join('\n');
+
+	const paragraphs = message
+		.split(/\n\s*\n/)
+		.map((p) => para(escapeHtml(p.trim()).replace(/\n/g, '<br>')));
+
+	const html = brandedEmail({
+		title: o.subject,
+		preheader: message.slice(0, 120),
+		eyebrow: 'D&D Barber Academy',
+		heading: `Hi ${name}`,
+		sections: [paragraphs.join('')],
+		signOff: 'D&D Barber Academy',
+		footnote: "You're receiving this because you registered for a course with us."
+	});
+
+	return { subject: o.subject, text, html };
+}
+
+/** "2026-11-01" -> "1 Nov 2026" */
+const shortDate = (iso: string) =>
+	new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', {
+		day: 'numeric',
+		month: 'short',
+		year: 'numeric',
+		timeZone: 'UTC'
+	});
+
+/** The email a paid student receives with their link to choose a class. */
+export function classPickerEmail(o: {
+	firstName: string;
+	courseName: string;
+	link: string;
+	/** The classes they can pick from, e.g. { name, schedule: "Mon 10:00–16:00", startDate } */
+	classes: { name: string; schedule: string; startDate: string }[];
+}) {
+	const name = o.firstName.trim() || 'there';
+	const options: [string, string][] = o.classes.map((c) => [
+		c.name,
+		`${c.schedule} · from ${shortDate(c.startDate)}`
+	]);
+	const intro = `Your place on the ${o.courseName} is confirmed. Now choose the class that fits your week: each one meets on different days and times.`;
+	const note =
+		'Places in each class are limited, so choose soon. You can use the same link to change your class until it starts.';
+
+	const text = [
+		`Hi ${name},`,
+		'',
+		intro,
+		'',
+		'Classes to choose from:',
+		...options.map(([k, v]) => `- ${k}: ${v}`),
+		'',
+		`Choose your class: ${o.link}`,
+		'',
+		note,
+		'',
+		contactLine,
+		'',
+		'D&D Barber Academy',
+		siteUrl()
+	].join('\n');
+
+	const html = brandedEmail({
+		title: 'Choose your class',
+		preheader: `Pick the days and times for your ${o.courseName}.`,
+		eyebrow: 'One more step',
+		heading: `Choose your class, ${name}`,
+		sections: [
+			para(escapeHtml(intro)),
+			detailsBox('Classes to choose from', options),
+			`<div style="text-align:center;padding:8px 0 4px">${button(o.link, 'Choose my class')}</div>`,
+			`<p style="margin:0;font-size:14px;color:#666">${escapeHtml(note)}</p>`
+		],
+		signOff: 'See you in the chair.',
+		footnote: "You're receiving this because you enrolled on a course with us."
+	});
+
+	return { subject: `Choose your class for the ${o.courseName}`, text, html };
+}
+
+/** The email a student in a class receives with when and where it meets. */
+export function classScheduleEmail(o: {
+	firstName: string;
+	courseName: string;
+	className: string;
+	startDate: string;
+	endDate: string | null;
+	/** Weekly meetings in timetable order, e.g. ["Monday", "10:00–16:00"] */
+	sessions: [string, string][];
+	location: string | null;
+	instructor: string | null;
+	notes: string | null;
+}) {
+	const name = o.firstName.trim() || 'there';
+	const intro = `Here is the schedule for your class on the ${o.courseName}. Please keep this email so you know when and where to be.`;
+	const details: [string, string][] = [
+		['Class', o.className],
+		['Starts', shortDate(o.startDate)],
+		['Ends', o.endDate ? shortDate(o.endDate) : 'Ongoing'],
+		...(o.location ? [['Location', o.location] as [string, string]] : []),
+		...(o.instructor ? [['Instructor', o.instructor] as [string, string]] : [])
+	];
+	const sessions: [string, string][] = o.sessions.length
+		? o.sessions
+		: [['To be confirmed', "We'll let you know the days and times soon."]];
+	const notes = o.notes?.trim() ?? '';
+
+	const text = [
+		`Hi ${name},`,
+		'',
+		intro,
+		'',
+		...details.map(([k, v]) => `${k}: ${v}`),
+		'',
+		'Each week:',
+		...sessions.map(([k, v]) => `- ${k}: ${v}`),
+		...(notes ? ['', notes] : []),
+		'',
+		contactLine,
+		'',
+		'D&D Barber Academy',
+		siteUrl()
+	].join('\n');
+
+	const html = brandedEmail({
+		title: 'Your class schedule',
+		preheader: `When and where your ${o.className} class meets.`,
+		eyebrow: 'Class schedule',
+		heading: `Your schedule, ${name}`,
+		sections: [
+			para(escapeHtml(intro)),
+			detailsBox('Your class', details),
+			detailsBox('Each week', sessions),
+			...(notes
+				? [
+						notes
+							.split(/\n\s*\n/)
+							.map((p) => para(escapeHtml(p.trim()).replace(/\n/g, '<br>')))
+							.join('')
+					]
+				: [])
+		],
+		signOff: 'See you in the chair.',
+		footnote: "You're receiving this because you enrolled on a course with us."
+	});
+
+	return { subject: `Your class schedule for the ${o.courseName}`, text, html };
+}
+
 /** The email a student receives with their certificate attached. */
 export function certificateEmail(o: {
 	studentName: string;
@@ -342,8 +508,11 @@ export function newEnrolmentAdminEmail(o: {
 	paidWith?: string | null;
 	reference: number;
 	source: string;
+	/** What the student wrote when registering, or staff noted */
+	notes?: string | null;
 }) {
 	const site = siteUrl();
+	const notes = o.notes?.trim() ?? '';
 	const ref = `DND-${String(o.reference).padStart(5, '0')}`;
 	const dashboard = `${site}/dashboard/enrollments`;
 
@@ -364,6 +533,7 @@ export function newEnrolmentAdminEmail(o: {
 		`New enrolment: ${o.studentName} has enrolled on the ${o.courseName}.`,
 		'',
 		...details.map(([k, v]) => `${k}: ${v}`),
+		...(notes ? ['', 'Notes:', notes] : []),
 		'',
 		`See all enrolments: ${dashboard}`,
 		'',
@@ -380,6 +550,12 @@ export function newEnrolmentAdminEmail(o: {
 				`Good news: <strong style="color:#111">${escapeHtml(o.studentName)}</strong> has paid and is enrolled on the <strong style="color:#111">${escapeHtml(o.courseName)}</strong>. They've been sent their welcome email.`
 			),
 			detailsBox('Enrolment details', details),
+			...(notes
+				? [
+						`<p style="margin:0 0 6px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#666">Notes</p>` +
+							para(escapeHtml(notes).replace(/\n/g, '<br>'))
+					]
+				: []),
 			para('Reply to this email to contact the student directly.') +
 				`<div style="text-align:center;padding:4px 0">${button(dashboard, 'Open Enrollments')}</div>`
 		],

@@ -22,4 +22,9 @@ export const certificateId = z.object({
 	id: z.coerce.number().int().positive()
 });
 
+// Certificates ticked in the table, for the bulk actions
+export const certificateIds = z.object({
+	ids: z.array(z.coerce.number().int().positive()).min(1)
+});
+
 export type IssueCertificate = typeof issueCertificate;

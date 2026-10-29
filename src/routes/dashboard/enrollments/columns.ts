@@ -7,6 +7,9 @@ import WelcomeEmailCell from './welcome-email-cell.svelte';
 import EditStudentCell from './edit-student-cell.svelte';
 import DiscountCell from './discount-cell.svelte';
 import PaymentCell from './payment-cell.svelte';
+import ClassCell from './class-cell.svelte';
+import DeleteStudentCell from './delete-student-cell.svelte';
+import NotesCell from './notes-cell.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import { formatDate } from '$lib/global.svelte';
 
@@ -64,6 +67,25 @@ export const columns = [
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true
+	},
+	{
+		accessorKey: 'className',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Class',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) =>
+			renderComponent(ClassCell, {
+				id: row.original.id,
+				name: row.original.name,
+				courseId: row.original.courseId,
+				classId: row.original.classId,
+				className: row.original.className,
+				status: row.original.status,
+				classLink: row.original.classLink
+			})
 	},
 	{
 		accessorKey: 'audience',
@@ -163,6 +185,17 @@ export const columns = [
 	},
 
 	{
+		accessorKey: 'notes',
+		header: 'Notes',
+		cell: ({ row }) =>
+			renderComponent(NotesCell, {
+				id: row.original.id,
+				name: row.original.name,
+				notes: row.original.notes
+			})
+	},
+
+	{
 		accessorKey: 'enrolledAt',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
@@ -173,6 +206,18 @@ export const columns = [
 		cell: ({ row }) => {
 			return formatDate(row.original.enrolledAt);
 		}
+	},
+
+	{
+		accessorKey: 'delete',
+		header: 'Delete',
+		cell: ({ row }) =>
+			renderComponent(DeleteStudentCell, {
+				id: row.original.id,
+				name: row.original.name,
+				status: row.original.status,
+				paidByStripe: row.original.paidByStripe
+			})
 	}
 
 	// {

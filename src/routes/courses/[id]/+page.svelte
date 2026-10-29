@@ -228,6 +228,15 @@
 					/>
 				</div>
 			</div>
+			<div class="fg" style="margin-bottom:14px">
+				<label for="notes">Notes (optional)</label><textarea
+					bind:value={$form.notes}
+					name="notes"
+					id="notes"
+					maxlength="2000"
+					placeholder="Anything we should know, e.g. your experience or availability"
+				></textarea>
+			</div>
 			<div class="fg">
 				<label id="ee" for="paymentOptions">Payment Options</label>
 			</div>

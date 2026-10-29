@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import { superValidate, message } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { and, desc, eq, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { certificates, courses, enrolments } from '$lib/server/db/schema';
 import {
@@ -11,7 +11,7 @@ import {
 	newCertificateCode
 } from '$lib/server/certificate';
 import { certificateEmail, mailConfigured, sendMail } from '$lib/server/mail';
-import { certificateId, issueCertificate } from './schema';
+import { certificateId, certificateIds, issueCertificate } from './schema';
 import type { Actions, PageServerLoad } from './$types';
 
 /** Today as a UK calendar date, YYYY-MM-DD */
@@ -103,6 +103,68 @@ async function certificateFor(request: Request) {
 		.leftJoin(enrolments, eq(certificates.enrolmentId, enrolments.id))
 		.where(eq(certificates.id, parsed.data.id))
 		.then((rows) => rows[0]);
+}
+
+type Outcome = { ok: true; message: string } | { ok: false; status: number; message: string };
+
+/** Ids of the certificates ticked in the table, or undefined if none */
+async function selectedIds(request: Request) {
+	const parsed = certificateIds.safeParse({ ids: (await request.formData()).getAll('id') });
+	return parsed.success ? parsed.data.ids : undefined;
+}
+
+/** Email a valid certificate to its student, with the PDF attached */
+async function emailCertificate(
+	{
+		certificate: cert,
+		email
+	}: { certificate: typeof certificates.$inferSelect; email: string | null },
+	origin: string
+): Promise<Outcome> {
+	if (!cert.isActive) {
+		return { ok: false, status: 400, message: 'A revoked certificate cannot be sent.' };
+	}
+	if (!email) {
+		return {
+			ok: false,
+			status: 400,
+			message: 'No email address for this student. Download the PDF and send it instead.'
+		};
+	}
+	if (!mailConfigured()) {
+		return {
+			ok: false,
+			status: 500,
+			message: 'Email is not set up yet. Download the PDF and send it instead.'
+		};
+	}
+
+	try {
+		const verifyUrl = certificateUrl(origin, cert.code);
+		await sendMail({
+			to: email,
+			...certificateEmail({
+				studentName: cert.studentName,
+				courseName: cert.courseName,
+				verifyUrl
+			}),
+			attachments: [
+				{
+					filename: certificateFileName(cert.studentName, cert.code),
+					content: await certificatePdf(cert, verifyUrl),
+					contentType: 'application/pdf'
+				}
+			]
+		});
+	} catch (err) {
+		console.error('Error emailing certificate:', err instanceof Error ? err.message : err);
+		return {
+			ok: false,
+			status: 500,
+			message: "The email couldn't be sent. Download the PDF and send it instead."
+		};
+	}
+	return { ok: true, message: `Certificate emailed to ${email}` };
 }
 
 export const actions: Actions = {
@@ -210,47 +272,99 @@ export const actions: Actions = {
 		return { message: `Certificate ${found.certificate.code} is valid again` };
 	},
 
+	// Only revoked certificates can be deleted, so a valid one is never removed by mistake
+	delete: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const found = await certificateFor(request);
+		if (!found) return fail(404, { message: 'Certificate not found.' });
+		if (found.certificate.isActive) {
+			return fail(400, { message: 'Revoke the certificate before deleting it.' });
+		}
+		await db.delete(certificates).where(eq(certificates.id, found.certificate.id));
+		return { message: `Certificate ${found.certificate.code} deleted` };
+	},
+
 	email: async ({ request, locals, url }) => {
 		if (!locals.user) return fail(401, { message: 'Please log in again.' });
 		const found = await certificateFor(request);
 		if (!found) return fail(404, { message: 'Certificate not found.' });
-		const { certificate: cert, email } = found;
+		const outcome = await emailCertificate(found, url.origin);
+		return outcome.ok
+			? { message: outcome.message }
+			: fail(outcome.status, { message: outcome.message });
+	},
 
-		if (!cert.isActive) return fail(400, { message: 'A revoked certificate cannot be sent.' });
-		if (!email) {
-			return fail(400, {
-				message: 'No email address for this student. Download the PDF and send it instead.'
-			});
-		}
-		if (!mailConfigured()) {
-			return fail(500, {
-				message: 'Email is not set up yet. Download the PDF and send it instead.'
-			});
-		}
+	// Bulk actions on the certificates ticked in the table
 
-		try {
-			const verifyUrl = certificateUrl(url.origin, cert.code);
-			await sendMail({
-				to: email,
-				...certificateEmail({
-					studentName: cert.studentName,
-					courseName: cert.courseName,
-					verifyUrl
-				}),
-				attachments: [
-					{
-						filename: certificateFileName(cert.studentName, cert.code),
-						content: await certificatePdf(cert, verifyUrl),
-						contentType: 'application/pdf'
-					}
-				]
-			});
-		} catch (err) {
-			console.error('Error emailing certificate:', err instanceof Error ? err.message : err);
-			return fail(500, {
-				message: "The email couldn't be sent. Download the PDF and send it instead."
-			});
+	bulkRevoke: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const ids = await selectedIds(request);
+		if (!ids) return fail(400, { message: 'Select at least one certificate.' });
+		const [result] = await db
+			.update(certificates)
+			.set({ isActive: false, updatedBy: locals.user.id })
+			.where(and(inArray(certificates.id, ids), eq(certificates.isActive, true)));
+		return {
+			message: `${result.affectedRows} certificate${result.affectedRows === 1 ? '' : 's'} revoked`
+		};
+	},
+
+	bulkRestore: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const ids = await selectedIds(request);
+		if (!ids) return fail(400, { message: 'Select at least one certificate.' });
+		const [result] = await db
+			.update(certificates)
+			.set({ isActive: true, updatedBy: locals.user.id })
+			.where(and(inArray(certificates.id, ids), eq(certificates.isActive, false)));
+		return {
+			message: `${result.affectedRows} certificate${result.affectedRows === 1 ? ' is' : 's are'} valid again`
+		};
+	},
+
+	// As for one certificate, only revoked ones are deleted
+	bulkDelete: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const ids = await selectedIds(request);
+		if (!ids) return fail(400, { message: 'Select at least one certificate.' });
+		const [result] = await db
+			.delete(certificates)
+			.where(and(inArray(certificates.id, ids), eq(certificates.isActive, false)));
+		const deleted = result.affectedRows;
+		const skipped = ids.length - deleted;
+		const message = [
+			`${deleted} certificate${deleted === 1 ? '' : 's'} deleted.`,
+			skipped ? `${skipped} still valid, so not deleted. Revoke them first.` : ''
+		]
+			.filter(Boolean)
+			.join(' ');
+		return deleted ? { message } : fail(400, { message });
+	},
+
+	bulkEmail: async ({ request, locals, url }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const ids = await selectedIds(request);
+		if (!ids) return fail(400, { message: 'Select at least one certificate.' });
+		if (!mailConfigured()) return fail(500, { message: 'Email is not set up yet.' });
+
+		const rows = await db
+			.select({ certificate: certificates, email: enrolments.email })
+			.from(certificates)
+			.leftJoin(enrolments, eq(certificates.enrolmentId, enrolments.id))
+			.where(inArray(certificates.id, ids));
+
+		// One at a time, so a slow mail server isn't sent everything at once
+		let sent = 0;
+		const problems = new Map<string, number>();
+		for (const row of rows) {
+			const outcome = await emailCertificate(row, url.origin);
+			if (outcome.ok) sent++;
+			else problems.set(outcome.message, (problems.get(outcome.message) ?? 0) + 1);
 		}
-		return { message: `Certificate emailed to ${email}` };
+		const message = [
+			`${sent} certificate${sent === 1 ? '' : 's'} emailed.`,
+			...[...problems].map(([reason, n]) => `${n} skipped: ${reason}`)
+		].join(' ');
+		return sent ? { message } : fail(400, { message });
 	}
 };

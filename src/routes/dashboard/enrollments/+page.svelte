@@ -10,6 +10,7 @@
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
 	import RegisterStudent from './register-student.svelte';
 	import NotificationEmails from './notification-emails.svelte';
+	import BulkActions from './bulk-actions.svelte';
 	import { audienceLabels } from '$lib/courses';
 	let filteredList = $derived(data.customersList);
 </script>
@@ -46,6 +47,7 @@
 			'paidBy',
 			'audience',
 			'course',
+			'className',
 			'paymentOption',
 			'discount',
 			'enrolledAt'
@@ -54,6 +56,10 @@
 
 	<!-- Rebuilt when the list changes, so a newly registered student shows up on the same page -->
 	{#key data.customersList}
-		<DataTable data={filteredList} {columns} fileName="Enrollments List" />
+		<DataTable data={filteredList} {columns} fileName="Enrollments List">
+			{#snippet select(selected, clear)}
+				<BulkActions {selected} {clear} />
+			{/snippet}
+		</DataTable>
 	{/key}
 {/if}

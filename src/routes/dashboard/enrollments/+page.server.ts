@@ -9,7 +9,8 @@ import {
 	discountNullifications,
 	notificationEmails,
 	paymentMethods,
-	paymentWays
+	paymentWays,
+	classes
 } from '$lib/server/db/schema';
 import { user } from '$lib/server/db/auth.schema';
 import { asc, desc, eq, sql } from 'drizzle-orm';
@@ -20,7 +21,7 @@ import { getActiveDiscounts, getCourseDiscounts } from '$lib/server/discounts';
 import { confirmEnrolment, stripe } from '$lib/server/stripe';
 import { manualPaymentWay, manualPaymentWays } from '$lib/server/paymentWays';
 import { STRIPE_WAY } from '$lib/paymentWays';
-import { mailConfigured, paymentLinkEmail, sendMail } from '$lib/server/mail';
+import { customEmail, mailConfigured, paymentLinkEmail, sendMail } from '$lib/server/mail';
 import { payLinkFor } from '$lib/server/payLink';
 import { sendWelcomeEmail, trySendWelcomeEmail } from '$lib/server/welcome';
 import { alwaysNotified, tryNotifyAdmins } from '$lib/server/adminNotify';
@@ -32,8 +33,20 @@ import {
 	registerStudent,
 	removeNotificationEmail,
 	sendLink,
-	setPayment
+	setClass,
+	setNotes,
+	setPayment,
+	bulkStudents,
+	bulkPayment,
+	bulkEmail
 } from './schema';
+import { setStudentClass } from '$lib/server/classes';
+import {
+	sendClassPickerEmail,
+	sendClassScheduleEmail,
+	trySendClassPickerEmail
+} from '$lib/server/classPicker';
+import { classLinkFor } from '$lib/server/classLink';
 
 const pounds = (n: number) => Math.round(n * 100) / 100;
 
@@ -60,6 +73,10 @@ export const load: PageServerLoad = async ({ url }) => {
 			methodInstalments: paymentMethods.instalments,
 			methodPercentOff: paymentMethods.percentOff,
 			status: customers.status,
+			courseId: customers.courseId,
+			classId: customers.classId,
+			notes: customers.notes,
+			className: classes.name,
 			paymentWayId: customers.paymentWayId,
 			paymentWayName: paymentWays.name,
 			paymentWaySlug: paymentWays.slug,
@@ -78,6 +95,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		.leftJoin(courses, eq(customers.courseId, courses.id))
 		.leftJoin(paymentMethods, eq(customers.paymentMethodId, paymentMethods.id))
 		.leftJoin(paymentWays, eq(customers.paymentWayId, paymentWays.id))
+		.leftJoin(classes, eq(customers.classId, classes.id))
 		.leftJoin(discountNullifications, eq(discountNullifications.enrolmentId, customers.id))
 		.leftJoin(user, eq(user.id, discountNullifications.createdBy))
 		.where(audience ? eq(courses.audience, audience) : undefined)
@@ -140,6 +158,9 @@ export const load: PageServerLoad = async ({ url }) => {
 							: Math.max(pounds(undiscounted - amount), 0)
 						: null,
 				status: r.status === 'confirmed' ? 'paid' : r.status === 'pending' ? 'unpaid' : 'cancelled',
+				className: r.className ?? 'No class',
+				// Link a paid student uses to choose (or change) their class
+				classLink: r.status === 'confirmed' ? classLinkFor(url.origin, r.id) : null,
 				// Link the student can use to pay, for anyone who still owes the amount
 				payLink:
 					r.status === 'pending' && Number(r.amount) > 0 ? payLinkFor(url.origin, r.id) : null
@@ -181,8 +202,15 @@ export const load: PageServerLoad = async ({ url }) => {
 			.orderBy(asc(notificationEmails.email))
 	};
 
+	// Classes a student can be put in, from the Class column
+	const classOptions = await db
+		.select({ id: classes.id, name: classes.name, courseId: classes.courseId })
+		.from(classes)
+		.orderBy(desc(classes.startDate));
+
 	return {
 		customersList,
+		classOptions,
 		form,
 		coursesList,
 		canEmail: mailConfigured(),
@@ -192,6 +220,281 @@ export const load: PageServerLoad = async ({ url }) => {
 		paymentWays: await manualPaymentWays()
 	};
 };
+
+type Outcome = { ok: true; message: string } | { ok: false; status: number; message: string };
+const failed = (status: number, message: string): Outcome => ({ ok: false, status, message });
+
+/** Email an unpaid student the link to pay for their registration */
+async function emailPayLink(enrolmentId: number, origin: string): Promise<Outcome> {
+	const enrolment = await db
+		.select({
+			id: customers.id,
+			firstName: customers.firstName,
+			email: customers.email,
+			status: customers.status,
+			amount: customers.amount,
+			course: sql<string>`COALESCE(${courses.name}, ${customers.course})`,
+			removedDiscount: discountNullifications.discountName
+		})
+		.from(customers)
+		.leftJoin(courses, eq(customers.courseId, courses.id))
+		.leftJoin(discountNullifications, eq(discountNullifications.enrolmentId, customers.id))
+		.where(eq(customers.id, enrolmentId))
+		.then((rows) => rows[0]);
+	if (!enrolment || enrolment.status !== 'pending') {
+		return failed(400, 'This student has nothing left to pay.');
+	}
+
+	try {
+		await sendMail({
+			to: enrolment.email,
+			...paymentLinkEmail({
+				firstName: enrolment.firstName,
+				courseName: enrolment.course,
+				link: payLinkFor(origin, enrolment.id),
+				amountText: enrolment.removedDiscount
+					? `The ${enrolment.removedDiscount} discount has been removed from your enrolment, so the remaining balance due is £${Number(enrolment.amount)}.`
+					: `The amount due is £${Number(enrolment.amount)}.`
+			})
+		});
+	} catch (err) {
+		console.error('Error sending payment link:', err instanceof Error ? err.message : err);
+		return failed(500, "The email couldn't be sent. Copy the link and send it instead.");
+	}
+
+	return { ok: true, message: `Link emailed to ${enrolment.email}` };
+}
+
+/** Send a paid student their welcome email again */
+async function resendWelcomeEmail(enrolmentId: number): Promise<Outcome> {
+	const enrolment = await db
+		.select({ status: customers.status })
+		.from(customers)
+		.where(eq(customers.id, enrolmentId))
+		.then((rows) => rows[0]);
+	if (enrolment?.status !== 'confirmed') {
+		return failed(400, 'Only paid students get a welcome email.');
+	}
+
+	try {
+		const email = await sendWelcomeEmail(enrolmentId);
+		return { ok: true, message: `Welcome email sent to ${email}` };
+	} catch (err) {
+		console.error('Error resending welcome email:', err instanceof Error ? err.message : err);
+		return failed(500, "The welcome email couldn't be sent.");
+	}
+}
+
+/** Email a student a message written in the dashboard */
+async function emailCustom(
+	enrolmentId: number,
+	subject: string,
+	message: string
+): Promise<Outcome> {
+	const enrolment = await db
+		.select({ firstName: customers.firstName, email: customers.email })
+		.from(customers)
+		.where(eq(customers.id, enrolmentId))
+		.then((rows) => rows[0]);
+	if (!enrolment) return failed(404, 'Unknown student.');
+
+	try {
+		await sendMail({
+			to: enrolment.email,
+			...customEmail({ firstName: enrolment.firstName, subject, message })
+		});
+	} catch (err) {
+		console.error('Error sending custom email:', err instanceof Error ? err.message : err);
+		return failed(500, "The email couldn't be sent.");
+	}
+	return { ok: true, message: `Email sent to ${enrolment.email}` };
+}
+
+/** Email a paid student the link to choose their class */
+async function emailClassLink(enrolmentId: number, origin: string): Promise<Outcome> {
+	try {
+		const email = await sendClassPickerEmail(enrolmentId, origin);
+		if (!email) {
+			return failed(
+				400,
+				'Only paid students on a course with classes that have places left can choose.'
+			);
+		}
+		return { ok: true, message: `Class link emailed to ${email}` };
+	} catch (err) {
+		console.error('Error sending class link:', err instanceof Error ? err.message : err);
+		return failed(500, "The class link couldn't be sent.");
+	}
+}
+
+/** Email a paid student the schedule of the class they're in */
+async function emailClassSchedule(enrolmentId: number): Promise<Outcome> {
+	try {
+		const email = await sendClassScheduleEmail(enrolmentId);
+		if (!email) return failed(400, 'Only paid students who are in a class get a schedule.');
+		return { ok: true, message: `Class schedule emailed to ${email}` };
+	} catch (err) {
+		console.error('Error sending class schedule:', err instanceof Error ? err.message : err);
+		return failed(500, "The class schedule couldn't be sent.");
+	}
+}
+
+/**
+ * Remove a student's enrolment for good, e.g. a test or duplicate registration.
+ * Their discount removal record goes with it; certificates stay, unlinked.
+ */
+async function deleteEnrolment(enrolmentId: number): Promise<Outcome> {
+	const enrolment = await db
+		.select({
+			status: customers.status,
+			stripeSessionId: customers.stripeSessionId,
+			name: sql<string>`TRIM(CONCAT_WS(' ', ${customers.firstName}, ${customers.lastName}))`
+		})
+		.from(customers)
+		.where(eq(customers.id, enrolmentId))
+		.then((rows) => rows[0]);
+	if (!enrolment) return failed(404, 'Unknown student.');
+
+	// An unpaid student may have a Stripe checkout open from their payment link.
+	// It must not be payable once the enrolment is gone.
+	if (enrolment.status === 'pending' && enrolment.stripeSessionId) {
+		try {
+			let session = await stripe.checkout.sessions.retrieve(enrolment.stripeSessionId);
+			if (session.status === 'open') {
+				session = await stripe.checkout.sessions.expire(session.id);
+			}
+			if (session.status === 'complete' && (await confirmEnrolment(session))) {
+				return failed(400, "This student has just paid through Stripe, so they weren't deleted.");
+			}
+		} catch (err) {
+			console.error('Checking Stripe checkout failed:', err instanceof Error ? err.message : err);
+			return failed(500, "Couldn't check the student's Stripe payment. Please try again.");
+		}
+	}
+
+	try {
+		await db.delete(customers).where(eq(customers.id, enrolmentId));
+	} catch (err) {
+		console.error('Error deleting student:', err instanceof Error ? err.message : err);
+		return failed(500, "The student couldn't be deleted.");
+	}
+
+	return { ok: true, message: `${enrolment.name} deleted` };
+}
+
+/**
+ * Record how and whether a student paid outside Stripe (bank transfer, cash...).
+ * Payments made through Stripe are set automatically and can't be changed here.
+ */
+async function applyPayment(
+	enrolmentId: number,
+	status: 'paid' | 'unpaid' | 'cancelled',
+	paymentWayId: string,
+	by: string,
+	origin: string
+): Promise<Outcome> {
+	const enrolment = await db
+		.select({
+			id: customers.id,
+			status: customers.status,
+			stripeSessionId: customers.stripeSessionId,
+			waySlug: paymentWays.slug
+		})
+		.from(customers)
+		.leftJoin(paymentWays, eq(customers.paymentWayId, paymentWays.id))
+		.where(eq(customers.id, enrolmentId))
+		.then((rows) => rows[0]);
+	if (!enrolment) return failed(404, 'Unknown student.');
+	if (enrolment.waySlug === STRIPE_WAY) {
+		return failed(400, "This student paid through Stripe, so their payment can't be changed.");
+	}
+
+	const way = status === 'paid' ? await manualPaymentWay(Number(paymentWayId)) : null;
+	if (way === undefined) return failed(400, 'Choose how the student paid.');
+
+	// An unpaid student may have a Stripe checkout open from their payment link.
+	// Once they're paid or cancelled here it must not be payable any more, and if
+	// it was paid in the meantime, Stripe's payment stands instead.
+	if (enrolment.status === 'pending' && enrolment.stripeSessionId && status !== 'unpaid') {
+		try {
+			let session = await stripe.checkout.sessions.retrieve(enrolment.stripeSessionId);
+			if (session.status === 'open') {
+				session = await stripe.checkout.sessions.expire(session.id);
+			}
+			if (session.status === 'complete' && (await confirmEnrolment(session))) {
+				return failed(
+					400,
+					'This student has just paid through Stripe, so their payment is already recorded.'
+				);
+			}
+		} catch (err) {
+			console.error('Checking Stripe checkout failed:', err instanceof Error ? err.message : err);
+			return failed(500, "Couldn't check the student's Stripe payment. Please try again.");
+		}
+	}
+
+	const newStatus =
+		status === 'paid' ? 'confirmed' : status === 'unpaid' ? 'pending' : ('cancelled' as const);
+	try {
+		await db
+			.update(customers)
+			.set({ status: newStatus, paymentWayId: way?.id ?? null })
+			.where(eq(customers.id, enrolmentId));
+	} catch (err) {
+		console.error('Error saving payment:', err instanceof Error ? err.message : err);
+		return failed(500, "The payment couldn't be saved.");
+	}
+
+	// A changed status is emailed to the student and staff. Newly paid students
+	// get the welcome email (saying how they paid), as for an online payment.
+	const changed = newStatus !== enrolment.status;
+	if (changed && newStatus === 'confirmed') {
+		await Promise.all([
+			trySendWelcomeEmail(enrolmentId).then(() => trySendClassPickerEmail(enrolmentId, origin)),
+			tryNotifyAdmins(enrolmentId, `Marked as paid in the dashboard by ${by}`)
+		]);
+	} else if (changed && newStatus !== 'confirmed') {
+		await tryNotifyStatusChange(enrolmentId, {
+			from: enrolment.status ?? 'pending',
+			to: newStatus,
+			by,
+			origin
+		});
+	}
+
+	const saved =
+		newStatus === 'confirmed'
+			? `Marked as paid by ${way!.name}`
+			: newStatus === 'pending'
+				? 'Marked as unpaid'
+				: 'Marked as cancelled';
+	return {
+		ok: true,
+		message: !changed
+			? saved
+			: mailConfigured()
+				? `${saved}. The student and staff have been emailed.`
+				: `${saved}. Email isn't set up, so no one was emailed.`
+	};
+}
+
+/**
+ * Run one student action for each selected student, one at a time, and sum up
+ * how it went, e.g. "3 marked as paid. 1 skipped: This student paid through Stripe..."
+ */
+async function forEachStudent(ids: number[], done: string, run: (id: number) => Promise<Outcome>) {
+	let succeeded = 0;
+	const problems = new Map<string, number>();
+	for (const id of ids) {
+		const outcome = await run(id);
+		if (outcome.ok) succeeded++;
+		else problems.set(outcome.message, (problems.get(outcome.message) ?? 0) + 1);
+	}
+
+	const skipped = [...problems].map(([reason, n]) => `${n} skipped: ${reason}`).join(' ');
+	const message = [`${succeeded} ${done}.`, skipped].filter(Boolean).join(' ');
+	return succeeded ? { message } : fail(400, { message });
+}
 
 export const actions: Actions = {
 	// Record a student who enrolled in person (cash, bank transfer...), without Stripe
@@ -208,7 +511,7 @@ export const actions: Actions = {
 			);
 		}
 
-		const { firstName, lastName, email, phone, amount, status } = form.data;
+		const { firstName, lastName, email, phone, amount, status, notes } = form.data;
 		// Paid students are recorded with how they paid (never Stripe)
 		const way = status === 'paid' ? await manualPaymentWay(Number(form.data.paymentWayId)) : null;
 		if (way === undefined) {
@@ -258,6 +561,7 @@ export const actions: Actions = {
 					lastName,
 					email,
 					phone: phone || null,
+					notes: notes || null,
 					courseId,
 					course: course.name,
 					paymentMethodId: method.id,
@@ -272,7 +576,7 @@ export const actions: Actions = {
 			// Students who have already paid are enrolled, so welcome them now
 			if (status === 'paid') {
 				await Promise.all([
-					trySendWelcomeEmail(id),
+					trySendWelcomeEmail(id).then(() => trySendClassPickerEmail(id, url.origin)),
 					tryNotifyAdmins(
 						id,
 						`Registered in the dashboard by ${locals.user.name}, paid by ${way!.name}`
@@ -306,46 +610,10 @@ export const actions: Actions = {
 		if (!mailConfigured()) {
 			return fail(500, { message: 'Email is not set up yet. Copy the link and send it instead.' });
 		}
-
-		const enrolment = await db
-			.select({
-				id: customers.id,
-				firstName: customers.firstName,
-				email: customers.email,
-				status: customers.status,
-				amount: customers.amount,
-				course: sql<string>`COALESCE(${courses.name}, ${customers.course})`,
-				removedDiscount: discountNullifications.discountName
-			})
-			.from(customers)
-			.leftJoin(courses, eq(customers.courseId, courses.id))
-			.leftJoin(discountNullifications, eq(discountNullifications.enrolmentId, customers.id))
-			.where(eq(customers.id, parsed.data.enrolmentId))
-			.then((rows) => rows[0]);
-		if (!enrolment || enrolment.status !== 'pending') {
-			return fail(400, { message: 'This student has nothing left to pay.' });
-		}
-
-		try {
-			await sendMail({
-				to: enrolment.email,
-				...paymentLinkEmail({
-					firstName: enrolment.firstName,
-					courseName: enrolment.course,
-					link: payLinkFor(url.origin, enrolment.id),
-					amountText: enrolment.removedDiscount
-						? `The ${enrolment.removedDiscount} discount has been removed from your enrolment, so the remaining balance due is £${Number(enrolment.amount)}.`
-						: `The amount due is £${Number(enrolment.amount)}.`
-				})
-			});
-		} catch (err) {
-			console.error('Error sending payment link:', err instanceof Error ? err.message : err);
-			return fail(500, {
-				message: "The email couldn't be sent. Copy the link and send it instead."
-			});
-		}
-
-		return { message: `Link emailed to ${enrolment.email}` };
+		const outcome = await emailPayLink(parsed.data.enrolmentId, url.origin);
+		return outcome.ok
+			? { message: outcome.message }
+			: fail(outcome.status, { message: outcome.message });
 	},
 
 	// Record how and whether a student paid outside Stripe (bank transfer, cash...).
@@ -357,94 +625,52 @@ export const actions: Actions = {
 		if (!parsed.success) {
 			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
 		}
-		const { enrolmentId, status } = parsed.data;
+		const { enrolmentId, status, paymentWayId } = parsed.data;
+		const outcome = await applyPayment(
+			enrolmentId,
+			status,
+			paymentWayId,
+			locals.user.name,
+			url.origin
+		);
+		return outcome.ok
+			? { message: outcome.message }
+			: fail(outcome.status, { message: outcome.message });
+	},
 
-		const enrolment = await db
-			.select({
-				id: customers.id,
-				status: customers.status,
-				stripeSessionId: customers.stripeSessionId,
-				waySlug: paymentWays.slug
-			})
-			.from(customers)
-			.leftJoin(paymentWays, eq(customers.paymentWayId, paymentWays.id))
-			.where(eq(customers.id, enrolmentId))
-			.then((rows) => rows[0]);
-		if (!enrolment) return fail(404, { message: 'Unknown student.' });
-		if (enrolment.waySlug === STRIPE_WAY) {
-			return fail(400, {
-				message: "This student paid through Stripe, so their payment can't be changed."
-			});
+	// Put a student in a class on the schedule, or take them out (classId empty)
+	setClass: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = setClass.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
 		}
+		const { enrolmentId, classId } = parsed.data;
 
-		const way = status === 'paid' ? await manualPaymentWay(Number(parsed.data.paymentWayId)) : null;
-		if (way === undefined) return fail(400, { message: 'Choose how the student paid.' });
-
-		// An unpaid student may have a Stripe checkout open from their payment link.
-		// Once they're paid or cancelled here it must not be payable any more, and if
-		// it was paid in the meantime, Stripe's payment stands instead.
-		if (enrolment.status === 'pending' && enrolment.stripeSessionId && status !== 'unpaid') {
-			try {
-				let session = await stripe.checkout.sessions.retrieve(enrolment.stripeSessionId);
-				if (session.status === 'open') {
-					session = await stripe.checkout.sessions.expire(session.id);
-				}
-				if (session.status === 'complete' && (await confirmEnrolment(session))) {
-					return fail(400, {
-						message:
-							'This student has just paid through Stripe, so their payment is already recorded.'
-					});
-				}
-			} catch (err) {
-				console.error('Checking Stripe checkout failed:', err instanceof Error ? err.message : err);
-				return fail(500, {
-					message: "Couldn't check the student's Stripe payment. Please try again."
-				});
-			}
-		}
-
-		const newStatus =
-			status === 'paid' ? 'confirmed' : status === 'unpaid' ? 'pending' : ('cancelled' as const);
 		try {
-			await db
-				.update(customers)
-				.set({ status: newStatus, paymentWayId: way?.id ?? null })
-				.where(eq(customers.id, enrolmentId));
+			const problem = await setStudentClass(enrolmentId, classId);
+			if (problem) return fail(400, { message: problem });
 		} catch (err) {
-			console.error('Error saving payment:', err instanceof Error ? err.message : err);
-			return fail(500, { message: "The payment couldn't be saved." });
+			console.error('Error setting class:', err instanceof Error ? err.message : err);
+			return fail(500, { message: "The student's class couldn't be saved." });
 		}
 
-		// A changed status is emailed to the student and staff. Newly paid students
-		// get the welcome email (saying how they paid), as for an online payment.
-		const changed = newStatus !== enrolment.status;
-		if (changed && newStatus === 'confirmed') {
-			await Promise.all([
-				trySendWelcomeEmail(enrolmentId),
-				tryNotifyAdmins(enrolmentId, `Marked as paid in the dashboard by ${locals.user.name}`)
-			]);
-		} else if (changed && newStatus !== 'confirmed') {
-			await tryNotifyStatusChange(enrolmentId, {
-				from: enrolment.status ?? 'pending',
-				to: newStatus,
-				by: locals.user.name,
-				origin: url.origin
-			});
-		}
+		return { message: classId ? 'Class updated' : 'Student taken out of their class' };
+	},
 
-		const saved =
-			newStatus === 'confirmed'
-				? `Marked as paid by ${way!.name}`
-				: newStatus === 'pending'
-					? 'Marked as unpaid'
-					: 'Marked as cancelled';
-		return {
-			message: !changed
-				? saved
-				: mailConfigured()
-					? `${saved}. The student and staff have been emailed.`
-					: `${saved}. Email isn't set up, so no one was emailed.`
-		};
+	// Email a paid student the link to choose their class, e.g. after adding classes
+	sendClassLink: async ({ request, locals, url }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = sendLink.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) return fail(400, { message: 'Unknown student.' });
+		if (!mailConfigured()) return fail(500, { message: 'Email is not set up yet.' });
+
+		const outcome = await emailClassLink(parsed.data.enrolmentId, url.origin);
+		return outcome.ok
+			? { message: outcome.message }
+			: fail(outcome.status, { message: outcome.message });
 	},
 
 	// Correct a student's name, email or phone. Nothing else about the enrolment changes.
@@ -469,6 +695,37 @@ export const actions: Actions = {
 		}
 
 		return { message: `${firstName} ${lastName}'s details updated` };
+	},
+
+	// Add, change or clear the notes on a student
+	setNotes: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = setNotes.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the notes.' });
+		}
+		const { enrolmentId, notes } = parsed.data;
+
+		const [result] = await db
+			.update(customers)
+			.set({ notes: notes || null })
+			.where(eq(customers.id, enrolmentId));
+		if (result.affectedRows === 0) return fail(404, { message: 'Unknown student.' });
+		return { message: notes ? 'Notes saved' : 'Notes cleared' };
+	},
+
+	// Remove a student's enrolment for good, e.g. a test or duplicate registration.
+	// Their discount removal record goes with it; certificates stay, unlinked.
+	deleteStudent: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = sendLink.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) return fail(400, { message: 'Unknown student.' });
+		const outcome = await deleteEnrolment(parsed.data.enrolmentId);
+		return outcome.ok
+			? { message: outcome.message }
+			: fail(outcome.status, { message: outcome.message });
 	},
 
 	// Add an address to tell about new enrolments
@@ -518,22 +775,10 @@ export const actions: Actions = {
 			return fail(500, { message: 'Email is not set up yet.' });
 		}
 
-		const enrolment = await db
-			.select({ status: customers.status })
-			.from(customers)
-			.where(eq(customers.id, parsed.data.enrolmentId))
-			.then((rows) => rows[0]);
-		if (enrolment?.status !== 'confirmed') {
-			return fail(400, { message: 'Only paid students get a welcome email.' });
-		}
-
-		try {
-			const email = await sendWelcomeEmail(parsed.data.enrolmentId);
-			return { message: `Welcome email sent to ${email}` };
-		} catch (err) {
-			console.error('Error resending welcome email:', err instanceof Error ? err.message : err);
-			return fail(500, { message: "The welcome email couldn't be sent." });
-		}
+		const outcome = await resendWelcomeEmail(parsed.data.enrolmentId);
+		return outcome.ok
+			? { message: outcome.message }
+			: fail(outcome.status, { message: outcome.message });
 	},
 
 	// Take a discount off a student who shouldn't have had it. Their payment
@@ -615,5 +860,69 @@ export const actions: Actions = {
 					? `Discount removed. Send the payment link for £${amountDue} from the Payment Link column.`
 					: 'Discount removed.'
 		};
+	},
+
+	// Bulk actions on the students ticked in the table
+
+	bulkDelete: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const parsed = bulkStudents.safeParse({
+			enrolmentIds: (await request.formData()).getAll('enrolmentId')
+		});
+		if (!parsed.success) return fail(400, { message: 'Select at least one student.' });
+
+		return forEachStudent(parsed.data.enrolmentIds, 'deleted', deleteEnrolment);
+	},
+
+	bulkPayment: async ({ request, locals, url }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const formData = await request.formData();
+		const parsed = bulkPayment.safeParse({
+			...Object.fromEntries(formData),
+			enrolmentIds: formData.getAll('enrolmentId')
+		});
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
+		}
+		const { enrolmentIds, status, paymentWayId } = parsed.data;
+		const by = locals.user.name;
+
+		return forEachStudent(
+			enrolmentIds,
+			status === 'paid' ? 'marked as paid' : status === 'unpaid' ? 'marked as unpaid' : 'cancelled',
+			(id) => applyPayment(id, status, paymentWayId, by, url.origin)
+		);
+	},
+
+	bulkEmail: async ({ request, locals, url }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const formData = await request.formData();
+		const parsed = bulkEmail.safeParse({
+			...Object.fromEntries(formData),
+			enrolmentIds: formData.getAll('enrolmentId')
+		});
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
+		}
+		if (!mailConfigured()) return fail(500, { message: 'Email is not set up yet.' });
+		const { enrolmentIds, email, subject, message } = parsed.data;
+
+		if (email === 'payLink') {
+			return forEachStudent(enrolmentIds, 'payment links emailed', (id) =>
+				emailPayLink(id, url.origin)
+			);
+		}
+		if (email === 'custom') {
+			return forEachStudent(enrolmentIds, 'emails sent', (id) => emailCustom(id, subject, message));
+		}
+		if (email === 'welcome') {
+			return forEachStudent(enrolmentIds, 'welcome emails sent', resendWelcomeEmail);
+		}
+		if (email === 'schedule') {
+			return forEachStudent(enrolmentIds, 'class schedules emailed', emailClassSchedule);
+		}
+		return forEachStudent(enrolmentIds, 'class links emailed', (id) =>
+			emailClassLink(id, url.origin)
+		);
 	}
 };

@@ -12,5 +12,7 @@ export const schema = z.object({
 		.number('Please Select a Payment Option')
 		.int()
 		.positive('Please Select a Payment Option'),
+	// Optional, e.g. experience or availability
+	notes: z.string().trim().max(2000, 'Notes must be at most 2000 characters').default(''),
 	paymentAmount: z.number('Payment Amount is Required').positive('Payment Amount is required')
 });

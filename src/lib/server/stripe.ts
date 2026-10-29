@@ -5,6 +5,7 @@ import { db } from '$lib/server/db';
 import { enrolments, paymentWays } from '$lib/server/db/schema';
 import { STRIPE_WAY } from '$lib/paymentWays';
 import { trySendWelcomeEmail } from '$lib/server/welcome';
+import { trySendClassPickerEmail } from '$lib/server/classPicker';
 import { tryNotifyAdmins } from '$lib/server/adminNotify';
 
 export const stripe = new Stripe(STRIPE_SECRET_KEY);
@@ -53,10 +54,11 @@ export async function confirmEnrolment(session: Stripe.Checkout.Session): Promis
 		);
 
 	// Only the call that actually confirmed it sends the emails, so the webhook
-	// and the success page never both send them
+	// and the success page never both send them. The class link (if the course
+	// has classes to choose from) follows the welcome email.
 	if (result.affectedRows > 0) {
 		await Promise.all([
-			trySendWelcomeEmail(enrolment.id),
+			trySendWelcomeEmail(enrolment.id).then(() => trySendClassPickerEmail(enrolment.id)),
 			tryNotifyAdmins(
 				enrolment.id,
 				session.metadata?.source === 'pay-link' ? 'Payment link' : 'Online checkout'

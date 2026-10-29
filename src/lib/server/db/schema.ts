@@ -12,7 +12,8 @@ import {
 	boolean,
 	uniqueIndex,
 	primaryKey,
-	date
+	date,
+	time
 } from 'drizzle-orm/mysql-core';
 
 const timestamps = () => ({
@@ -110,6 +111,8 @@ export const enrolments = mysqlTable('enrolments', {
 	paymentOption: varchar('payment_option', { length: 255 }),
 	// How they paid; set once paid (Stripe automatically, otherwise by staff)
 	paymentWayId: int('payment_way_id').references(() => paymentWays.id, { onDelete: 'set null' }),
+	// The class (group on the timetable) the student attends, picked by staff
+	classId: int('class_id').references(() => classes.id, { onDelete: 'set null' }),
 	firstName: varchar('first_name', { length: 255 }).notNull(),
 	lastName: varchar('last_name', { length: 255 }).notNull(),
 	phone: varchar('phone', { length: 50 }),
@@ -120,8 +123,42 @@ export const enrolments = mysqlTable('enrolments', {
 	amount: decimal('amount', { precision: 10, scale: 2 }),
 	discountName: varchar('discount_name', { length: 255 }),
 	discountPercentage: decimal('discount_percentage', { precision: 5, scale: 2 }),
+	// Anything the student told us when registering, or staff noted about them
+	notes: text('notes'),
 	stripeSessionId: varchar('stripe_session_id', { length: 255 }).unique(),
 	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()
+});
+
+// --- Classes Table ---
+// A group of students taking a course together, e.g. "January Weekday Group".
+// When it meets each week is in class_sessions; students join it through
+// enrolments.class_id. isActive = false hides it from the timetable.
+export const classes = mysqlTable('classes', {
+	id: int('id').primaryKey().autoincrement(),
+	courseId: int('course_id')
+		.notNull()
+		.references(() => courses.id, { onDelete: 'cascade' }),
+	name: varchar('name', { length: 255 }).notNull(),
+	startDate: date('start_date', { mode: 'string' }).notNull(),
+	endDate: date('end_date', { mode: 'string' }), // empty = ongoing
+	location: varchar('location', { length: 255 }),
+	instructor: varchar('instructor', { length: 255 }),
+	capacity: int('capacity'), // empty = no limit
+	notes: text('notes'),
+	...secureFields
+});
+
+// --- Class Sessions Table ---
+// One weekly meeting of a class, e.g. Monday 10:00 - 16:00
+export const classSessions = mysqlTable('class_sessions', {
+	id: int('id').primaryKey().autoincrement(),
+	classId: int('class_id')
+		.notNull()
+		.references(() => classes.id, { onDelete: 'cascade' }),
+	// JS Date#getDay() convention: 0 = Sunday ... 6 = Saturday
+	dayOfWeek: int('day_of_week').notNull(),
+	startTime: time('start_time').notNull(),
+	endTime: time('end_time').notNull()
 });
 
 // --- Discount Nullifications Table ---

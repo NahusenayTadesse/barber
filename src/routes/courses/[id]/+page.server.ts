@@ -54,7 +54,7 @@ export const actions: Actions = {
 			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}
 
-		const { firstName, lastName, phone, email, courseId, paymentMethodId } = form.data;
+		const { firstName, lastName, phone, email, courseId, paymentMethodId, notes } = form.data;
 
 		// Price the enrolment from the database, never from the submitted amount,
 		// so the discount (and the price itself) can't be tampered with.
@@ -95,6 +95,7 @@ export const actions: Actions = {
 					lastName,
 					phone,
 					email,
+					notes: notes || null,
 					courseId,
 					course: course.name,
 					paymentMethodId: method.id,

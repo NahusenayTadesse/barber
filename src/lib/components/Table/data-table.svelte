@@ -26,13 +26,20 @@
 		columns,
 		search = true,
 		class: className = '',
-		fileName = 'File'
+		fileName = 'File',
+		select
 	}: DataTableProps<TData, TValue> = $props();
 	// let filterSchema = $derived(
 	//   discoverFilterSchema(data).filter(meta => !filterBlacklist.includes(meta.key))
 	// );  import { Input } from "$lib/components/ui/input/index.js";
 
-	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
+	import {
+		createSvelteTable,
+		FlexRender,
+		renderComponent
+	} from '$lib/components/ui/data-table/index.js';
+	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
+	import type { Snippet } from 'svelte';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { ChevronDownIcon, Frown, ListOrdered } from '@lucide/svelte';
@@ -53,6 +60,32 @@
 		class?: string;
 		filterBlacklist?: string[];
 		fileName?: string;
+		/**
+		 * Turns on row checkboxes. Rendered above the table while rows are
+		 * selected, with the selected rows (as shown, after search) and a function
+		 * that clears the selection, e.g. for bulk action buttons.
+		 */
+		select?: Snippet<[selected: TData[], clear: () => void]>;
+	};
+
+	// Checkbox column added in front when the table has bulk actions
+	const selectColumn: ColumnDef<TData, TValue> = {
+		id: 'select',
+		header: ({ table }) =>
+			renderComponent(Checkbox, {
+				checked: table.getIsAllPageRowsSelected(),
+				indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
+				onCheckedChange: (value: boolean) => table.toggleAllPageRowsSelected(value),
+				'aria-label': 'Select all'
+			}),
+		cell: ({ row }) =>
+			renderComponent(Checkbox, {
+				checked: row.getIsSelected(),
+				onCheckedChange: (value: boolean) => row.toggleSelected(value),
+				'aria-label': 'Select row'
+			}),
+		enableSorting: false,
+		enableHiding: false
 	};
 
 	let sorting = $state<SortingState>([]);
@@ -65,7 +98,14 @@
 		get data() {
 			return data;
 		},
-		columns,
+		get columns() {
+			return select ? [selectColumn, ...columns] : columns;
+		},
+		// Rows keep their selection when the list is filtered or re-sorted
+		getRowId: (row, index) => {
+			const id = (row as { id?: unknown }).id;
+			return id == null ? String(index) : String(id);
+		},
 		state: {
 			get pagination() {
 				return pagination;
@@ -154,6 +194,11 @@
 		return column.id.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
 	}
 	const isIndexColumn = (column: Column<TData, unknown>) => column.columnDef.header === '#';
+	const isSelectColumn = (column: Column<TData, unknown>) => column.id === 'select';
+	// The column kept in view while scrolling sideways: the one after # (and the checkbox)
+	const stickyIndex = $derived(select ? 2 : 1);
+
+	const selectedRows = $derived(table.getFilteredSelectedRowModel().rows.map((r) => r.original));
 </script>
 
 {#snippet toolbar()}
@@ -224,6 +269,22 @@
 	</div>
 {/snippet}
 
+{#snippet bulkBar()}
+	{#if select && selectedRows.length}
+		<div
+			class="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 p-2 text-sm"
+			role="toolbar"
+			aria-label="Bulk actions"
+		>
+			<span class="font-medium">{selectedRows.length} selected</span>
+			{@render select(selectedRows, () => table.resetRowSelection())}
+			<Button variant="ghost" size="sm" class="ml-auto" onclick={() => table.resetRowSelection()}>
+				Clear
+			</Button>
+		</div>
+	{/if}
+{/snippet}
+
 {#snippet pager()}
 	{#if table.getPageCount() > 1}
 		<div class="flex items-center justify-end gap-2 py-3">
@@ -258,15 +319,27 @@
 				{@render toolbar()}
 			</div>
 		{/if}
+		{@render bulkBar()}
 
 		<ul class="flex flex-col gap-3">
 			{#each table.getRowModel().rows as row, rowIndex (row.id)}
-				{@const cells = row.getVisibleCells()}
+				{@const cells = row.getVisibleCells().filter((cell) => !isSelectColumn(cell.column))}
 				{@const titleCell = cells[1] && !isIndexColumn(cells[1].column) ? cells[1] : undefined}
-				<li class="rounded-xl border bg-card p-4 shadow-sm">
+				<li
+					class="rounded-xl border bg-card p-4 shadow-sm data-[state=selected]:border-primary"
+					data-state={row.getIsSelected() && 'selected'}
+				>
 					{#if titleCell}
 						<div class="mb-2 flex items-start justify-between gap-3">
-							<div class="min-w-0 text-base font-semibold break-words capitalize">
+							{#if select}
+								<Checkbox
+									class="mt-1"
+									checked={row.getIsSelected()}
+									onCheckedChange={(value) => row.toggleSelected(value)}
+									aria-label="Select row"
+								/>
+							{/if}
+							<div class="min-w-0 flex-1 text-base font-semibold break-words capitalize">
 								<FlexRender
 									content={titleCell.column.columnDef.cell}
 									context={titleCell.getContext()}
@@ -310,7 +383,9 @@
 			<thead>
 				<tr>
 					{#each table.getVisibleLeafColumns() as column (column.id)}
-						<th>{columnLabel(column)}</th>
+						{#if !isSelectColumn(column)}
+							<th>{columnLabel(column)}</th>
+						{/if}
 					{/each}
 				</tr>
 			</thead>
@@ -318,7 +393,9 @@
 				{#each table.getRowModel().rows as row (row.id)}
 					<tr>
 						{#each row.getVisibleCells() as cell (cell.id)}
-							<td>{isIndexColumn(cell.column) ? row.index + 1 : (cell.getValue() ?? '')}</td>
+							{#if !isSelectColumn(cell.column)}
+								<td>{isIndexColumn(cell.column) ? row.index + 1 : (cell.getValue() ?? '')}</td>
+							{/if}
 						{/each}
 					</tr>
 				{/each}
@@ -347,6 +424,7 @@
 							</div>
 						</ScrollArea>
 					{/if}
+					{@render bulkBar()}
 					<!-- As tall as the screen; longer tables scroll inside it -->
 					<div class="max-h-[calc(100dvh-8rem)] overflow-y-auto rounded-md border">
 						<Table.Root id={uniqueTableId} class="relative">
@@ -356,7 +434,8 @@
 										{#each headerGroup.headers as header, index (header.id)}
 											<Table.Head
 												colspan={header.colSpan}
-												class="{index === 1
+												data-export-skip={isSelectColumn(header.column) || undefined}
+												class="{index === stickyIndex
 													? 'sticky left-0 z-10 bg-background'
 													: ''} p-0 px-2 text-start"
 											>
@@ -376,7 +455,8 @@
 									<Table.Row data-state={row.getIsSelected() && 'selected'}>
 										{#each row.getVisibleCells() as cell, index (cell.id)}
 											<Table.Cell
-												class="word-break capitalize {index === 1
+												data-export-skip={isSelectColumn(cell.column) || undefined}
+												class="word-break capitalize {index === stickyIndex
 													? 'sticky left-0 z-10 bg-background'
 													: ''}"
 											>
@@ -389,7 +469,10 @@
 									</Table.Row>
 								{:else}
 									<Table.Row>
-										<Table.Cell colspan={columns.length} class="text-center font-2xl">
+										<Table.Cell
+											colspan={table.getVisibleLeafColumns().length}
+											class="text-center font-2xl"
+										>
 											<div class="flex flex-row items-center justify-center gap-2">
 												<Frown class="animate-bounce" /> Nothing found here.
 											</div>

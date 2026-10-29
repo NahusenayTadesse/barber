@@ -7,6 +7,7 @@
 	import { formatDate } from '$lib/global.svelte.js';
 	import IssueCertificate from './issue-certificate.svelte';
 	import CertificateActions from './certificate-actions.svelte';
+	import BulkActions from './bulk-actions.svelte';
 	import type { CellContext, ColumnDef, HeaderContext } from '@tanstack/table-core';
 
 	let { data } = $props();
@@ -87,5 +88,9 @@
 		bind:filteredList
 		filterKeys={['courseName', 'title', 'status']}
 	/>
-	<DataTable {columns} data={filteredList} search={true} fileName="Certificates" />
+	<DataTable {columns} data={filteredList} search={true} fileName="Certificates">
+		{#snippet select(selected, clear)}
+			<BulkActions {selected} {clear} />
+		{/snippet}
+	</DataTable>
 {/key}

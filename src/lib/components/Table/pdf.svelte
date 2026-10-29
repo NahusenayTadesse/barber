@@ -13,11 +13,18 @@
 		data
 	}: { fileName: string; tableId: string; data: any } = $props();
 
+	/** The table to export, without columns marked data-export-skip (row checkboxes) */
+	function exportableTable() {
+		const table = document.querySelector(tableId)?.cloneNode(true) as HTMLTableElement | undefined;
+		table?.querySelectorAll('[data-export-skip]').forEach((cell) => cell.remove());
+		return table;
+	}
+
 	function generatedPdf() {
 		const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 
 		autoTable(doc, {
-			html: tableId,
+			html: exportableTable() ?? tableId,
 			styles: {
 				font: 'helvetica',
 				fontSize: 10,
@@ -53,7 +60,9 @@
 
 			const rows = Array.from(tableElement.querySelectorAll('tr'));
 			csvData = rows.map((row) => {
-				const cells = Array.from(row.querySelectorAll('th, td'));
+				const cells = Array.from(row.querySelectorAll('th, td')).filter(
+					(cell) => !cell.hasAttribute('data-export-skip')
+				);
 				return cells.map((cell) => (cell as HTMLElement).innerText.trim());
 			});
 		} else {

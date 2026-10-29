@@ -12,6 +12,7 @@ import {
 	BadgePercent,
 	CreditCard,
 	Award,
+	CalendarDays,
 	Mars,
 	Venus
 } from '@lucide/svelte';
@@ -29,6 +30,7 @@ export const navigation = [
 			{ title: "Women's Students", url: '/dashboard/enrollments?for=women', icon: Venus }
 		]
 	},
+	{ title: 'Class Schedule', url: '/dashboard/classes', icon: CalendarDays },
 	{ title: 'Certificates', url: '/dashboard/certificates', icon: Award },
 	{ title: 'Services', url: '/dashboard/services', icon: SprayCan },
 	{ title: 'Gallery', url: '/dashboard/gallery', icon: Images },

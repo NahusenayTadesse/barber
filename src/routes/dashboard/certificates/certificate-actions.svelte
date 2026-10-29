@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Ban, Copy, CopyCheck, Mail, Printer, RotateCcw } from '@lucide/svelte';
+	import { Ban, Copy, CopyCheck, Mail, Printer, RotateCcw, Trash } from '@lucide/svelte';
 	import CertificateViewer from './certificate-viewer.svelte';
 	import { enhance } from '$app/forms';
 	import { toast } from 'svelte-sonner';
@@ -98,6 +98,22 @@
 			<input type="hidden" name="id" value={id} />
 			<Button size="sm" variant="outline" type="submit" disabled={busy}>
 				<RotateCcw class="h-4 w-4" /> Restore
+			</Button>
+		</form>
+		<form
+			method="post"
+			action="?/delete"
+			use:enhance={({ cancel }) => {
+				if (!confirm(`Delete certificate ${code} for good? This can't be undone.`)) {
+					cancel();
+					return;
+				}
+				return action();
+			}}
+		>
+			<input type="hidden" name="id" value={id} />
+			<Button size="icon" variant="ghost" type="submit" disabled={busy} title="Delete">
+				<Trash class="h-4 w-4 text-red-500" />
 			</Button>
 		</form>
 	{/if}

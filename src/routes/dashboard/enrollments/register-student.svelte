@@ -289,6 +289,14 @@
 					items={paymentWayItems}
 				/>
 			{/if}
+			<InputComp
+				{form}
+				{errors}
+				label="Notes (optional)"
+				type="textarea"
+				name="notes"
+				placeholder="Anything worth remembering about this student"
+			/>
 			<p class="text-xs text-muted-foreground">
 				The amount is filled in with today's price (including any discount). Change it if you agreed
 				a different amount. For unpaid students, it's what the link charges.
