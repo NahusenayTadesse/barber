@@ -144,3 +144,42 @@ export const bulkEmail = z
 		message: 'Write a message',
 		path: ['message']
 	});
+
+const isoDate = (what: string) =>
+	z
+		.string(`${what} is required`)
+		.regex(/^\d{4}-\d{2}-\d{2}$/, `Pick a valid ${what.toLowerCase()}`);
+
+// A teacher's report on one practice session, following the mark sheet.
+// skills and marks are matching lists; a blank mark means the skill wasn't practised.
+export const addReport = z
+	.object({
+		enrolmentId: z.coerce.number().int().positive(),
+		reportDate: isoDate('Date'),
+		week: z.coerce.number('Choose a week').int().positive('Choose a week'),
+		teacherName: z.string().trim().max(255, 'Teacher name is too long').default(''),
+		comment: z.string().trim().max(5000, 'Comment is too long').default(''),
+		skills: z.array(z.string().trim().min(1).max(255)),
+		marks: z.array(
+			z
+				.string()
+				.trim()
+				.refine((m) => m === '' || (/^\d+$/.test(m) && Number(m) <= 10), 'Marks are 0 to 10')
+		)
+	})
+	.refine((d) => d.skills.length === d.marks.length, { message: 'Please check the marks.' })
+	.refine((d) => d.comment.length > 0 || d.marks.some((m) => m !== ''), {
+		message: 'Give at least one mark or write a comment',
+		path: ['marks']
+	});
+
+export const deleteReport = z.object({ reportId: z.coerce.number().int().positive() });
+
+// The period a report covers, both dates included
+export const reportRange = z
+	.object({ from: isoDate('Start date'), to: isoDate('End date') })
+	.refine((d) => d.from <= d.to, { message: 'The start date must be before the end date' });
+
+export const bulkReport = z
+	.object({ enrolmentIds, from: isoDate('Start date'), to: isoDate('End date') })
+	.refine((d) => d.from <= d.to, { message: 'The start date must be before the end date' });

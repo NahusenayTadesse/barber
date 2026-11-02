@@ -409,6 +409,69 @@ export function certificateEmail(o: {
 	return { subject: `Your certificate: ${o.courseName}`, text, html };
 }
 
+/** A student's practice report for a week or date range, with the PDF attached. */
+export function studentReportEmail(o: {
+	firstName: string;
+	courseName: string;
+	/** e.g. "2 Nov 2026 – 8 Nov 2026" */
+	period: string;
+	sessions: number;
+	/** e.g. "7.5/10", or null when nothing was marked */
+	average: string | null;
+	/** e.g. ["Week 3: Classic Haircuts, Sectioning & Guidelines"] */
+	weeks: string[];
+}) {
+	const name = o.firstName.trim() || 'there';
+	const sessions = `${o.sessions} session${o.sessions === 1 ? '' : 's'}`;
+	const text = [
+		`Hi ${name},`,
+		'',
+		`Here is your practice report for ${o.period} on the ${o.courseName}. The full mark sheet is attached as a PDF.`,
+		'',
+		`Sessions reported: ${o.sessions}`,
+		...(o.average ? [`Average mark: ${o.average}`] : []),
+		...(o.weeks.length ? ['Worked on:', ...o.weeks.map((w) => `- ${w}`)] : []),
+		'',
+		'Keep practising, and ask your teacher if anything on the sheet is unclear.',
+		'',
+		contactLine,
+		'',
+		'D&D Barber Academy',
+		siteUrl()
+	].join('\n');
+
+	const html = brandedEmail({
+		title: 'Your practice report',
+		preheader: `Your practice report for ${o.period} is attached.`,
+		eyebrow: 'Practice report',
+		heading: `Well done, ${name}`,
+		sections: [
+			para(
+				`Here is your practice report for <strong style="color:#111">${escapeHtml(o.period)}</strong> on the ${escapeHtml(o.courseName)}. The full mark sheet, with your teacher's comments, is attached as a PDF.`
+			),
+			detailsBox('Your report', [
+				['Period', o.period],
+				['Sessions', sessions],
+				...(o.average ? [['Average mark', o.average] as [string, string]] : []),
+				['Format', 'PDF, attached']
+			]),
+			...(o.weeks.length
+				? [
+						para(
+							'<strong style="color:#111">Worked on</strong><br>' +
+								o.weeks.map(escapeHtml).join('<br>')
+						)
+					]
+				: []),
+			para('Keep practising, and ask your teacher if anything on the sheet is unclear.')
+		],
+		signOff: 'Keep it sharp.',
+		footnote: "You're receiving this because you're studying a course with us."
+	});
+
+	return { subject: `Your practice report: ${o.period}`, text, html };
+}
+
 /** The email a student receives once their enrolment is confirmed. */
 export function welcomeEmail(o: {
 	firstName: string;

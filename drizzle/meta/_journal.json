@@ -169,6 +169,13 @@
       "when": 1793292601768,
       "tag": "0023_enrolment_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1793637719229,
+      "tag": "0024_student_reports",
+      "breakpoints": true
     }
   ]
 }

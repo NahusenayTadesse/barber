@@ -306,3 +306,34 @@ export const notificationEmails = mysqlTable('notification_emails', {
 	email: varchar('email', { length: 255 }).notNull().unique(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
+
+// --- Student Reports ---
+// A teacher's report on one practice session, following the course's practice
+// & mark sheet: the week of the sheet worked on, a mark out of 10 for each skill
+// practised and a comment. Weekly or date-ranged reports are built from these.
+export const studentReports = mysqlTable('student_reports', {
+	id: int('id').primaryKey().autoincrement(),
+	enrolmentId: int('enrolment_id')
+		.notNull()
+		.references(() => enrolments.id, { onDelete: 'cascade' }),
+	reportDate: date('report_date', { mode: 'string' }).notNull(),
+	// Week of the mark sheet, with its title kept in case the sheet changes later
+	week: int('week').notNull(),
+	weekTitle: varchar('week_title', { length: 255 }).notNull(),
+	teacherName: varchar('teacher_name', { length: 255 }),
+	comment: text('comment'),
+	createdBy: varchar('created_by', { length: 255 }).references(() => user.id, {
+		onDelete: 'set null'
+	}),
+	...timestamps()
+});
+
+// One mark on a report; the skill's name is kept as written on the sheet
+export const studentReportMarks = mysqlTable('student_report_marks', {
+	id: int('id').primaryKey().autoincrement(),
+	reportId: int('report_id')
+		.notNull()
+		.references(() => studentReports.id, { onDelete: 'cascade' }),
+	skill: varchar('skill', { length: 255 }).notNull(),
+	mark: int('mark').notNull() // 0 to 10
+});

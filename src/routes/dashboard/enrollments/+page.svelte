@@ -11,6 +11,7 @@
 	import RegisterStudent from './register-student.svelte';
 	import NotificationEmails from './notification-emails.svelte';
 	import BulkActions from './bulk-actions.svelte';
+	import SendReports from './send-reports.svelte';
 	import { audienceLabels } from '$lib/courses';
 	let filteredList = $derived(data.customersList);
 </script>
@@ -22,6 +23,15 @@
 <div class="mb-6 flex flex-wrap items-center gap-2">
 	<RegisterStudent data={data.form} coursesList={data.coursesList} canEmail={data.canEmail} />
 	<NotificationEmails always={data.notifications.always} saved={data.notifications.saved} />
+	{#if data.customersList.length}
+		<!-- Everyone listed (not cancelled), e.g. every Friday's weekly reports -->
+		<SendReports
+			students={data.customersList.filter((s) => s.status !== 'cancelled')}
+			label={data.audience
+				? `Send ${audienceLabels[data.audience]} Reports`
+				: 'Send Reports to All'}
+		/>
+	{/if}
 </div>
 
 {#if data.customersList.length === 0}

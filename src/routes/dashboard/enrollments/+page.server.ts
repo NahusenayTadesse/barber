@@ -10,7 +10,9 @@ import {
 	notificationEmails,
 	paymentMethods,
 	paymentWays,
-	classes
+	classes,
+	studentReports,
+	studentReportMarks
 } from '$lib/server/db/schema';
 import { user } from '$lib/server/db/auth.schema';
 import { asc, desc, eq, sql } from 'drizzle-orm';
@@ -38,8 +40,12 @@ import {
 	setPayment,
 	bulkStudents,
 	bulkPayment,
-	bulkEmail
+	bulkEmail,
+	addReport,
+	bulkReport
 } from './schema';
+import { markSheetFor } from '$lib/markSheets';
+import { emailStudentReport } from '$lib/server/studentReport';
 import { setStudentClass } from '$lib/server/classes';
 import {
 	sendClassPickerEmail,
@@ -77,6 +83,14 @@ export const load: PageServerLoad = async ({ url }) => {
 			classId: customers.classId,
 			notes: customers.notes,
 			className: classes.name,
+			// For the report dialog: which mark sheet, who teaches and when the class began
+			sheet: sql<'men' | 'women'>`COALESCE(${courses.audience}, 'men')`,
+			instructor: classes.instructor,
+			classStart: classes.startDate,
+			reportCount: sql<number>`(SELECT COUNT(*) FROM ${studentReports} WHERE ${studentReports.enrolmentId} = ${customers.id})`,
+			lastReport: sql<
+				string | null
+			>`(SELECT DATE_FORMAT(MAX(${studentReports.reportDate}), '%Y-%m-%d') FROM ${studentReports} WHERE ${studentReports.enrolmentId} = ${customers.id})`,
 			paymentWayId: customers.paymentWayId,
 			paymentWayName: paymentWays.name,
 			paymentWaySlug: paymentWays.slug,
@@ -128,6 +142,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			return {
 				...r,
 				paymentOption: r.paymentOption ?? '',
+				reportCount: Number(r.reportCount),
 				// How they paid. Stripe payments are set automatically and locked.
 				paidBy: paymentWayName ?? (r.status === 'confirmed' ? 'Not recorded' : '—'),
 				paidByStripe: paymentWaySlug === STRIPE_WAY,
@@ -862,7 +877,83 @@ export const actions: Actions = {
 		};
 	},
 
+	// A teacher's report on one practice session, marked against the course's mark sheet
+	addReport: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const formData = await request.formData();
+		const parsed = addReport.safeParse({
+			...Object.fromEntries(formData),
+			skills: formData.getAll('skill'),
+			marks: formData.getAll('mark')
+		});
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the report.' });
+		}
+		const { enrolmentId, reportDate, week, teacherName, comment, skills, marks } = parsed.data;
+
+		const enrolment = await db
+			.select({ audience: courses.audience })
+			.from(customers)
+			.leftJoin(courses, eq(customers.courseId, courses.id))
+			.where(eq(customers.id, enrolmentId))
+			.then((rows) => rows[0]);
+		if (!enrolment) return fail(404, { message: 'Unknown student.' });
+		const sheetWeek = markSheetFor(enrolment.audience).find((w) => w.week === week);
+		if (!sheetWeek) return fail(400, { message: 'Choose a week from the mark sheet.' });
+
+		const given = skills
+			.map((skill, i) => ({ skill, mark: marks[i] }))
+			.filter((m) => m.mark !== '' && sheetWeek.skills.includes(m.skill))
+			.map((m) => ({ skill: m.skill, mark: Number(m.mark) }));
+		if (!given.length && !comment) {
+			return fail(400, { message: 'Give at least one mark or write a comment.' });
+		}
+
+		try {
+			await db.transaction(async (tx) => {
+				const [{ id }] = await tx
+					.insert(studentReports)
+					.values({
+						enrolmentId,
+						reportDate,
+						week,
+						weekTitle: sheetWeek.title,
+						teacherName: teacherName || null,
+						comment: comment || null,
+						createdBy: locals.user!.id
+					})
+					.$returningId();
+				if (given.length) {
+					await tx.insert(studentReportMarks).values(given.map((m) => ({ ...m, reportId: id })));
+				}
+			});
+		} catch (err) {
+			console.error('Error saving report:', err instanceof Error ? err.message : err);
+			return fail(500, { message: "The report couldn't be saved." });
+		}
+		return { message: 'Report saved' };
+	},
+
 	// Bulk actions on the students ticked in the table
+
+	// Email each student their report for a week or date range, PDF attached
+	bulkReport: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+		const formData = await request.formData();
+		const parsed = bulkReport.safeParse({
+			...Object.fromEntries(formData),
+			enrolmentIds: formData.getAll('enrolmentId')
+		});
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
+		}
+		if (!mailConfigured()) return fail(500, { message: 'Email is not set up yet.' });
+		const { enrolmentIds, from, to } = parsed.data;
+
+		return forEachStudent(enrolmentIds, 'reports emailed', (id) =>
+			emailStudentReport(id, from, to)
+		);
+	},
 
 	bulkDelete: async ({ request, locals }) => {
 		if (!locals.user) return fail(401, { message: 'Please log in again.' });

@@ -10,6 +10,7 @@ import PaymentCell from './payment-cell.svelte';
 import ClassCell from './class-cell.svelte';
 import DeleteStudentCell from './delete-student-cell.svelte';
 import NotesCell from './notes-cell.svelte';
+import ReportCell from './report-cell.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import { formatDate } from '$lib/global.svelte';
 
@@ -192,6 +193,22 @@ export const columns = [
 				id: row.original.id,
 				name: row.original.name,
 				notes: row.original.notes
+			})
+	},
+
+	{
+		accessorKey: 'reportCount',
+		header: 'Reports',
+		cell: ({ row }) =>
+			renderComponent(ReportCell, {
+				id: row.original.id,
+				name: row.original.name,
+				status: row.original.status,
+				sheet: row.original.sheet,
+				instructor: row.original.instructor,
+				classStart: row.original.classStart,
+				reportCount: row.original.reportCount,
+				lastReport: row.original.lastReport
 			})
 	},
 

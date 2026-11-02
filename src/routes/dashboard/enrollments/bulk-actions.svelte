@@ -11,6 +11,7 @@
 	import SelectComp from '$lib/formComponents/SelectComp.svelte';
 	import type { ManualPaymentWay } from '$lib/paymentWays';
 	import { submitWithToast } from '../classes/submit';
+	import SendReports from './send-reports.svelte';
 
 	type Student = {
 		id: number;
@@ -18,6 +19,7 @@
 		status: string;
 		paidByStripe: boolean;
 		classId: number | null;
+		reportCount: number;
 	};
 
 	let { selected, clear }: { selected: Student[]; clear: () => void } = $props();
@@ -220,6 +222,9 @@
 		</form>
 	</Dialog.Content>
 </Dialog.Root>
+
+<!-- Reports: each student's weekly or date-ranged mark sheet, emailed as a PDF -->
+<SendReports students={selected} onSent={clear} />
 
 <Dialog.Root bind:open={deleteOpen}>
 	<Dialog.Trigger class={buttonVariants({ variant: 'destructive', size: 'sm' })}>

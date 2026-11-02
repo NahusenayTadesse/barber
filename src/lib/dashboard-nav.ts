@@ -71,6 +71,7 @@ export function pageTitle(url: URL) {
 	if (path === '/dashboard/courses/add-course') return 'Add Course';
 	if (path === '/dashboard/change-password') return 'Change Password';
 	if (/^\/dashboard\/courses\/[^/]+$/.test(path)) return 'Edit Course';
+	if (/^\/dashboard\/enrollments\/[^/]+\/report$/.test(path)) return 'Student Report';
 	// The men's / women's views of Courses and Enrollments
 	const audience = audienceParam(url);
 	if (audience && path === '/dashboard/courses') return `${audienceLabels[audience]} Courses`;
