@@ -3,6 +3,9 @@ import { z } from 'zod/v4';
 // Anything the student told us, or staff noted about them
 const notes = z.string().trim().max(2000, 'Notes must be at most 2000 characters').default('');
 
+/** The Payment Option value for a plan agreed with the student, not one of the course's methods */
+export const CUSTOM_PLAN = 'custom';
+
 export const registerStudent = z
 	.object({
 		firstName: z
@@ -17,11 +20,19 @@ export const registerStudent = z
 		phone: z.string().trim().max(15, 'Phone number must be at most 15 characters').default(''),
 		// Course id as a string, matching the select's values
 		courseId: z.string('Course is Required').regex(/^\d+$/, 'Course is Required'),
-		// Method id as a string, matching the select's values
+		// Method id as a string, matching the select's values, or CUSTOM_PLAN
 		paymentMethodId: z
 			.string('Please select a payment option')
-			.regex(/^\d+$/, 'Please select a payment option'),
+			.regex(/^(\d+|custom)$/, 'Please select a payment option'),
 		amount: z.coerce.number('Amount is required').min(0, 'Amount cannot be negative'),
+		// Only for a custom plan: the whole course price and how many instalments it's paid in
+		totalPrice: z.coerce.number().min(0, 'Total cannot be negative').default(0),
+		planInstalments: z.coerce
+			.number()
+			.int('Instalments must be a whole number')
+			.min(1, 'At least 1 instalment')
+			.max(24, 'At most 24 instalments')
+			.default(2),
 		status: z.enum(['paid', 'unpaid']).default('unpaid'),
 		// How they paid (Bank Transfer, Cash...), as a string matching the select's
 		// values; only for paid students
@@ -30,6 +41,14 @@ export const registerStudent = z
 	})
 	.refine((d) => d.status === 'paid' || d.amount > 0, {
 		message: 'Enter the amount the student needs to pay',
+		path: ['amount']
+	})
+	.refine((d) => d.paymentMethodId !== CUSTOM_PLAN || d.totalPrice > 0, {
+		message: 'Enter the course total for the custom plan',
+		path: ['totalPrice']
+	})
+	.refine((d) => d.paymentMethodId !== CUSTOM_PLAN || d.amount <= d.totalPrice, {
+		message: 'The first payment cannot be more than the course total',
 		path: ['amount']
 	})
 	.refine((d) => d.status !== 'paid' || /^\d+$/.test(d.paymentWayId), {
@@ -183,3 +202,45 @@ export const reportRange = z
 export const bulkReport = z
 	.object({ enrolmentIds, from: isoDate('Start date'), to: isoDate('End date') })
 	.refine((d) => d.from <= d.to, { message: 'The start date must be before the end date' });
+
+const money = (what: string) =>
+	z.coerce.number(`${what} is required`).min(0, `${what} cannot be negative`).max(1_000_000);
+
+// A payment made outside Stripe (bank transfer, cash...), e.g. a later instalment
+export const recordPayment = z.object({
+	enrolmentId: z.coerce.number().int().positive(),
+	amount: money('Amount').refine((n) => n > 0, 'Enter the amount received'),
+	paymentWayId: z
+		.string('Choose how the student paid')
+		.regex(/^\d+$/, 'Choose how the student paid'),
+	paidOn: isoDate('Date'),
+	note: z.string().trim().max(500, 'Note is too long').default('')
+});
+
+export const deletePayment = z.object({ paymentId: z.coerce.number().int().positive() });
+
+// A student's payment plan: the whole course price they owe across all their
+// payments, and how many instalments (empty = not paying by instalments)
+export const setPlan = z.object({
+	enrolmentId: z.coerce.number().int().positive(),
+	totalPrice: money('Total'),
+	planInstalments: z.preprocess(
+		(v) => (v === '' || v == null ? null : v),
+		z.coerce
+			.number()
+			.int('Instalments must be a whole number')
+			.min(1, 'At least 1 instalment')
+			.max(24, 'At most 24 instalments')
+			.nullable()
+	)
+});
+
+// A Stripe payment link for an enrolled student's next payment; 0 stops the link
+export const setBalanceLink = z.object({
+	enrolmentId: z.coerce.number().int().positive(),
+	amount: money('Amount'),
+	email: z
+		.string()
+		.optional()
+		.transform((v) => v === 'on')
+});

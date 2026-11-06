@@ -7,7 +7,7 @@ import { courses, enrolments } from '$lib/server/db/schema';
 import type { PageServerLoad, Actions } from './$types';
 import { error, redirect } from '@sveltejs/kit';
 import { getActiveDiscounts, getCourseDiscounts } from '$lib/server/discounts';
-import { methodAmountFor } from '$lib/discounts';
+import { methodAmountFor, methodTotalFor } from '$lib/discounts';
 import { getCourseMethods } from '$lib/server/paymentMethods';
 import { stripe } from '$lib/server/stripe';
 
@@ -101,6 +101,10 @@ export const actions: Actions = {
 					paymentMethodId: method.id,
 					paymentOption: method.name,
 					amount: String(paymentAmount),
+					// The whole course price, paid over the deposit or instalments
+					totalPrice: String(
+						Math.max(methodTotalFor(course, method, discount?.percentage), paymentAmount)
+					),
 					discountName: discount?.name ?? null,
 					discountPercentage: discount ? String(discount.percentage) : null
 				})

@@ -7,6 +7,7 @@ import WelcomeEmailCell from './welcome-email-cell.svelte';
 import EditStudentCell from './edit-student-cell.svelte';
 import DiscountCell from './discount-cell.svelte';
 import PaymentCell from './payment-cell.svelte';
+import BalanceCell from './balance-cell.svelte';
 import ClassCell from './class-cell.svelte';
 import DeleteStudentCell from './delete-student-cell.svelte';
 import NotesCell from './notes-cell.svelte';
@@ -135,7 +136,7 @@ export const columns = [
 	},
 
 	{
-		accessorKey: 'status',
+		accessorKey: 'paymentStatus',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
 				name: 'Status',
@@ -147,9 +148,24 @@ export const columns = [
 				id: row.original.id,
 				name: row.original.name,
 				status: row.original.status,
+				paymentStatus: row.original.paymentStatus,
 				paidBy: row.original.paidBy,
 				paidByStripe: row.original.paidByStripe,
 				paymentWayId: row.original.paymentWayId
+			})
+	},
+
+	{
+		accessorKey: 'balance',
+		header: 'Balance',
+		cell: ({ row }) =>
+			renderComponent(BalanceCell, {
+				id: row.original.id,
+				name: row.original.name,
+				email: row.original.email,
+				status: row.original.status,
+				balance: row.original.balance,
+				payLink: row.original.payLink
 			})
 	},
 

@@ -1,9 +1,14 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { courses, discountNullifications, enrolments } from '$lib/server/db/schema';
+import {
+	courses,
+	discountNullifications,
+	enrolmentPayments,
+	enrolments
+} from '$lib/server/db/schema';
 import { enrolmentIdFromToken } from '$lib/server/payLink';
-import { confirmEnrolment, stripe } from '$lib/server/stripe';
+import { BALANCE_PAYMENT, confirmEnrolment, stripe } from '$lib/server/stripe';
 import type { Actions, PageServerLoad } from './$types';
 
 /** The registration a payment link points to, or a 404 for a wrong or edited link. */
@@ -25,6 +30,9 @@ async function enrolmentFor(token: string) {
 						amount: enrolments.amount,
 						status: enrolments.status,
 						stripeSessionId: enrolments.stripeSessionId,
+						totalPrice: enrolments.totalPrice,
+						balanceLinkAmount: enrolments.balanceLinkAmount,
+						paid: sql<string>`(SELECT COALESCE(SUM(${enrolmentPayments.amount}), 0) FROM ${enrolmentPayments} WHERE ${enrolmentPayments.enrolmentId} = ${enrolments.id})`,
 						removedDiscount: discountNullifications.discountName
 					})
 					.from(enrolments)
@@ -33,7 +41,19 @@ async function enrolmentFor(token: string) {
 					.where(eq(enrolments.id, id))
 					.then((rows) => rows[0]);
 	if (!enrolment) error(404, 'This payment link is not valid');
-	return enrolment;
+
+	// An enrolled student staff have asked for a further payment, e.g. their next
+	// instalment. Otherwise the link is for the payment that enrols them.
+	const balanceAmount = Number(enrolment.balanceLinkAmount ?? 0);
+	const balance = enrolment.status === 'confirmed' && balanceAmount > 0;
+	const total = Number(enrolment.totalPrice ?? 0);
+	return {
+		...enrolment,
+		balance,
+		due: balance ? balanceAmount : Number(enrolment.amount ?? 0),
+		// Left to pay after this payment, if a total is known
+		leftAfter: balance && total ? Math.max(total - Number(enrolment.paid) - balanceAmount, 0) : null
+	};
 }
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -42,8 +62,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		firstName: e.firstName,
 		course: e.courseName ?? e.course ?? 'your course',
 		paymentOption: e.paymentOption ?? '',
-		amount: Number(e.amount ?? 0),
+		amount: e.due,
 		status: e.status,
+		// A further payment by an enrolled student, and what they'll owe after it
+		balance: e.balance,
+		leftAfter: e.leftAfter,
 		// Set when a discount was taken off and this is the balance left to pay
 		removedDiscount: e.removedDiscount
 	};
@@ -52,8 +75,8 @@ export const load: PageServerLoad = async ({ params }) => {
 export const actions: Actions = {
 	pay: async ({ params, url }) => {
 		const e = await enrolmentFor(params.token);
-		const amount = Number(e.amount ?? 0);
-		if (e.status !== 'pending' || amount <= 0) {
+		const amount = e.due;
+		if ((e.status !== 'pending' && !e.balance) || amount <= 0) {
 			return fail(400, { message: 'This enrolment has nothing left to pay.' });
 		}
 
@@ -75,7 +98,10 @@ export const actions: Actions = {
 					message: "We couldn't start the payment. Please try again, or call us on 020 3700 3997."
 				});
 			}
-			if (previous.status === 'complete') {
+			// An enrolled student's first checkout was paid long ago; only a further
+			// payment just made in another tab matters here
+			const previousIsBalance = previous.metadata?.purpose === BALANCE_PAYMENT;
+			if (previous.status === 'complete' && (!e.balance || previousIsBalance)) {
 				// Already paid in another tab
 				if (await confirmEnrolment(previous)) {
 					redirect(303, `/courses/success?session_id=${previous.id}`);
@@ -97,14 +123,17 @@ export const actions: Actions = {
 					enrolmentId: String(e.id),
 					courseId: String(e.courseId ?? ''),
 					paymentOption: e.paymentOption ?? '',
-					source: 'pay-link'
+					source: 'pay-link',
+					...(e.balance && { purpose: BALANCE_PAYMENT })
 				},
 				line_items: [
 					{
 						price_data: {
 							currency: 'gbp',
 							product_data: {
-								name: [courseName, e.paymentOption].filter(Boolean).join(' — ')
+								name: [courseName, e.balance ? 'Further payment' : e.paymentOption]
+									.filter(Boolean)
+									.join(' — ')
 							},
 							unit_amount: Math.round(amount * 100)
 						},

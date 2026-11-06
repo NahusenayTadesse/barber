@@ -1,0 +1,1 @@
+ALTER TABLE `enrolments` ADD `plan_instalments` int;

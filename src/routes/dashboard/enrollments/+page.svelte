@@ -53,7 +53,7 @@
 		data={data.customersList}
 		bind:filteredList
 		filterKeys={[
-			'status',
+			'paymentStatus',
 			'paidBy',
 			'audience',
 			'course',

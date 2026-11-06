@@ -96,3 +96,18 @@ export function methodAmountFor(
 /** " × 3" after an instalment amount, nothing otherwise. */
 export const amountSuffix = (method: Pick<PaymentMethod, 'kind' | 'instalments'>) =>
 	method.kind === 'instalments' && method.instalments ? ` × ${method.instalments}` : '';
+
+/**
+ * The whole price a student owes for a course on a payment method, across all
+ * their payments: the deposit and instalments add up to the course price.
+ */
+export function methodTotalFor(
+	course: { basePrice: number | string; minPrice: number | string | null } | undefined,
+	method: Pick<PaymentMethod, 'kind' | 'instalments' | 'percentOff'> | undefined,
+	coursePercentage = 0
+): number {
+	if (!course || !method) return 0;
+	return Math.floor(
+		applyDiscount(applyDiscount(course.basePrice, coursePercentage), method.percentOff)
+	);
+}

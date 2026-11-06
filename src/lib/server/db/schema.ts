@@ -121,11 +121,41 @@ export const enrolments = mysqlTable('enrolments', {
 	status: mysqlEnum('status', ['pending', 'confirmed', 'cancelled']).default('pending'),
 	// What was actually charged at checkout, and the discount applied (if any)
 	amount: decimal('amount', { precision: 10, scale: 2 }),
+	// The whole course price the student owes across all their payments (after
+	// discounts). Each payment made is in enrolment_payments; the difference is what's left.
+	totalPrice: decimal('total_price', { precision: 10, scale: 2 }),
+	// Set by staff to send an enrolled student a payment link for a further
+	// payment (e.g. their next instalment); cleared once Stripe reports it paid
+	balanceLinkAmount: decimal('balance_link_amount', { precision: 10, scale: 2 }),
+	// Instalments agreed with this student for a custom plan (or a changed one);
+	// when null, their payment method's instalments apply
+	planInstalments: int('plan_instalments'),
 	discountName: varchar('discount_name', { length: 255 }),
 	discountPercentage: decimal('discount_percentage', { precision: 5, scale: 2 }),
 	// Anything the student told us when registering, or staff noted about them
 	notes: text('notes'),
 	stripeSessionId: varchar('stripe_session_id', { length: 255 }).unique(),
+	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()
+});
+
+// --- Enrolment Payments Table ---
+// Every payment a student has made towards their course: the first one at
+// enrolment and any later instalments, by Stripe (recorded automatically, with
+// the checkout session) or by bank transfer, cash... (recorded by staff).
+export const enrolmentPayments = mysqlTable('enrolment_payments', {
+	id: int('id').primaryKey().autoincrement(),
+	enrolmentId: int('enrolment_id')
+		.notNull()
+		.references(() => enrolments.id, { onDelete: 'cascade' }),
+	amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+	paymentWayId: int('payment_way_id').references(() => paymentWays.id, { onDelete: 'set null' }),
+	paidOn: date('paid_on', { mode: 'string' }).notNull(),
+	// Set for Stripe payments, so the same checkout is never recorded twice
+	stripeSessionId: varchar('stripe_session_id', { length: 255 }).unique(),
+	note: varchar('note', { length: 500 }),
+	createdBy: varchar('created_by', { length: 255 }).references(() => user.id, {
+		onDelete: 'set null'
+	}),
 	createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull()
 });
 

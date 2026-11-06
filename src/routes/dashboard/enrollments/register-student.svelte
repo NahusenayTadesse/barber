@@ -30,9 +30,9 @@
 	import InputComp from '$lib/formComponents/InputComp.svelte';
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { amountSuffix, bestDiscount, methodAmountFor } from '$lib/discounts';
+	import { amountSuffix, applyDiscount, bestDiscount, methodAmountFor } from '$lib/discounts';
 	import { courseLabel } from '$lib/courses';
-	import { registerStudent, type RegisterStudent } from './schema';
+	import { CUSTOM_PLAN, registerStudent, type RegisterStudent } from './schema';
 
 	let {
 		data,
@@ -87,13 +87,28 @@
 				};
 			},
 			onChange(event) {
+				const course = coursesList.find((c) => String(c.id) === $form.courseId);
+				const percentage = bestDiscount(course?.discounts ?? [])?.percentage;
+				if ($form.paymentMethodId === CUSTOM_PLAN) {
+					// A custom plan starts from today's course price, split into its instalments
+					if (event.paths.some((p) => ['courseId', 'paymentMethodId'].includes(p))) {
+						$form.totalPrice = Math.floor(applyDiscount(course?.basePrice, percentage));
+					}
+					if (
+						event.paths.some((p) =>
+							['courseId', 'paymentMethodId', 'totalPrice', 'planInstalments'].includes(p)
+						)
+					) {
+						const count = Math.max(Number($form.planInstalments) || 1, 1);
+						$form.amount = Math.floor(Number($form.totalPrice) / count);
+					}
+					return;
+				}
 				// Suggest today's price when the course or option changes; it can still be edited
 				if (event.paths.some((p) => ['courseId', 'paymentMethodId'].includes(p))) {
-					const course = coursesList.find((c) => String(c.id) === $form.courseId);
 					const method = course?.methods.find((m) => String(m.id) === $form.paymentMethodId);
 					// A method the newly chosen course doesn't offer
 					if (!method && $form.paymentMethodId) $form.paymentMethodId = '';
-					const percentage = bestDiscount(course?.discounts ?? [])?.percentage;
 					const amount = methodAmountFor(course, method, percentage);
 					if (amount > 0) $form.amount = amount;
 				}
@@ -110,12 +125,17 @@
 	// The payment methods the chosen course offers
 	const selectedCourse = $derived(coursesList.find((c) => String(c.id) === $form.courseId));
 	const discount = $derived(bestDiscount(selectedCourse?.discounts ?? []));
-	const optionItems = $derived(
-		(selectedCourse?.methods ?? []).map((m) => ({
+	const optionItems = $derived([
+		...(selectedCourse?.methods ?? []).map((m) => ({
 			value: String(m.id),
 			name: `${m.name} — £${methodAmountFor(selectedCourse, m, discount?.percentage)}${amountSuffix(m)}`
-		}))
-	);
+		})),
+		// A plan agreed with the student: their own total and number of instalments
+		...(selectedCourse
+			? [{ value: CUSTOM_PLAN, name: 'Custom plan (agreed with the student)' }]
+			: [])
+	]);
+	const customPlan = $derived($form.paymentMethodId === CUSTOM_PLAN);
 	// Bank Transfer, Cash... Students who pay online through Stripe are recorded automatically.
 	const paymentWayItems = $derived(page.data.paymentWays ?? []);
 	const statusItems = [
@@ -270,13 +290,45 @@
 				<p class="text-xs text-muted-foreground">
 					Choose a course first to see its payment options.
 				</p>
-			{:else if !optionItems.length}
+			{:else if !selectedCourse.methods.length}
 				<p class="text-xs text-muted-foreground">
-					This course has no payment methods. Add some on the course's page.
+					This course has no payment methods. Add some on the course's page, or use a custom plan.
+				</p>
+			{/if}
+			{#if customPlan}
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					<InputComp
+						{form}
+						{errors}
+						label="Course Total (£)"
+						type="number"
+						name="totalPrice"
+						min="0"
+					/>
+					<InputComp
+						{form}
+						{errors}
+						label="Number of Instalments"
+						type="number"
+						name="planInstalments"
+						min="1"
+						max="24"
+					/>
+				</div>
+				<p class="text-xs text-muted-foreground">
+					The whole price they've agreed to pay, and how many instalments. Later payments of any
+					amount are recorded from the Balance column.
 				</p>
 			{/if}
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-				<InputComp {form} {errors} label="Amount (£)" type="number" name="amount" min="0" />
+				<InputComp
+					{form}
+					{errors}
+					label={customPlan ? 'First Payment (£)' : 'Amount (£)'}
+					type="number"
+					name="amount"
+					min="0"
+				/>
 				<InputComp {form} {errors} label="Status" type="select" name="status" items={statusItems} />
 			</div>
 			{#if $form.status === 'paid'}

@@ -7,7 +7,15 @@
 
 <div class="psec lg:mt-32!">
 	<div class="pinner">
-		{#if data.paid}
+		{#if data.paid && data.balance}
+			<h2 class="ptitle">Payment <span class="g">received</span></h2>
+			<p class="psub">
+				Thanks{data.firstName ? `, ${data.firstName}` : ''}. Your payment{data.amount
+					? ` of £${data.amount}`
+					: ''} for <strong>{data.course || 'your course'}</strong> has been received.
+				{#if data.email}A receipt is on its way to {data.email}.{/if}
+			</p>
+		{:else if data.paid}
 			<h2 class="ptitle">You're <span class="g">enrolled!</span></h2>
 			<p class="psub">
 				Thanks{data.firstName ? `, ${data.firstName}` : ''}. Your payment{data.amount

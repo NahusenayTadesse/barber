@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { enrolments } from '$lib/server/db/schema';
-import { confirmEnrolment, stripe } from '$lib/server/stripe';
+import { BALANCE_PAYMENT, confirmEnrolment, stripe } from '$lib/server/stripe';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -33,7 +33,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		paid,
 		firstName: enrolment?.firstName ?? '',
 		course: enrolment?.course ?? '',
-		amount: enrolment?.amount ?? null,
+		// What this checkout charged (an enrolled student's further payment, or their first)
+		amount: session.amount_total ? session.amount_total / 100 : (enrolment?.amount ?? null),
+		balance: session.metadata?.purpose === BALANCE_PAYMENT,
 		email: session.customer_details?.email ?? session.customer_email ?? ''
 	};
 };

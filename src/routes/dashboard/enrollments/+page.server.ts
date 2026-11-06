@@ -5,6 +5,7 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { db } from '$lib/server/db';
 import {
 	enrolments as customers,
+	enrolmentPayments,
 	courses,
 	discountNullifications,
 	notificationEmails,
@@ -15,12 +16,13 @@ import {
 	studentReportMarks
 } from '$lib/server/db/schema';
 import { user } from '$lib/server/db/auth.schema';
-import { asc, desc, eq, sql } from 'drizzle-orm';
-import { methodAmountFor } from '$lib/discounts';
+import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { methodAmountFor, methodTotalFor } from '$lib/discounts';
+import { nextPayment, planProgress } from '$lib/paymentPlan';
 import { audienceLabels, audienceParam, byAudience } from '$lib/courses';
 import { getCourseMethods } from '$lib/server/paymentMethods';
 import { getActiveDiscounts, getCourseDiscounts } from '$lib/server/discounts';
-import { confirmEnrolment, stripe } from '$lib/server/stripe';
+import { closeCheckout, stripe } from '$lib/server/stripe';
 import { manualPaymentWay, manualPaymentWays } from '$lib/server/paymentWays';
 import { STRIPE_WAY } from '$lib/paymentWays';
 import { customEmail, mailConfigured, paymentLinkEmail, sendMail } from '$lib/server/mail';
@@ -42,7 +44,12 @@ import {
 	bulkPayment,
 	bulkEmail,
 	addReport,
-	bulkReport
+	bulkReport,
+	recordPayment,
+	deletePayment,
+	setPlan,
+	CUSTOM_PLAN,
+	setBalanceLink
 } from './schema';
 import { markSheetFor } from '$lib/markSheets';
 import { emailStudentReport } from '$lib/server/studentReport';
@@ -55,6 +62,34 @@ import {
 import { classLinkFor } from '$lib/server/classLink';
 
 const pounds = (n: number) => Math.round(n * 100) / 100;
+// Today as a UK calendar date
+const today = () =>
+	new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
+// Everything a student has paid so far, from their payment history
+const paidSoFar = sql<string>`(SELECT COALESCE(SUM(${enrolmentPayments.amount}), 0) FROM ${enrolmentPayments} WHERE ${enrolmentPayments.enrolmentId} = ${customers.id})`;
+
+/**
+ * What a student owes in total, has paid and has left to pay. Enrolments made
+ * before the total was recorded fall back to an estimate from what they paid.
+ */
+function balanceFor(e: {
+	status: string | null;
+	amount: number;
+	totalPrice: string | null;
+	paid: string | number;
+	methodKind?: string | null;
+	methodInstalments?: number | null;
+}) {
+	const paid = pounds(Number(e.paid));
+	const total =
+		e.totalPrice !== null
+			? Number(e.totalPrice)
+			: e.methodKind === 'instalments'
+				? pounds(e.amount * Math.max(e.methodInstalments ?? 1, 1))
+				: e.amount;
+	const left = e.status === 'cancelled' ? 0 : Math.max(pounds(total - paid), 0);
+	return { total, paid, left };
+}
 
 export const load: PageServerLoad = async ({ url }) => {
 	// ?for=men or ?for=women shows only students on those courses
@@ -69,6 +104,10 @@ export const load: PageServerLoad = async ({ url }) => {
 			phone: customers.phone,
 			paymentOption: customers.paymentOption,
 			amount: customers.amount,
+			totalPrice: customers.totalPrice,
+			paid: paidSoFar,
+			balanceLinkAmount: customers.balanceLinkAmount,
+			planInstalments: customers.planInstalments,
 			discountName: customers.discountName,
 			discountPercentage: customers.discountPercentage,
 			course: sql<string>`COALESCE(${courses.name}, ${customers.course})`,
@@ -115,6 +154,36 @@ export const load: PageServerLoad = async ({ url }) => {
 		.where(audience ? eq(courses.audience, audience) : undefined)
 		.orderBy(desc(customers.createdAt));
 
+	// Every payment made, for each student's payment history
+	const paymentRows = await db
+		.select({
+			id: enrolmentPayments.id,
+			enrolmentId: enrolmentPayments.enrolmentId,
+			amount: enrolmentPayments.amount,
+			paidOn: sql<string>`DATE_FORMAT(${enrolmentPayments.paidOn}, '%Y-%m-%d')`,
+			note: enrolmentPayments.note,
+			way: paymentWays.name,
+			waySlug: paymentWays.slug,
+			stripeSessionId: enrolmentPayments.stripeSessionId,
+			by: user.name
+		})
+		.from(enrolmentPayments)
+		.leftJoin(paymentWays, eq(enrolmentPayments.paymentWayId, paymentWays.id))
+		.leftJoin(user, eq(user.id, enrolmentPayments.createdBy))
+		.orderBy(asc(enrolmentPayments.paidOn), asc(enrolmentPayments.id));
+	const paymentsByStudent = new Map<number, StudentPayment[]>();
+	for (const { enrolmentId, stripeSessionId, waySlug, ...p } of paymentRows) {
+		const list = paymentsByStudent.get(enrolmentId) ?? [];
+		list.push({
+			...p,
+			amount: Number(p.amount),
+			way: p.way ?? 'Not recorded',
+			// Stripe payments are recorded automatically and can't be deleted
+			byStripe: !!stripeSessionId || waySlug === STRIPE_WAY
+		});
+		paymentsByStudent.set(enrolmentId, list);
+	}
+
 	const customersList = rows.map(
 		({
 			methodKind,
@@ -123,6 +192,10 @@ export const load: PageServerLoad = async ({ url }) => {
 			nullified,
 			paymentWayName,
 			paymentWaySlug,
+			paid: paidRaw,
+			totalPrice,
+			balanceLinkAmount,
+			planInstalments,
 			...r
 		}) => {
 			const course = r.basePrice ? { basePrice: r.basePrice, minPrice: r.minPrice } : undefined;
@@ -138,17 +211,50 @@ export const load: PageServerLoad = async ({ url }) => {
 				percentage < 100
 					? pounds(amount / (1 - percentage / 100))
 					: methodAmountFor(course, method);
+			const payments = paymentsByStudent.get(r.id) ?? [];
+			const { total, paid, left } = balanceFor({
+				status: r.status,
+				amount,
+				totalPrice,
+				paid: paidRaw,
+				methodKind,
+				methodInstalments
+			});
+			// Their own plan if one was agreed, otherwise their payment method's
+			const instalments =
+				planInstalments ?? (methodKind === 'instalments' ? methodInstalments : null);
+			const progress = r.status === 'cancelled' ? null : planProgress(total, paid, instalments);
+			const linkAmount = Number(balanceLinkAmount ?? 0);
+			// How they've paid so far, e.g. "Stripe" or "Stripe, Cash"
+			const ways = [...new Set(payments.map((p) => p.way).filter((w) => w !== 'Not recorded'))];
 
 			return {
 				...r,
 				paymentOption: r.paymentOption ?? '',
 				reportCount: Number(r.reportCount),
 				// How they paid. Stripe payments are set automatically and locked.
-				paidBy: paymentWayName ?? (r.status === 'confirmed' ? 'Not recorded' : '—'),
+				paidBy: ways.length
+					? ways.join(', ')
+					: (paymentWayName ?? (r.status === 'confirmed' ? 'Not recorded' : '—')),
 				paidByStripe: paymentWaySlug === STRIPE_WAY,
 				// Whose hair the course is for; unknown if the course was deleted
 				audience: r.audience ? audienceLabels[r.audience] : '—',
 				amount,
+				// The student's payments towards the course and what's left to pay
+				balance: {
+					total,
+					paid,
+					left,
+					payments,
+					// Instalments in their plan (null when not paying by instalments), and
+					// how far through them their payments so far take them
+					instalments,
+					progress,
+					// Suggested next payment: the rest of the current instalment, or what's left
+					next: nextPayment(left, progress),
+					// Amount of the Stripe link for their next payment, if one was sent
+					linkAmount: r.status === 'confirmed' && linkAmount > 0 ? linkAmount : null
+				},
 				discount: nullified?.discountName
 					? `Removed: ${nullified.discountName} (${Number(nullified.discountPercentage)}%)`
 					: r.discountName
@@ -173,12 +279,26 @@ export const load: PageServerLoad = async ({ url }) => {
 							: Math.max(pounds(undiscounted - amount), 0)
 						: null,
 				status: r.status === 'confirmed' ? 'paid' : r.status === 'pending' ? 'unpaid' : 'cancelled',
+				// Shown in the Status column: paid students who still owe part of the
+				// course price are partially paid
+				paymentStatus:
+					r.status === 'confirmed'
+						? left > 0
+							? 'partially paid'
+							: 'paid'
+						: r.status === 'pending'
+							? 'unpaid'
+							: 'cancelled',
 				className: r.className ?? 'No class',
 				// Link a paid student uses to choose (or change) their class
 				classLink: r.status === 'confirmed' ? classLinkFor(url.origin, r.id) : null,
 				// Link the student can use to pay, for anyone who still owes the amount
+				// (or, once enrolled, a further payment staff have asked for)
 				payLink:
-					r.status === 'pending' && Number(r.amount) > 0 ? payLinkFor(url.origin, r.id) : null
+					(r.status === 'pending' && Number(r.amount) > 0) ||
+					(r.status === 'confirmed' && linkAmount > 0)
+						? payLinkFor(url.origin, r.id)
+						: null
 			};
 		}
 	);
@@ -236,6 +356,16 @@ export const load: PageServerLoad = async ({ url }) => {
 	};
 };
 
+export type StudentPayment = {
+	id: number;
+	amount: number;
+	paidOn: string;
+	note: string | null;
+	way: string;
+	by: string | null;
+	byStripe: boolean;
+};
+
 type Outcome = { ok: true; message: string } | { ok: false; status: number; message: string };
 const failed = (status: number, message: string): Outcome => ({ ok: false, status, message });
 
@@ -248,6 +378,9 @@ async function emailPayLink(enrolmentId: number, origin: string): Promise<Outcom
 			email: customers.email,
 			status: customers.status,
 			amount: customers.amount,
+			totalPrice: customers.totalPrice,
+			balanceLinkAmount: customers.balanceLinkAmount,
+			paid: paidSoFar,
 			course: sql<string>`COALESCE(${courses.name}, ${customers.course})`,
 			removedDiscount: discountNullifications.discountName
 		})
@@ -256,8 +389,30 @@ async function emailPayLink(enrolmentId: number, origin: string): Promise<Outcom
 		.leftJoin(discountNullifications, eq(discountNullifications.enrolmentId, customers.id))
 		.where(eq(customers.id, enrolmentId))
 		.then((rows) => rows[0]);
-	if (!enrolment || enrolment.status !== 'pending') {
+	// An enrolled student staff have asked for a further payment (e.g. an instalment)
+	const further = enrolment?.status === 'confirmed' && Number(enrolment.balanceLinkAmount) > 0;
+	if (!enrolment || (enrolment.status !== 'pending' && !further)) {
 		return failed(400, 'This student has nothing left to pay.');
+	}
+
+	let amountText: string;
+	if (further) {
+		const due = Number(enrolment.balanceLinkAmount);
+		const leftAfter =
+			enrolment.totalPrice !== null
+				? Math.max(pounds(Number(enrolment.totalPrice) - Number(enrolment.paid) - due), 0)
+				: null;
+		amountText =
+			`The amount due is £${due}.` +
+			(leftAfter === null
+				? ''
+				: leftAfter > 0
+					? ` After this payment, £${leftAfter} will be left to pay.`
+					: ' This payment completes your course fees.');
+	} else {
+		amountText = enrolment.removedDiscount
+			? `The ${enrolment.removedDiscount} discount has been removed from your enrolment, so the remaining balance due is £${Number(enrolment.amount)}.`
+			: `The amount due is £${Number(enrolment.amount)}.`;
 	}
 
 	try {
@@ -267,9 +422,8 @@ async function emailPayLink(enrolmentId: number, origin: string): Promise<Outcom
 				firstName: enrolment.firstName,
 				courseName: enrolment.course,
 				link: payLinkFor(origin, enrolment.id),
-				amountText: enrolment.removedDiscount
-					? `The ${enrolment.removedDiscount} discount has been removed from your enrolment, so the remaining balance due is £${Number(enrolment.amount)}.`
-					: `The amount due is £${Number(enrolment.amount)}.`
+				amountText,
+				further
 			})
 		});
 	} catch (err) {
@@ -363,6 +517,7 @@ async function deleteEnrolment(enrolmentId: number): Promise<Outcome> {
 		.select({
 			status: customers.status,
 			stripeSessionId: customers.stripeSessionId,
+			balanceLinkAmount: customers.balanceLinkAmount,
 			name: sql<string>`TRIM(CONCAT_WS(' ', ${customers.firstName}, ${customers.lastName}))`
 		})
 		.from(customers)
@@ -370,15 +525,14 @@ async function deleteEnrolment(enrolmentId: number): Promise<Outcome> {
 		.then((rows) => rows[0]);
 	if (!enrolment) return failed(404, 'Unknown student.');
 
-	// An unpaid student may have a Stripe checkout open from their payment link.
-	// It must not be payable once the enrolment is gone.
-	if (enrolment.status === 'pending' && enrolment.stripeSessionId) {
+	// A student may have a Stripe checkout open from their payment link (to enrol,
+	// or for a further payment). It must not be payable once the enrolment is gone.
+	if (
+		enrolment.stripeSessionId &&
+		(enrolment.status === 'pending' || enrolment.balanceLinkAmount !== null)
+	) {
 		try {
-			let session = await stripe.checkout.sessions.retrieve(enrolment.stripeSessionId);
-			if (session.status === 'open') {
-				session = await stripe.checkout.sessions.expire(session.id);
-			}
-			if (session.status === 'complete' && (await confirmEnrolment(session))) {
+			if ((await closeCheckout(enrolment.stripeSessionId)) && enrolment.status === 'pending') {
 				return failed(400, "This student has just paid through Stripe, so they weren't deleted.");
 			}
 		} catch (err) {
@@ -405,14 +559,20 @@ async function applyPayment(
 	enrolmentId: number,
 	status: 'paid' | 'unpaid' | 'cancelled',
 	paymentWayId: string,
-	by: string,
-	origin: string
+	staff: { id: string; name: string },
+	origin: string,
+	// The payment received, when newly paid; by default the amount they owed
+	payment?: { amount: number; paidOn: string; note: string }
 ): Promise<Outcome> {
+	const by = staff.name;
 	const enrolment = await db
 		.select({
 			id: customers.id,
 			status: customers.status,
+			amount: customers.amount,
 			stripeSessionId: customers.stripeSessionId,
+			balanceLinkAmount: customers.balanceLinkAmount,
+			paymentWayId: customers.paymentWayId,
 			waySlug: paymentWays.slug
 		})
 		.from(customers)
@@ -432,11 +592,7 @@ async function applyPayment(
 	// it was paid in the meantime, Stripe's payment stands instead.
 	if (enrolment.status === 'pending' && enrolment.stripeSessionId && status !== 'unpaid') {
 		try {
-			let session = await stripe.checkout.sessions.retrieve(enrolment.stripeSessionId);
-			if (session.status === 'open') {
-				session = await stripe.checkout.sessions.expire(session.id);
-			}
-			if (session.status === 'complete' && (await confirmEnrolment(session))) {
+			if (await closeCheckout(enrolment.stripeSessionId)) {
 				return failed(
 					400,
 					'This student has just paid through Stripe, so their payment is already recorded.'
@@ -450,11 +606,70 @@ async function applyPayment(
 
 	const newStatus =
 		status === 'paid' ? 'confirmed' : status === 'unpaid' ? 'pending' : ('cancelled' as const);
+
+	// An enrolled student's link for a further payment stops once their status changes
+	if (
+		enrolment.status === 'confirmed' &&
+		newStatus !== 'confirmed' &&
+		enrolment.balanceLinkAmount !== null &&
+		enrolment.stripeSessionId
+	) {
+		try {
+			await closeCheckout(enrolment.stripeSessionId);
+		} catch (err) {
+			console.error('Closing Stripe checkout failed:', err instanceof Error ? err.message : err);
+			return failed(500, "Couldn't stop the student's Stripe payment link. Please try again.");
+		}
+	}
+
+	const amountReceived = payment?.amount ?? Number(enrolment.amount ?? 0);
+	const newlyPaid = newStatus === 'confirmed' && enrolment.status !== 'confirmed';
 	try {
-		await db
-			.update(customers)
-			.set({ status: newStatus, paymentWayId: way?.id ?? null })
-			.where(eq(customers.id, enrolmentId));
+		await db.transaction(async (tx) => {
+			await tx
+				.update(customers)
+				.set({
+					status: newStatus,
+					paymentWayId: way?.id ?? null,
+					...(newStatus !== 'confirmed' && { balanceLinkAmount: null })
+				})
+				.where(eq(customers.id, enrolmentId));
+			if (newlyPaid && amountReceived > 0) {
+				// Kept in their payment history
+				await tx.insert(enrolmentPayments).values({
+					enrolmentId,
+					amount: String(amountReceived),
+					paymentWayId: way!.id,
+					paidOn: payment?.paidOn ?? today(),
+					note: payment?.note || null,
+					createdBy: staff.id
+				});
+			} else if (
+				newStatus === 'confirmed' &&
+				enrolment.paymentWayId &&
+				enrolment.paymentWayId !== way!.id
+			) {
+				// Correcting how they paid: their first payment in the history follows
+				const [first] = await tx
+					.select({ id: enrolmentPayments.id })
+					.from(enrolmentPayments)
+					.where(
+						and(
+							eq(enrolmentPayments.enrolmentId, enrolmentId),
+							eq(enrolmentPayments.paymentWayId, enrolment.paymentWayId),
+							isNull(enrolmentPayments.stripeSessionId)
+						)
+					)
+					.orderBy(asc(enrolmentPayments.paidOn), asc(enrolmentPayments.id))
+					.limit(1);
+				if (first) {
+					await tx
+						.update(enrolmentPayments)
+						.set({ paymentWayId: way!.id })
+						.where(eq(enrolmentPayments.id, first.id));
+				}
+			}
+		});
 	} catch (err) {
 		console.error('Error saving payment:', err instanceof Error ? err.message : err);
 		return failed(500, "The payment couldn't be saved.");
@@ -479,7 +694,9 @@ async function applyPayment(
 
 	const saved =
 		newStatus === 'confirmed'
-			? `Marked as paid by ${way!.name}`
+			? newlyPaid && amountReceived > 0
+				? `£${amountReceived} recorded, paid by ${way!.name}`
+				: `Marked as paid by ${way!.name}`
 			: newStatus === 'pending'
 				? 'Marked as unpaid'
 				: 'Marked as cancelled';
@@ -537,10 +754,17 @@ export const actions: Actions = {
 			);
 		}
 		const courseId = Number(form.data.courseId);
-		const methodId = Number(form.data.paymentMethodId);
+		// A plan agreed with the student rather than one of the course's methods
+		const custom = form.data.paymentMethodId === CUSTOM_PLAN;
+		const methodId = custom ? 0 : Number(form.data.paymentMethodId);
 
 		const course = await db
-			.select({ id: courses.id, name: courses.name })
+			.select({
+				id: courses.id,
+				name: courses.name,
+				basePrice: courses.basePrice,
+				minPrice: courses.minPrice
+			})
 			.from(courses)
 			.where(eq(courses.id, courseId))
 			.then((rows) => rows[0]);
@@ -552,12 +776,20 @@ export const actions: Actions = {
 			);
 		}
 
-		const method = await db
-			.select({ id: paymentMethods.id, name: paymentMethods.name })
-			.from(paymentMethods)
-			.where(eq(paymentMethods.id, methodId))
-			.then((rows) => rows[0]);
-		if (!method) {
+		const method = custom
+			? null
+			: await db
+					.select({
+						id: paymentMethods.id,
+						name: paymentMethods.name,
+						kind: paymentMethods.kind,
+						instalments: paymentMethods.instalments,
+						percentOff: paymentMethods.percentOff
+					})
+					.from(paymentMethods)
+					.where(eq(paymentMethods.id, methodId))
+					.then((rows) => rows[0]);
+		if (!custom && !method) {
 			return message(
 				form,
 				{ type: 'error', text: 'Please select a valid payment option.' },
@@ -567,27 +799,61 @@ export const actions: Actions = {
 
 		// Recorded so the discount can be removed later if it turns out not to apply
 		const discount = (await getActiveDiscounts([course.id]))[course.id];
+		// The whole course price, paid over the deposit or instalments. Paying in
+		// full, the amount entered is the whole price; a custom plan sets its own.
+		const { planInstalments } = form.data;
+		const totalPrice = !method
+			? form.data.totalPrice
+			: method.kind === 'full'
+				? amount
+				: Math.max(
+						methodTotalFor(
+							course,
+							{ ...method, percentOff: Number(method.percentOff) },
+							discount?.percentage
+						),
+						amount
+					);
 
 		try {
-			const [{ id }] = await db
-				.insert(customers)
-				.values({
-					firstName,
-					lastName,
-					email,
-					phone: phone || null,
-					notes: notes || null,
-					courseId,
-					course: course.name,
-					paymentMethodId: method.id,
-					paymentOption: method.name,
-					amount: String(amount),
-					discountName: discount?.name ?? null,
-					discountPercentage: discount ? String(discount.percentage) : null,
-					status: status === 'paid' ? 'confirmed' : 'pending',
-					paymentWayId: way?.id ?? null
-				})
-				.$returningId();
+			const id = await db.transaction(async (tx) => {
+				const [{ id }] = await tx
+					.insert(customers)
+					.values({
+						firstName,
+						lastName,
+						email,
+						phone: phone || null,
+						notes: notes || null,
+						courseId,
+						course: course.name,
+						paymentMethodId: method?.id ?? null,
+						paymentOption: method
+							? method.name
+							: planInstalments > 1
+								? `Custom plan: ${planInstalments} instalments`
+								: 'Custom plan',
+						amount: String(amount),
+						totalPrice: String(totalPrice),
+						planInstalments: method ? null : planInstalments,
+						discountName: discount?.name ?? null,
+						discountPercentage: discount ? String(discount.percentage) : null,
+						status: status === 'paid' ? 'confirmed' : 'pending',
+						paymentWayId: way?.id ?? null
+					})
+					.$returningId();
+				// Their first payment, kept in their payment history
+				if (way && amount > 0) {
+					await tx.insert(enrolmentPayments).values({
+						enrolmentId: id,
+						amount: String(amount),
+						paymentWayId: way.id,
+						paidOn: today(),
+						createdBy: locals.user!.id
+					});
+				}
+				return id;
+			});
 			// Students who have already paid are enrolled, so welcome them now
 			if (status === 'paid') {
 				await Promise.all([
@@ -641,13 +907,7 @@ export const actions: Actions = {
 			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
 		}
 		const { enrolmentId, status, paymentWayId } = parsed.data;
-		const outcome = await applyPayment(
-			enrolmentId,
-			status,
-			paymentWayId,
-			locals.user.name,
-			url.origin
-		);
+		const outcome = await applyPayment(enrolmentId, status, paymentWayId, locals.user, url.origin);
 		return outcome.ok
 			? { message: outcome.message }
 			: fail(outcome.status, { message: outcome.message });
@@ -743,6 +1003,194 @@ export const actions: Actions = {
 			: fail(outcome.status, { message: outcome.message });
 	},
 
+	// Record a payment made outside Stripe (bank transfer, cash...), e.g. a later
+	// instalment. A student who hadn't paid yet becomes paid.
+	recordPayment: async ({ request, locals, url }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = recordPayment.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
+		}
+		const { enrolmentId, amount, paymentWayId, paidOn, note } = parsed.data;
+
+		const enrolment = await db
+			.select({ status: customers.status })
+			.from(customers)
+			.where(eq(customers.id, enrolmentId))
+			.then((rows) => rows[0]);
+		if (!enrolment) return fail(404, { message: 'Unknown student.' });
+
+		// Their first payment: recorded the same way as marking them paid
+		if (enrolment.status !== 'confirmed') {
+			const outcome = await applyPayment(
+				enrolmentId,
+				'paid',
+				paymentWayId,
+				locals.user,
+				url.origin,
+				{
+					amount,
+					paidOn,
+					note
+				}
+			);
+			return outcome.ok
+				? { message: outcome.message }
+				: fail(outcome.status, { message: outcome.message });
+		}
+
+		const way = await manualPaymentWay(Number(paymentWayId));
+		if (!way) return fail(400, { message: 'Choose how the student paid.' });
+
+		try {
+			await db.insert(enrolmentPayments).values({
+				enrolmentId,
+				amount: String(amount),
+				paymentWayId: way.id,
+				paidOn,
+				note: note || null,
+				createdBy: locals.user.id
+			});
+		} catch (err) {
+			console.error('Error recording payment:', err instanceof Error ? err.message : err);
+			return fail(500, { message: "The payment couldn't be saved." });
+		}
+		return { message: `£${amount} recorded, paid by ${way.name}` };
+	},
+
+	// Delete a payment recorded by mistake. Stripe payments can't be deleted.
+	deletePayment: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = deletePayment.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) return fail(400, { message: 'Unknown payment.' });
+
+		const payment = await db
+			.select({
+				id: enrolmentPayments.id,
+				stripeSessionId: enrolmentPayments.stripeSessionId,
+				waySlug: paymentWays.slug
+			})
+			.from(enrolmentPayments)
+			.leftJoin(paymentWays, eq(enrolmentPayments.paymentWayId, paymentWays.id))
+			.where(eq(enrolmentPayments.id, parsed.data.paymentId))
+			.then((rows) => rows[0]);
+		if (!payment) return fail(404, { message: 'Unknown payment.' });
+		if (payment.stripeSessionId || payment.waySlug === STRIPE_WAY) {
+			return fail(400, { message: "Payments made through Stripe can't be deleted." });
+		}
+
+		await db.delete(enrolmentPayments).where(eq(enrolmentPayments.id, payment.id));
+		return { message: 'Payment deleted' };
+	},
+
+	// Change a student's payment plan: the whole course price they owe and how
+	// many instalments they pay it in, e.g. after agreeing a different arrangement
+	setPlan: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = setPlan.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the plan.' });
+		}
+		const { enrolmentId, totalPrice, planInstalments } = parsed.data;
+
+		const [result] = await db
+			.update(customers)
+			.set({ totalPrice: String(totalPrice), planInstalments })
+			.where(eq(customers.id, enrolmentId));
+		if (result.affectedRows === 0) return fail(404, { message: 'Unknown student.' });
+		return {
+			message:
+				planInstalments && planInstalments > 1
+					? `Plan set to £${totalPrice} in ${planInstalments} instalments`
+					: `Plan set to £${totalPrice}`
+		};
+	},
+
+	// Make (or stop, with 0) a Stripe payment link for an enrolled student's next
+	// payment, e.g. their next instalment, and optionally email it to them
+	setBalanceLink: async ({ request, locals, url }) => {
+		if (!locals.user) return fail(401, { message: 'Please log in again.' });
+
+		const parsed = setBalanceLink.safeParse(Object.fromEntries(await request.formData()));
+		if (!parsed.success) {
+			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the amount.' });
+		}
+		const { enrolmentId, amount, email } = parsed.data;
+
+		const enrolment = await db
+			.select({
+				status: customers.status,
+				amount: customers.amount,
+				totalPrice: customers.totalPrice,
+				paid: paidSoFar,
+				stripeSessionId: customers.stripeSessionId
+			})
+			.from(customers)
+			.where(eq(customers.id, enrolmentId))
+			.then((rows) => rows[0]);
+		if (!enrolment) return fail(404, { message: 'Unknown student.' });
+		if (enrolment.status !== 'confirmed') {
+			return fail(400, {
+				message:
+					'Only students who have made their first payment can be sent a link for a further payment. Unpaid students use the link in the Payment Link column.'
+			});
+		}
+
+		// The previous link's checkout (if any) must not be paid at its old amount.
+		// If it was just paid, that payment is recorded first.
+		if (enrolment.stripeSessionId) {
+			try {
+				await closeCheckout(enrolment.stripeSessionId);
+			} catch (err) {
+				console.error('Closing Stripe checkout failed:', err instanceof Error ? err.message : err);
+				return fail(500, {
+					message: "Couldn't check the student's Stripe payment. Please try again."
+				});
+			}
+		}
+
+		if (amount > 0) {
+			// Read again: closing the old checkout may have just recorded a payment
+			const paid = await db
+				.select({ paid: paidSoFar })
+				.from(customers)
+				.where(eq(customers.id, enrolmentId))
+				.then((rows) => rows[0]?.paid ?? enrolment.paid);
+			const { left } = balanceFor({ ...enrolment, amount: Number(enrolment.amount ?? 0), paid });
+			if (amount > left) {
+				return fail(400, {
+					message:
+						left > 0 ? `Only £${left} is left to pay.` : 'This student has nothing left to pay.'
+				});
+			}
+		}
+
+		await db
+			.update(customers)
+			.set({ balanceLinkAmount: amount > 0 ? String(amount) : null })
+			.where(eq(customers.id, enrolmentId));
+		if (amount === 0) return { message: 'Payment link stopped' };
+
+		const link = payLinkFor(url.origin, enrolmentId);
+		if (!email) return { message: `Payment link for £${amount} ready`, link };
+		if (!mailConfigured()) {
+			return {
+				message: `Payment link for £${amount} ready. Email isn't set up, so copy the link and send it.`,
+				link
+			};
+		}
+		const outcome = await emailPayLink(enrolmentId, url.origin);
+		return {
+			message: outcome.ok
+				? `Payment link for £${amount} emailed`
+				: `Payment link for £${amount} ready, but ${outcome.message.charAt(0).toLowerCase()}${outcome.message.slice(1)}`,
+			link
+		};
+	},
+
 	// Add an address to tell about new enrolments
 	addNotificationEmail: async ({ request, locals }) => {
 		if (!locals.user) return fail(401, { message: 'Please log in again.' });
@@ -814,6 +1262,8 @@ export const actions: Actions = {
 				amount: customers.amount,
 				discountName: customers.discountName,
 				discountPercentage: customers.discountPercentage,
+				totalPrice: customers.totalPrice,
+				paid: paidSoFar,
 				stripeSessionId: customers.stripeSessionId,
 				alreadyNullified: discountNullifications.id
 			})
@@ -829,14 +1279,24 @@ export const actions: Actions = {
 			return fail(400, { message: 'This student has no discount to remove.' });
 		}
 
-		// A checkout the student started at the discounted price must not be paid any more
-		if (enrolment.status === 'pending' && enrolment.stripeSessionId) {
+		// A checkout the student started at the discounted price (or a further
+		// payment link) must not be paid any more
+		if (enrolment.stripeSessionId) {
 			try {
 				await stripe.checkout.sessions.expire(enrolment.stripeSessionId);
 			} catch {
 				// Already expired or completed: nothing to stop
 			}
 		}
+
+		// Without the discount, the whole course costs more: at least what they've
+		// paid plus what's now due
+		const percentage = Number(enrolment.discountPercentage ?? 0);
+		const undiscountedTotal =
+			enrolment.totalPrice !== null && percentage < 100
+				? pounds(Number(enrolment.totalPrice) / (1 - percentage / 100))
+				: 0;
+		const totalPrice = Math.max(undiscountedTotal, pounds(Number(enrolment.paid) + amountDue));
 
 		try {
 			await db.transaction(async (tx) => {
@@ -856,6 +1316,8 @@ export const actions: Actions = {
 						discountName: null,
 						discountPercentage: null,
 						stripeSessionId: null,
+						balanceLinkAmount: null,
+						totalPrice: String(totalPrice),
 						// Owing money again: unpaid, with a link for the amount due (paid
 						// however they like, so the earlier payment way no longer applies)
 						...(amountDue > 0
@@ -976,12 +1438,12 @@ export const actions: Actions = {
 			return fail(400, { message: parsed.error.issues[0]?.message ?? 'Please check the form.' });
 		}
 		const { enrolmentIds, status, paymentWayId } = parsed.data;
-		const by = locals.user.name;
+		const staff = locals.user;
 
 		return forEachStudent(
 			enrolmentIds,
 			status === 'paid' ? 'marked as paid' : status === 'unpaid' ? 'marked as unpaid' : 'cancelled',
-			(id) => applyPayment(id, status, paymentWayId, by, url.origin)
+			(id) => applyPayment(id, status, paymentWayId, staff, url.origin)
 		);
 	},
 

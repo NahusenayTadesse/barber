@@ -16,6 +16,7 @@
 		id,
 		name,
 		status,
+		paymentStatus,
 		paidBy,
 		paidByStripe,
 		paymentWayId
@@ -23,6 +24,8 @@
 		id: number;
 		name: string;
 		status: 'paid' | 'unpaid' | 'cancelled';
+		/** As shown: paid students who still owe part of the course are "partially paid" */
+		paymentStatus: 'paid' | 'partially paid' | 'unpaid' | 'cancelled';
 		/** e.g. "Cash", "Stripe", "Not recorded" or "—" */
 		paidBy: string;
 		/** Paid through Stripe: set automatically, so it can't be changed */
@@ -54,7 +57,7 @@
 
 <div class="flex items-center gap-2">
 	<div class="flex flex-col items-start gap-1">
-		<Statuses {status} />
+		<Statuses status={paymentStatus} />
 		{#if status === 'paid'}
 			<span
 				class="flex items-center gap-1 text-xs text-muted-foreground"
@@ -98,6 +101,10 @@
 				<p class="text-sm text-muted-foreground">
 					Record a payment made outside the website, such as cash or a bank transfer. Payments made
 					online through Stripe are recorded automatically.
+				</p>
+				<p class="text-xs text-muted-foreground">
+					Paid students who still owe part of the course show as <strong>Partially Paid</strong>
+					until it's all paid. Record their further payments from the Balance column.
 				</p>
 
 				<div class="flex flex-col gap-2">

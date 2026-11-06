@@ -20,6 +20,7 @@
 		/* cancelled / unpaid */
 		cancelled: { icon: OctagonMinus, colour: 'bg-red-500' },
 		unpaid: { icon: OctagonMinus, colour: 'bg-red-500' },
+		'partially paid': { icon: Loader, colour: 'bg-amber-500' },
 		dead: { icon: OctagonMinus, colour: 'bg-red-500' },
 
 		/* pending */
@@ -56,8 +57,8 @@
 	} as const;
 
 	/* ---------- derived ---------- */
-	const key = String(status).trim().toLowerCase() as keyof typeof statusMeta;
-	const { icon: Icon, colour } = statusMeta[key] ?? statusMeta.unknown;
+	const key = $derived(String(status).trim().toLowerCase() as keyof typeof statusMeta);
+	const { icon: Icon, colour } = $derived(statusMeta[key] ?? statusMeta.unknown);
 </script>
 
 <Badge variant="secondary" class="{colour} text-white">

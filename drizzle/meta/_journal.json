@@ -176,6 +176,20 @@
       "when": 1793637719229,
       "tag": "0024_student_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1793995736435,
+      "tag": "0025_enrolment_payments",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1793996877130,
+      "tag": "0026_payment_plans",
+      "breakpoints": true
     }
   ]
 }

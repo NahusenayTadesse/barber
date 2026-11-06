@@ -156,16 +156,24 @@ export function paymentLinkEmail(o: {
 	courseName: string;
 	link: string;
 	amountText: string;
+	/** A further payment (e.g. the next instalment) by a student who is already enrolled */
+	further?: boolean;
 }) {
 	const name = o.firstName.trim() || 'there';
+	const intro = o.further
+		? `Here is your link to make your next payment for the ${o.courseName} at D&D Barber Academy.`
+		: `Here is your link to pay for the ${o.courseName} at D&D Barber Academy.`;
+	const outro = o.further
+		? 'Just follow the link to pay securely by card.'
+		: 'Your place is reserved: just follow the link to pay securely by card.';
 	const text = [
 		`Hi ${name},`,
 		'',
-		`Here is your link to pay for the ${o.courseName} at D&D Barber Academy.${o.amountText ? ` ${o.amountText}` : ''}`,
+		`${intro}${o.amountText ? ` ${o.amountText}` : ''}`,
 		'',
 		o.link,
 		'',
-		'Your place is reserved: just follow the link to pay securely by card.',
+		outro,
 		'',
 		contactLine,
 		'',
@@ -174,23 +182,31 @@ export function paymentLinkEmail(o: {
 	].join('\n');
 
 	const html = brandedEmail({
-		title: 'Complete your enrolment',
-		preheader: `Your place on the ${o.courseName} is reserved. Pay securely to confirm it.`,
-		eyebrow: 'Complete your enrolment',
-		heading: `Your place is waiting, ${name}`,
+		title: o.further ? 'Your next payment' : 'Complete your enrolment',
+		preheader: o.further
+			? `Your next payment for the ${o.courseName}. Pay securely by card.`
+			: `Your place on the ${o.courseName} is reserved. Pay securely to confirm it.`,
+		eyebrow: o.further ? 'Your next payment' : 'Complete your enrolment',
+		heading: o.further ? `Your next payment, ${name}` : `Your place is waiting, ${name}`,
 		sections: [
 			para(
-				`Here is your link to pay for the <strong style="color:#111">${escapeHtml(o.courseName)}</strong> at D&amp;D Barber Academy. Your place is reserved: just follow the link to pay securely by card.`
+				`Here is your link to ${o.further ? 'make your next payment' : 'pay'} for the <strong style="color:#111">${escapeHtml(o.courseName)}</strong> at D&amp;D Barber Academy. ${escapeHtml(outro)}`
 			) + (o.amountText ? para(escapeHtml(o.amountText)) : ''),
 			detailsBox('Your enrolment', [['Course', o.courseName]]),
-			`<div style="text-align:center;padding:8px 0">${button(o.link, 'Pay & Confirm My Place')}</div>`,
+			`<div style="text-align:center;padding:8px 0">${button(o.link, o.further ? 'Make My Payment' : 'Pay & Confirm My Place')}</div>`,
 			`<p style="margin:0;font-size:13px;line-height:1.6;color:#666">If the button doesn't work, copy this link into your browser:<br><a href="${escapeHtml(o.link)}" style="color:#111;word-break:break-all">${escapeHtml(o.link)}</a></p>`
 		],
-		signOff: 'We look forward to training you.',
+		signOff: o.further ? 'Thank you for training with us.' : 'We look forward to training you.',
 		footnote: "You're receiving this because you registered for a course with us."
 	});
 
-	return { subject: `Complete your enrolment: ${o.courseName}`, text, html };
+	return {
+		subject: o.further
+			? `Your next payment: ${o.courseName}`
+			: `Complete your enrolment: ${o.courseName}`,
+		text,
+		html
+	};
 }
 
 /**

@@ -21,7 +21,7 @@
 
 <div class="psec lg:mt-32!">
 	<div class="pinner">
-		{#if data.status === 'confirmed'}
+		{#if data.status === 'confirmed' && !data.balance}
 			<h2 class="ptitle">Already <span class="g">paid</span></h2>
 			<p class="psub">
 				Thanks{data.firstName ? `, ${data.firstName}` : ''}. Your payment for
@@ -35,13 +35,25 @@
 					>020 3700 3997</a
 				> and we'll sort it out.
 			</p>
+		{:else if data.balance}
+			<h2 class="ptitle">Make your next <span class="g">payment</span></h2>
+			<p class="psub">
+				Hi {data.firstName}, here is your next payment for the <strong>{data.course}</strong>.
+				{#if data.leftAfter !== null}
+					{data.leftAfter > 0
+						? `After this payment, £${data.leftAfter} will be left to pay.`
+						: 'This payment completes your course fees.'}
+				{/if}
+			</p>
 		{:else}
 			<h2 class="ptitle">Complete your <span class="g">enrolment</span></h2>
 			<p class="psub">
 				Hi {data.firstName}, your place on the <strong>{data.course}</strong> is reserved. Pay below to
 				confirm it.
 			</p>
-			{#if data.removedDiscount}
+		{/if}
+		{#if data.balance || (data.status !== 'confirmed' && data.status !== 'cancelled' && data.amount > 0)}
+			{#if data.removedDiscount && !data.balance}
 				<p class="psub">
 					The <strong>{data.removedDiscount}</strong> discount has been removed from your enrolment, so
 					this is the remaining balance.
@@ -62,7 +74,11 @@
 					</div>
 					<div style="text-align:right">
 						<div class="clbl">
-							{data.removedDiscount ? 'Remaining Balance' : 'Amount Due Today'}
+							{data.balance
+								? 'Amount Due'
+								: data.removedDiscount
+									? 'Remaining Balance'
+									: 'Amount Due Today'}
 						</div>
 						<div class="cval">£ {data.amount}</div>
 					</div>
